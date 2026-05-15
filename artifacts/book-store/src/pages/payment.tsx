@@ -275,7 +275,7 @@ export default function Payment() {
                       disabled={!selectedMethod || (isMobileMoney && !phone)}
                       style={{ fontSize: "0.7rem", height: "3rem",
                         background: selectedMethod ? GOLD : "hsl(220,38%,12%)",
-                        color: selectedMethod ? "hsl(222,58%,7%)" : TEXT_DIM,
+                        color: selectedMethod ? "#fff" : TEXT_DIM, fontWeight: selectedMethod ? 700 : undefined,
                         boxShadow: selectedMethod ? "0 4px 24px hsl(42,78%,46%,0.28)" : "none",
                         transition: "all 0.2s" }}>
                       Pay K{order?.totalAmount ?? 0}
@@ -350,7 +350,7 @@ export default function Payment() {
                   </p>
                   <Button onClick={() => setStage("select")}
                     className="font-sans tracking-[0.14em] uppercase border-0"
-                    style={{ background: GOLD, color: "hsl(222,58%,7%)", boxShadow: "0 4px 20px hsl(42,78%,46%,0.25)" }}>
+                    style={{ background: GOLD, color: "#fff", fontWeight: 700, boxShadow: "0 4px 20px hsl(42,78%,46%,0.25)" }}>
                     Try Again
                   </Button>
                 </motion.div>

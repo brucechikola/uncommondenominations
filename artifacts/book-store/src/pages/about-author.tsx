@@ -258,7 +258,7 @@ export default function AboutAuthor() {
               <motion.div whileHover={{ scale: 1.03, y: -1 }} whileTap={{ scale: 0.97 }} className="inline-block">
                 <Button className="font-display tracking-[0.18em] uppercase border-0"
                   style={{ fontSize: "0.72rem", height: "3rem", padding: "0 3rem",
-                    background: GOLD, color: "hsl(222,58%,7%)", boxShadow: "0 4px 28px hsl(42,78%,46%,0.3)" }}>
+                    background: GOLD, color: "#fff", fontWeight: 700, boxShadow: "0 4px 28px hsl(42,78%,46%,0.3)" }}>
                   Order Your Copy
                 </Button>
               </motion.div>

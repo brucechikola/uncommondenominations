@@ -192,7 +192,7 @@ export default function Checkout() {
                   disabled={!productType || createOrder.isPending}
                   style={{ fontSize: "0.7rem", height: "3rem",
                     background: productType ? GOLD : "hsl(220,38%,12%)",
-                    color: productType ? "hsl(222,58%,7%)" : TEXT_DIM,
+                    color: productType ? "#fff" : TEXT_DIM, fontWeight: productType ? 700 : undefined,
                     boxShadow: productType ? "0 4px 24px hsl(42,78%,46%,0.28)" : "none",
                     transition: "all 0.2s" }}>
                   {createOrder.isPending ? "Placing order…" : "Proceed to Payment →"}

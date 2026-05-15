@@ -175,7 +175,7 @@ export default function Contact() {
                       <Button type="submit" disabled={submitContact.isPending}
                         className="font-display tracking-[0.14em] uppercase border-0"
                         style={{ fontSize: "0.7rem", height: "3rem", padding: "0 2.5rem",
-                          background: GOLD, color: "hsl(222,58%,7%)", boxShadow: "0 4px 20px hsl(42,78%,46%,0.25)",
+                          background: GOLD, color: "#fff", fontWeight: 700, boxShadow: "0 4px 20px hsl(42,78%,46%,0.25)",
                           opacity: submitContact.isPending ? 0.7 : 1 }}>
                         {submitContact.isPending ? "Sending…" : "Send Message"}
                       </Button>

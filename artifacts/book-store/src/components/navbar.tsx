@@ -77,7 +77,7 @@ export function Navbar() {
             <Link href="/shop">
               <Button size="sm"
                 className="hidden md:flex font-display text-[0.65rem] tracking-[0.1em] uppercase px-5 h-9 transition-all"
-                style={{ background: "hsl(42,80%,48%)", color: "hsl(220,52%,10%)", boxShadow: "0 2px 12px hsl(42,80%,48%,0.25)" }}>
+                style={{ background: "hsl(42,80%,48%)", color: "#fff", fontWeight: 700, boxShadow: "0 2px 12px hsl(42,80%,48%,0.25)" }}>
                 {cartProduct ? (
                   <><ShoppingCart className="h-3.5 w-3.5 mr-1.5" />{cartQuantity} in cart</>
                 ) : "Order Now"}
@@ -106,7 +106,7 @@ export function Navbar() {
             ))}
             <Link href="/shop" onClick={() => setMobileOpen(false)}>
               <Button className="w-full mt-2 font-display text-[0.65rem] tracking-widest uppercase"
-                style={{ background: "hsl(42,80%,48%)", color: "hsl(220,52%,10%)" }}>
+                style={{ background: "hsl(42,80%,48%)", color: "#fff", fontWeight: 700 }}>
                 Order Now
               </Button>
             </Link>
