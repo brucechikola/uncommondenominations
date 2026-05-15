@@ -127,7 +127,7 @@ function BookCover() {
         transition={{ duration: 5.5, repeat: Infinity, ease: "easeInOut" }}
         className="relative overflow-hidden"
         style={{
-          width: "clamp(170px, 17vw, 240px)",
+          width: "clamp(200px, 22vw, 300px)",
           aspectRatio: "2/3",
           borderRadius: "2px 4px 4px 2px",
           background:
@@ -377,7 +377,7 @@ export default function Home() {
         </motion.div>
 
         {/* Content grid */}
-        <div className="relative z-10 w-full container mx-auto px-6 lg:px-10 grid lg:grid-cols-[1fr_auto] gap-12 lg:gap-16 items-center"
+        <div className="relative z-10 w-full container mx-auto px-6 lg:px-10 grid lg:grid-cols-2 gap-12 lg:gap-8 items-center"
           style={{ minHeight: "100svh", paddingTop: "6rem", paddingBottom: "5rem" }}
         >
           {/* ── LEFT: text ── */}
@@ -703,14 +703,6 @@ export default function Home() {
         className="py-28 relative"
         style={{ background: "hsl(220,52%,9%)" }}
       >
-        {/* Top fade */}
-        <div
-          className="absolute inset-x-0 top-0 h-24 pointer-events-none"
-          style={{
-            background:
-              "linear-gradient(180deg, hsl(40,28%,96%) 0%, transparent 100%)",
-          }}
-        />
 
         <div className="container mx-auto px-6 lg:px-10">
           <Reveal className="text-center mb-16">
@@ -906,14 +898,6 @@ export default function Home() {
           </div>
         </div>
 
-        {/* Bottom fade out */}
-        <div
-          className="absolute inset-x-0 bottom-0 h-24 pointer-events-none"
-          style={{
-            background:
-              "linear-gradient(0deg, hsl(40,28%,96%) 0%, transparent 100%)",
-          }}
-        />
       </section>
 
       {/* ══════════════════════════════════════ AUTHOR ══ */}
@@ -1026,14 +1010,6 @@ export default function Home() {
           className="py-28 relative overflow-hidden"
           style={{ background: "hsl(220,52%,9%)" }}
         >
-          {/* Top fade */}
-          <div
-            className="absolute inset-x-0 top-0 h-24 pointer-events-none"
-            style={{
-              background:
-                "linear-gradient(180deg, hsl(40,28%,96%) 0%, transparent 100%)",
-            }}
-          />
 
           <div className="container mx-auto px-6 lg:px-10">
             <Reveal className="text-center mb-16">
@@ -1140,14 +1116,6 @@ export default function Home() {
             </div>
           </div>
 
-          {/* Bottom fade */}
-          <div
-            className="absolute inset-x-0 bottom-0 h-24 pointer-events-none"
-            style={{
-              background:
-                "linear-gradient(0deg, hsl(40,28%,96%) 0%, transparent 100%)",
-            }}
-          />
         </section>
       )}
 
