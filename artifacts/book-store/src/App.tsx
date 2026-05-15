@@ -33,6 +33,12 @@ const queryClient = new QueryClient();
 // correctly — avoids the Headers-spread bug that dropped Content-Type.
 setAuthTokenGetter(() => useAdminAuthStore.getState().token);
 
+function ScrollToTop() {
+  const [location] = useLocation();
+  useEffect(() => { window.scrollTo({ top: 0, left: 0, behavior: "instant" }); }, [location]);
+  return null;
+}
+
 function VisitorTracker() {
   const [location] = useLocation();
   const trackVisitor = useTrackVisitor();
@@ -48,6 +54,7 @@ function VisitorTracker() {
 function Router() {
   return (
     <>
+      <ScrollToTop />
       <VisitorTracker />
       <Switch>
         <Route path="/admin/login"    component={AdminLogin} />
