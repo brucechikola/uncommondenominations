@@ -130,7 +130,7 @@ export default function Payment() {
                       </p>
                       <p className="font-sans text-[0.72rem]" style={{ color: TEXT_MUTED }}>
                         Call or WhatsApp{" "}
-                        <span className="font-bold" style={{ color: GOLD }}>0962 219 419</span>{" "}
+                        <span className="font-bold" style={{ color: GOLD }}>0979 697 853</span>{" "}
                         to arrange payment directly.
                       </p>
                     </div>
@@ -346,7 +346,7 @@ export default function Payment() {
                   </h2>
                   <p className="font-serif text-sm mb-8" style={{ color: TEXT_MUTED }}>
                     Something went wrong. Please try again or call{" "}
-                    <span style={{ color: GOLD }}>0962 219 419</span>.
+                    <span style={{ color: GOLD }}>0979 697 853</span>.
                   </p>
                   <Button onClick={() => setStage("select")}
                     className="font-sans tracking-[0.14em] uppercase border-0"

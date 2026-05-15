@@ -8,19 +8,19 @@ export function Footer() {
           <div className="md:col-span-2">
             <div className="flex items-center gap-3 mb-5">
               <div className="w-8 h-8 rounded-lg bg-primary/10 border border-primary/30 flex items-center justify-center">
-                <span className="text-primary font-display text-sm font-bold">L</span>
+                <span className="text-primary font-display text-sm font-bold">U</span>
               </div>
               <h3 className="font-display text-sm font-bold tracking-[0.15em] uppercase text-foreground/90">
-                The Luminous Path
+                Uncommon Denominators
               </h3>
             </div>
             <p className="text-sm text-muted-foreground leading-relaxed max-w-xs">
-              A journey into purpose, leadership, and the enduring human spirit by Dr. Amara Zulu.
+              Understanding what holds back Zambia's economic transformation — by Monde Mwanalushi &amp; Eric Nalishebo.
               Available in Paperback and Hardcover across Zambia.
             </p>
             <div className="mt-6 gold-line w-24" />
             <p className="mt-4 text-xs text-muted-foreground/60 font-sans">
-              To order by phone: <a href="tel:0962219419" className="text-primary hover:underline">0962 219 419</a>
+              To order by phone: <a href="tel:0979697853" className="text-primary hover:underline">0979 697 853</a>
             </p>
           </div>
           <div>
@@ -29,7 +29,7 @@ export function Footer() {
               {[
                 ["/shop", "Shop"],
                 ["/about-book", "About the Book"],
-                ["/about-author", "About Dr. Zulu"],
+                ["/about-author", "About the Authors"],
                 ["/reviews", "Reader Reviews"],
               ].map(([href, label]) => (
                 <li key={href}>
@@ -56,7 +56,7 @@ export function Footer() {
         </div>
         <div className="gold-line mb-6" />
         <div className="flex flex-col md:flex-row items-center justify-between gap-3 text-xs text-muted-foreground/50 font-sans">
-          <p>&copy; {new Date().getFullYear()} Dr. Amara Zulu. All rights reserved.</p>
+          <p>&copy; {new Date().getFullYear()} Monde Mwanalushi &amp; Eric Nalishebo. All rights reserved.</p>
           <p>Published in Zambia · Delivered Nationwide</p>
         </div>
       </div>

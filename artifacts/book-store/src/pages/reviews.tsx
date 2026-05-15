@@ -187,7 +187,7 @@ export default function Reviews() {
               Leave a Review
             </h2>
             <p className="font-sans text-[0.85rem] text-center mb-10" style={{ color: TEXT_DIM }}>
-              Have you read The Luminous Path? Tell others what you thought.
+              Have you read Uncommon Denominators? Tell others what you thought.
             </p>
           </motion.div>
 

@@ -205,7 +205,7 @@ export default function Shop() {
             {[
               { icon: ShieldCheck, text: "Secure payment" },
               { icon: Truck,       text: "Nationwide delivery" },
-              { icon: Phone,       text: "0962 219 419" },
+              { icon: Phone,       text: "0979 697 853" },
             ].map(({ icon: Icon, text }) => (
               <div key={text} className="flex items-center gap-2.5">
                 <Icon className="h-3.5 w-3.5" style={{ color: GOLD }} />

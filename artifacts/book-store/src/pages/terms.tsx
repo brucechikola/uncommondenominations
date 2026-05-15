@@ -7,15 +7,15 @@ const sections = [
   },
   {
     title: "Payment",
-    content: `We accept Airtel Money, MTN Mobile Money, Zamtel Money, Visa/Mastercard, and bank transfer. Payment must be completed before an order is dispatched.\n\nFor mobile money payments, please use the contact number 0962 219 419 as the reference. For bank transfers, use your order ID as the reference.\n\nAll transactions are processed securely. We do not store card details on our servers.`,
+    content: `We accept Airtel Money, MTN Mobile Money, Zamtel Money, Visa/Mastercard, and bank transfer. Payment must be completed before an order is dispatched.\n\nFor mobile money payments, please use the contact number 0979 697 853 as the reference. For bank transfers, use your order ID as the reference.\n\nAll transactions are processed securely. We do not store card details on our servers.`,
   },
   {
     title: "Returns and Refunds",
-    content: `We do not accept returns for change of mind. If your order arrives damaged or defective, contact us within 7 days of receipt at 0962 219 419 and we will arrange a replacement at no additional cost.\n\nRefunds for cancelled orders (where cancellation is initiated by us) will be processed within 5–10 business days via the original payment method.`,
+    content: `We do not accept returns for change of mind. If your order arrives damaged or defective, contact us within 7 days of receipt at 0979 697 853 and we will arrange a replacement at no additional cost.\n\nRefunds for cancelled orders (where cancellation is initiated by us) will be processed within 5–10 business days via the original payment method.`,
   },
   {
     title: "Intellectual Property",
-    content: `The Luminous Path and all content on this website are the intellectual property of Dr. Amara Zulu and Lumina Publications Ltd. No part of the book or this website may be reproduced, distributed, or transmitted without prior written permission.\n\nExcerpts of up to 300 words may be quoted for reviews, educational, or non-commercial purposes with full attribution.`,
+    content: `Uncommon Denominators and all content on this website are the intellectual property of Monde Mwanalushi, Eric Nalishebo, and LIBROS Academic Publishing. No part of the book or this website may be reproduced, distributed, or transmitted without prior written permission.\n\nExcerpts of up to 300 words may be quoted for reviews, educational, or non-commercial purposes with full attribution.`,
   },
   {
     title: "Privacy Policy",
@@ -27,7 +27,7 @@ const sections = [
   },
   {
     title: "Limitation of Liability",
-    content: `To the maximum extent permitted by law, Lumina Publications Ltd shall not be liable for any indirect, incidental, or consequential damages arising from the use of this website or the purchase of products from it.\n\nOur total liability for any claim arising from a purchase shall not exceed the amount paid for the relevant product.`,
+    content: `To the maximum extent permitted by law, LIBROS Academic Publishing shall not be liable for any indirect, incidental, or consequential damages arising from the use of this website or the purchase of products from it.\n\nOur total liability for any claim arising from a purchase shall not exceed the amount paid for the relevant product.`,
   },
   {
     title: "Governing Law",
@@ -35,7 +35,7 @@ const sections = [
   },
   {
     title: "Contact",
-    content: `For any questions about these terms, contact us at info@luminouspath.co.zm or call 0962 219 419.\n\nThese terms were last updated in May 2026.`,
+    content: `For any questions about these terms, contact us at info@uncommondenominators.co.zm or call 0979 697 853.\n\nThese terms were last updated in May 2026.`,
   },
 ];
 

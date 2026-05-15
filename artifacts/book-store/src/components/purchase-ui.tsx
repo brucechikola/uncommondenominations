@@ -85,14 +85,14 @@ export function MiniBook({ size = 110 }: { size?: number }) {
           fontFamily: "var(--app-font-display)", fontStyle: "italic", fontWeight: 400,
           fontSize: fs(0.038), color: "hsl(40,20%,58%)", textAlign: "center",
           letterSpacing: "0.03em", position: "relative", zIndex: 1,
-        }}>DR. AMARA ZULU</p>
+        }}>MWANALUSHI &amp; NALISHEBO</p>
         {/* Gold strip label */}
         <p style={{
           position: "absolute", bottom: `calc(10% - ${fs(0.02)})`,
           fontFamily: "var(--app-font-display)", fontWeight: 600, fontSize: fs(0.034),
           color: "hsl(222,58%,10%)", letterSpacing: "0.08em",
           textTransform: "uppercase", zIndex: 2,
-        }}>AMARA ZULU</p>
+        }}>M. MWANALUSHI</p>
       </div>
     </div>
   );

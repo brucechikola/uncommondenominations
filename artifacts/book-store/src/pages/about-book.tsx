@@ -3,14 +3,14 @@ import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 
 const chapters = [
-  { num: "01", title: "Who Are You, Really?", desc: "An unflinching exploration of identity in the African context — between tradition and modernity, community and self, expectation and desire." },
-  { num: "02", title: "The Architecture of Resilience", desc: "What African communities have always known about bouncing back — and the science that explains why it works." },
-  { num: "03", title: "The People You Keep", desc: "On relationships: how to choose them, nurture them, and know when to let go. The hardest chapter, and the most essential." },
-  { num: "04", title: "Work That Matters", desc: "Vocation, purpose, and how to find work that feeds your soul without starving your family." },
-  { num: "05", title: "A Dignified Relationship with Money", desc: "Wealth is not the enemy of wisdom. Dr. Zulu dismantles the false choice between prosperity and integrity." },
-  { num: "06", title: "The Debt We Owe Each Other", desc: "Ubuntu as a living practice — what genuine community demands of us and gives back in return." },
-  { num: "07", title: "The Body That Carries You", desc: "Health as a prerequisite for everything else. Simple, profound, and frequently ignored." },
-  { num: "08", title: "What You Leave Behind", desc: "Legacy. The final chapter — and the one that changes how you read the previous seven." },
+  { num: "01", title: "The Growth Paradox", desc: "Zambia's GDP has grown — yet poverty persists. This chapter unpacks the contradiction at the heart of the development story and sets the analytical framework for the book." },
+  { num: "02", title: "The Resource Curse, Revisited", desc: "Why copper wealth has not translated into durable prosperity — and what the data reveals about revenue management, reinvestment, and the political economy of resource dependence." },
+  { num: "03", title: "Agriculture's Broken Promise", desc: "Zambia has fertile land, water, and a large rural workforce. This chapter examines why agricultural productivity remains stubbornly low and what structural reforms could unlock the sector." },
+  { num: "04", title: "The Infrastructure Gap", desc: "Roads, power, logistics, and connectivity: a rigorous assessment of how infrastructure deficits raise the cost of doing business and crowd out private investment across every sector." },
+  { num: "05", title: "Human Capital — The Long Game", desc: "Education, health, and skills development as determinants of long-run growth. The chapter traces the gap between enrolment statistics and actual learning outcomes." },
+  { num: "06", title: "Governance and the Fiscal Trap", desc: "Public finance, debt, and the incentive structures that shape how governments tax, spend, and borrow — with implications for Zambia's medium-term fiscal path." },
+  { num: "07", title: "The Private Sector Paradox", desc: "Why Zambia's private sector remains small, informal, and risk-averse — and what the regulatory environment, access to finance, and market structure have to do with it." },
+  { num: "08", title: "Uncommon Denominators", desc: "The concluding chapter synthesises the themes: the recurring factors that explain underperformance across sectors, and the strategic priorities that offer the most credible path forward." },
 ];
 
 export default function AboutBook() {
@@ -21,9 +21,10 @@ export default function AboutBook() {
         <div className="container mx-auto px-6 max-w-4xl text-center">
           <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }}>
             <p className="text-xs tracking-[0.3em] uppercase text-primary font-medium mb-4">The Book</p>
-            <h1 className="font-serif text-5xl lg:text-6xl font-bold leading-tight mb-6">The Luminous Path</h1>
+            <h1 className="font-serif text-5xl lg:text-6xl font-bold leading-tight mb-6">Uncommon Denominators</h1>
             <p className="text-xl text-muted-foreground leading-relaxed">
-              A complete guide to purposeful living — grounded in African wisdom, enriched by global psychology, and written for the realities of modern Zambian life.
+              Understanding what holds back Zambia's economic transformation — a rigorous, accessible diagnosis
+              from two of the country's leading economists.
             </p>
           </motion.div>
         </div>
@@ -35,16 +36,25 @@ export default function AboutBook() {
           <h2 className="font-serif text-3xl font-bold mb-6">About the Book</h2>
           <div className="prose prose-stone max-w-none space-y-4 text-muted-foreground leading-relaxed">
             <p>
-              The Luminous Path grew out of two decades of Dr. Amara Zulu's work with individuals, families, organizations, and communities across Zambia. What she found, again and again, was a hunger: people wanted to live more deliberately, with more meaning and less distraction — but they didn't have a framework that spoke to their actual lives.
+              Zambia should be prosperous. It has copper, cobalt, arable land, water, a young population, and
+              decades of relative political stability. And yet: persistent poverty, recurring fiscal crises,
+              low productivity, and structural dependence on a single commodity. Why?
             </p>
             <p>
-              Western self-help books offered advice built for Western lives. Academic psychology was locked behind jargon and journal paywalls. Traditional wisdom was real and profound, but rarely codified in a way that young professionals could engage with on their morning commute.
+              <em>Uncommon Denominators</em> is Monde Mwanalushi and Eric Nalishebo's attempt to answer that
+              question honestly. Drawing on years of policy research at ZIPAR, field data, budget analysis,
+              and the broader literature on African economic development, they identify the recurring
+              factors — across sectors and administrations — that explain Zambia's underperformance.
             </p>
             <p>
-              The Luminous Path bridges these worlds. It is serious but accessible, deeply African but globally informed, personally honest without being confessional. Each of its eight chapters addresses one dimension of a full life — and each ends with practical exercises that help you move from reading to living.
+              The book is not a counsel of despair. Each chapter concludes with concrete, evidence-based
+              recommendations. The authors believe Zambia has the ingredients for transformation — but that
+              transformation requires clear diagnosis before it can produce durable prescription.
             </p>
             <p className="font-medium text-foreground italic font-serif text-lg">
-              "I wrote this book because I needed it and it didn't exist. My hope is that it becomes the book you give to someone you love." — Dr. Amara Zulu
+              "We did not write this book to be pessimistic. We wrote it because we believe Zambia has every
+              ingredient for prosperity — and that understanding the obstacles clearly is the first step to
+              removing them." — Mwanalushi & Nalishebo
             </p>
           </div>
         </motion.div>
@@ -74,10 +84,10 @@ export default function AboutBook() {
         <h2 className="font-serif text-2xl font-bold mb-8">Book Details</h2>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
           {[
-            { label: "Pages", value: "256" },
-            { label: "Language", value: "English" },
-            { label: "Format", value: "Paperback & Hardcover" },
-            { label: "First Edition", value: "2026" },
+            { label: "Pages",        value: "248" },
+            { label: "Language",     value: "English" },
+            { label: "Format",       value: "Paperback & Hardcover" },
+            { label: "Publisher",    value: "LIBROS" },
           ].map((d) => (
             <div key={d.label} className="bg-card border border-card-border rounded-xl p-5 text-center">
               <div className="font-serif text-2xl font-bold text-primary mb-1">{d.value}</div>
@@ -90,8 +100,8 @@ export default function AboutBook() {
       {/* CTA */}
       <section className="py-16 bg-secondary text-secondary-foreground">
         <div className="container mx-auto px-6 text-center max-w-2xl">
-          <h2 className="font-serif text-3xl font-bold mb-4">Ready to Begin?</h2>
-          <p className="text-secondary-foreground/70 mb-8">Order your copy today and begin the journey.</p>
+          <h2 className="font-serif text-3xl font-bold mb-4">Ready to Read?</h2>
+          <p className="text-secondary-foreground/70 mb-8">Order your copy today — paperback or hardcover, delivered across Zambia.</p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link href="/shop">
               <Button size="lg" className="font-serif px-8">Buy Paperback — K400</Button>

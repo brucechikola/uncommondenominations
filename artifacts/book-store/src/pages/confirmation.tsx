@@ -39,8 +39,8 @@ export default function Confirmation() {
         <div className="pr-header">
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
             <div>
-              <div className="pr-logo">THE LUMINOUS PATH</div>
-              <div className="pr-subtitle">by Dr. Amara Zulu &nbsp;·&nbsp; Official Purchase Receipt</div>
+              <div className="pr-logo">UNCOMMON DENOMINATORS</div>
+              <div className="pr-subtitle">by Mwanalushi &amp; Nalishebo &nbsp;·&nbsp; Official Purchase Receipt</div>
             </div>
             {payment?.status === "successful" && (
               <span className="pr-status pr-status-paid">Paid</span>
@@ -80,8 +80,8 @@ export default function Confirmation() {
         )}
 
         <div className="pr-footer">
-          <strong>The Luminous Path</strong> by Dr. Amara Zulu &nbsp;·&nbsp; Lumina Publications Ltd<br />
-          For delivery enquiries call or WhatsApp <strong>0962 219 419</strong><br />
+          <strong>Uncommon Denominators</strong> by Mwanalushi &amp; Nalishebo &nbsp;·&nbsp; LIBROS Academic Publishing<br />
+          For delivery enquiries call or WhatsApp <strong>0979 697 853</strong><br />
           Thank you for your order — your copy is on its way.
         </div>
       </div>
@@ -143,7 +143,7 @@ export default function Confirmation() {
 
           <motion.p initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5 }}
             className="font-serif text-base leading-relaxed max-w-md" style={{ color: TEXT_MUTED }}>
-            Thank you for ordering <em>The Luminous Path</em>. Our team will be in touch within 24 hours
+            Thank you for ordering <em>Uncommon Denominators</em>. Our team will be in touch within 24 hours
             to arrange delivery.
           </motion.p>
         </motion.div>

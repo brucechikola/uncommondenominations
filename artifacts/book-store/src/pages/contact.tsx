@@ -196,8 +196,8 @@ export default function Contact() {
                 </h3>
                 <div className="space-y-5">
                   {[
-                    { icon: Phone, label: "Phone / WhatsApp", content: <a href="tel:0962219419" className="font-mono hover:underline" style={{ color: GOLD, fontSize: "0.85rem" }}>0962 219 419</a> },
-                    { icon: Mail,  label: "Email",            content: <a href="mailto:info@luminouspath.co.zm" className="hover:underline" style={{ color: GOLD, fontSize: "0.82rem" }}>info@luminouspath.co.zm</a> },
+                    { icon: Phone, label: "Phone / WhatsApp", content: <a href="tel:0979697853" className="font-mono hover:underline" style={{ color: GOLD, fontSize: "0.85rem" }}>0979 697 853</a> },
+                    { icon: Mail,  label: "Email",            content: <a href="mailto:info@uncommondenominators.co.zm" className="hover:underline" style={{ color: GOLD, fontSize: "0.82rem" }}>info@uncommondenominators.co.zm</a> },
                     { icon: MapPin,label: "Office",           content: <span className="font-sans" style={{ color: TEXT_MUTED, fontSize: "0.82rem" }}>Lusaka, Zambia</span> },
                   ].map(({ icon: Icon, label, content }) => (
                     <div key={label} className="flex items-start gap-3.5"

@@ -10,7 +10,7 @@ const faqs = [
   },
   {
     q: "What payment methods do you accept?",
-    a: "We accept Airtel Money, MTN Mobile Money, Zamtel Money, Visa/Mastercard, and Bank Transfer. You can also call or WhatsApp 0962 219 419 to arrange payment manually."
+    a: "We accept Airtel Money, MTN Mobile Money, Zamtel Money, Visa/Mastercard, and Bank Transfer. You can also call or WhatsApp 0979 697 853 to arrange payment manually."
   },
   {
     q: "How long does delivery take?",
@@ -18,7 +18,7 @@ const faqs = [
   },
   {
     q: "Do you deliver outside Zambia?",
-    a: "Currently, we deliver within Zambia only. We are working on international shipping — if you're based outside Zambia and would like a copy, please contact us on 0962 219 419 and we will try to assist."
+    a: "Currently, we deliver within Zambia only. We are working on international shipping — if you're based outside Zambia and would like a copy, please contact us on 0979 697 853 and we will try to assist."
   },
   {
     q: "Can I buy multiple copies?",
@@ -26,11 +26,11 @@ const faqs = [
   },
   {
     q: "What is the difference between Paperback and Hardcover?",
-    a: "Both editions contain the complete text of The Luminous Path. The Paperback (K400) is lightweight and great for everyday reading. The Hardcover (K500) features premium binding, thicker paper, a ribbon bookmark, and is designed to last a lifetime — ideal as a personal or gift purchase."
+    a: "Both editions contain the complete text of Uncommon Denominators. The Paperback (K400) is lightweight and great for everyday reading. The Hardcover (K500) features premium binding, thicker paper, a ribbon bookmark, and is designed to last a lifetime — ideal as a personal or gift purchase."
   },
   {
     q: "Can I return the book if I am not satisfied?",
-    a: "We stand behind the quality of this book. If your copy arrives damaged or defective, contact us within 7 days at 0962 219 419 and we will arrange a replacement at no cost. We do not accept returns for change of mind."
+    a: "We stand behind the quality of this book. If your copy arrives damaged or defective, contact us within 7 days at 0979 697 853 and we will arrange a replacement at no cost. We do not accept returns for change of mind."
   },
   {
     q: "Is my payment information secure?",
@@ -41,8 +41,8 @@ const faqs = [
     a: "Visit the 'About the Book' page for a detailed overview of each chapter. We will also be sharing selected excerpts on our social media pages."
   },
   {
-    q: "How can I contact Dr. Zulu for speaking engagements or media?",
-    a: "Use our Contact page to send a message, or call 0962 219 419. Serious inquiries for speaking, media appearances, or academic collaboration are welcome."
+    q: "How can I contact the authors for speaking engagements or media?",
+    a: "Use our Contact page to send a message, or call 0979 697 853. Serious inquiries for speaking, media appearances, or academic collaboration are welcome."
   },
 ];
 
@@ -82,9 +82,9 @@ export default function FAQ() {
             <Link href="/contact">
               <Button className="font-serif">Send a Message</Button>
             </Link>
-            <a href="tel:0962219419">
+            <a href="tel:0979697853">
               <Button variant="outline" className="font-serif border-secondary-foreground/30 text-secondary-foreground hover:bg-secondary-foreground/10">
-                Call 0962 219 419
+                Call 0979 697 853
               </Button>
             </a>
           </div>

@@ -145,16 +145,16 @@ function BookCover({ bookWidth = "clamp(220px,24vw,320px)" }: { bookWidth?: stri
         <div className="absolute inset-0 flex flex-col items-center justify-center px-[10%] text-center" style={{ gap: "5%" }}>
           <p className="font-sans font-medium tracking-[0.3em] uppercase"
             style={{ fontSize: "clamp(0.38rem,0.75vw,0.5rem)", color: "hsl(42,78%,60%)", letterSpacing: "0.35em" }}>
-            Dr. Amara Zulu
+            Mwanalushi &amp; Nalishebo
           </p>
           <div className="w-[28%] h-px" style={{ background: "hsl(42,78%,52%,0.45)" }} />
           <h2 className="font-display font-bold text-white leading-[1.05]"
             style={{ fontSize: "clamp(0.95rem,2vw,1.35rem)", letterSpacing: "0.06em" }}>
-            THE<br />LUMINOUS<br />PATH
+            UNCOMMON<br />DENOMINATORS
           </h2>
           <div className="w-[28%] h-px" style={{ background: "hsl(42,78%,52%,0.45)" }} />
           <p className="font-serif italic" style={{ fontSize: "clamp(0.36rem,0.72vw,0.48rem)", color: "rgba(255,255,255,0.3)" }}>
-            A Guide to Purposeful Living
+            Zambia's Economic Transformation
           </p>
         </div>
 
@@ -166,7 +166,7 @@ function BookCover({ bookWidth = "clamp(220px,24vw,320px)" }: { bookWidth?: stri
           style={{ height: "22%", background: "linear-gradient(135deg, hsl(42,68%,32%), hsl(44,80%,48%), hsl(42,68%,32%))" }}>
           <p className="font-sans font-bold tracking-[0.28em] uppercase"
             style={{ fontSize: "clamp(0.38rem,0.78vw,0.52rem)", color: "hsl(220,52%,10%)" }}>
-            AMARA ZULU
+            MWANALUSHI &amp; NALISHEBO
           </p>
         </div>
       </motion.div>
@@ -378,32 +378,24 @@ export default function Home() {
               </div>
             </motion.div>
 
-            {/* "The" — italic prefix */}
-            <motion.div variants={fadeUp} className="mb-1">
-              <p className="font-display italic font-normal leading-none"
-                style={{ fontSize: "clamp(1rem,2vw,1.4rem)", color: "hsl(40,22%,72%,0.42)", letterSpacing: "0.02em" }}>
-                The
-              </p>
-            </motion.div>
-
             {/* Main title — per-word clip-path slide-up */}
             <motion.div variants={stagger} className="mb-9">
               <h1 className="font-display font-bold leading-[0.92]" style={{ letterSpacing: "-0.015em" }}>
                 <div style={{ overflow: "hidden" }}>
                   <motion.span className="block" variants={slideUp}
                     style={{
-                      fontSize: "clamp(3.8rem,7.5vw,6.2rem)",
+                      fontSize: "clamp(3.2rem,6.5vw,5.4rem)",
                       color: "hsl(40,24%,96%)",
                       textShadow: "0 0 90px hsl(222,72%,44%,0.4), 0 0 180px hsl(222,65%,36%,0.2)",
-                    }}>Luminous</motion.span>
+                    }}>Uncommon</motion.span>
                 </div>
                 <div style={{ overflow: "hidden" }}>
                   <motion.span className="block" variants={slideUp}
                     style={{
-                      fontSize: "clamp(3.8rem,7.5vw,6.2rem)",
+                      fontSize: "clamp(3.2rem,6.5vw,5.4rem)",
                       background: "linear-gradient(118deg, hsl(44,92%,72%) 0%, hsl(42,78%,50%) 38%, hsl(44,90%,66%) 68%, hsl(42,76%,48%) 100%)",
                       WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text",
-                    }}>Path</motion.span>
+                    }}>Denominators</motion.span>
                 </div>
               </h1>
             </motion.div>
@@ -412,21 +404,22 @@ export default function Home() {
             <motion.div variants={fadeUp} className="flex items-center gap-4 mb-6">
               <div className="h-px w-10 flex-shrink-0" style={{ background: "hsl(42,78%,50%,0.55)" }} />
               <span className="font-sans text-[0.56rem] tracking-[0.4em] uppercase font-semibold flex-shrink-0"
-                style={{ color: "hsl(42,78%,54%,0.6)" }}>A Guide to Purposeful Living</span>
+                style={{ color: "hsl(42,78%,54%,0.6)" }}>Understanding Zambia's Economic Transformation</span>
               <div className="h-px flex-1" style={{ background: "hsl(42,78%,48%,0.1)" }} />
             </motion.div>
 
             {/* Author */}
             <motion.p variants={fadeUp} className="font-serif italic mb-5"
               style={{ fontSize: "clamp(1rem,1.5vw,1.14rem)", color: "hsl(40,20%,58%)" }}>
-              by Dr. Amara Zulu
+              by Monde Mwanalushi &amp; Eric Nalishebo
             </motion.p>
 
             {/* Description */}
             <motion.p variants={fadeUp} className="font-serif leading-[1.8] mb-8 max-w-[500px]"
               style={{ fontSize: "clamp(0.9rem,1.3vw,1rem)", color: "hsl(220,14%,50%)" }}>
-              A transformative guide to purposeful living — drawing on African wisdom,
-              modern psychology, and a life lived with extraordinary intention.
+              A rigorous, accessible diagnosis of the structural factors holding back
+              Zambia's economic transformation — written for policymakers, business
+              leaders, students, and every Zambian who wants to understand the real picture.
             </motion.p>
 
             {/* Pull quote — with oversized decorative mark */}
@@ -552,7 +545,7 @@ export default function Home() {
                 }} />
                 <img
                   src={bookPhoto}
-                  alt="The Luminous Path — physical book"
+                  alt="Uncommon Denominators — physical book"
                   style={{
                     width: "clamp(240px,23vw,305px)",
                     height: "auto",
@@ -689,9 +682,9 @@ export default function Home() {
               className="font-display font-bold text-foreground mb-5"
               style={{ fontSize: "clamp(1.7rem,3vw,2.4rem)", lineHeight: 1.15 }}
             >
-              A Book That Demands to Be{" "}
+              A Book Zambia{" "}
               <span className="gold-shimmer" style={{ WebkitTextFillColor: "transparent" }}>
-                Read Twice
+                Needs to Read
               </span>
             </motion.h2>
             <motion.div variants={fadeUp} className="gold-line-left w-14 mb-7" />
@@ -700,19 +693,20 @@ export default function Home() {
               className="font-serif text-muted-foreground leading-relaxed mb-4"
               style={{ fontSize: "clamp(1rem,1.6vw,1.1rem)" }}
             >
-              The Luminous Path is not a quick-fix guide. It is a serious,
-              sustained conversation about what it means to live well — grounded
-              in African philosophy, enriched by global research, and written
-              with the warmth of someone who genuinely wants you to succeed.
+              Uncommon Denominators is not a complaint about Zambia. It is a
+              clear-eyed, evidence-based examination of why the country's growth
+              has not translated into transformation — and what it would take
+              to change that.
             </motion.p>
             <motion.p
               variants={fadeUp}
               className="font-serif text-muted-foreground leading-relaxed mb-10"
               style={{ fontSize: "clamp(1rem,1.6vw,1.1rem)" }}
             >
-              Eight chapters. Eight dimensions of a purposeful life: identity,
-              resilience, relationships, vocation, wealth, community, health,
-              and legacy.
+              Eight chapters. Eight structural obstacles: resource dependence,
+              agricultural stagnation, infrastructure deficits, fiscal pressures,
+              human capital gaps, weak private sector, governance constraints,
+              and the path forward.
             </motion.p>
             <motion.div variants={fadeUp}>
               <Link href="/about-book">
@@ -742,7 +736,7 @@ export default function Home() {
               >
                 <img
                   src={bookPhoto}
-                  alt="The Luminous Path — physical book"
+                  alt="Uncommon Denominators — physical book"
                   className="w-full h-auto block"
                   style={{ display: "block" }}
                 />
@@ -982,13 +976,13 @@ export default function Home() {
                       WebkitTextFillColor: "transparent",
                     }}
                   >
-                    AZ
+                    MM
                   </div>
                   <div
                     className="font-sans text-[0.6rem] tracking-[0.28em] uppercase"
                     style={{ color: "hsl(40,22%,38%)" }}
                   >
-                    Dr. Amara Zulu
+                    Mwanalushi &amp; Nalishebo
                   </div>
                 </div>
               </div>
@@ -1001,10 +995,10 @@ export default function Home() {
                 className="absolute -bottom-5 -right-5 rounded-2xl px-5 py-4 shadow-xl bg-card border border-border"
               >
                 <p className="font-display text-[0.72rem] font-bold tracking-wider text-foreground">
-                  PhD Psychology
+                  Senior Economists
                 </p>
                 <p className="font-sans text-[0.68rem] text-muted-foreground mt-0.5">
-                  University of Zambia
+                  ZIPAR, Zambia
                 </p>
               </motion.div>
             </motion.div>
@@ -1016,14 +1010,14 @@ export default function Home() {
               variants={fadeUp}
               className="font-sans text-[0.65rem] tracking-[0.3em] uppercase text-primary font-semibold mb-5"
             >
-              The Author
+              The Authors
             </motion.p>
             <motion.h2
               variants={fadeUp}
               className="font-display font-bold text-foreground mb-5"
               style={{ fontSize: "clamp(1.7rem,3vw,2.4rem)" }}
             >
-              Dr. Amara Zulu
+              Mwanalushi &amp; Nalishebo
             </motion.h2>
             <motion.div variants={fadeUp} className="gold-line-left w-14 mb-7" />
             <motion.p
@@ -1031,19 +1025,19 @@ export default function Home() {
               className="font-serif text-muted-foreground leading-relaxed mb-4"
               style={{ fontSize: "clamp(1rem,1.6vw,1.1rem)" }}
             >
-              Psychologist, educator, and community leader based in Lusaka,
-              Zambia. With over two decades of work in human development and
-              organisational psychology, she has dedicated her career to helping
-              individuals and institutions unlock their fullest potential.
+              Monde Mwanalushi and Eric Nalishebo are Senior Economists at the
+              Zambia Institute for Policy Analysis and Research (ZIPAR), bringing
+              over fifteen years of combined research on fiscal policy, economic
+              diversification, and Zambia's development agenda.
             </motion.p>
             <motion.p
               variants={fadeUp}
               className="font-serif text-muted-foreground leading-relaxed mb-10"
               style={{ fontSize: "clamp(1rem,1.6vw,1.1rem)" }}
             >
-              The Luminous Path draws on everything she has learned — from
-              Copperbelt villages, to UNZA research halls, to the boardrooms and
-              community centres where she has worked for twenty years.
+              Uncommon Denominators draws on years of fieldwork, budget analysis,
+              and policy research — a book written for everyone who wants to
+              understand Zambia's economic story, not just read about it.
             </motion.p>
             <motion.div variants={fadeUp}>
               <Link href="/about-author">

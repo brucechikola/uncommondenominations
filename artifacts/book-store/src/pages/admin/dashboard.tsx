@@ -106,7 +106,7 @@ export default function AdminDashboard() {
         <div className="container mx-auto px-6 h-14 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <span className="font-serif font-bold">Admin Dashboard</span>
-            <Badge variant="secondary" className="text-xs">The Luminous Path</Badge>
+            <Badge variant="secondary" className="text-xs">Uncommon Denominators</Badge>
           </div>
           <Button variant="ghost" size="sm" onClick={handleLogout} className="gap-2 text-muted-foreground">
             <LogOut className="h-4 w-4" />Log Out

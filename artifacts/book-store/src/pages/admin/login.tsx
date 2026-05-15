@@ -36,7 +36,7 @@ export default function AdminLogin() {
           <Lock className="h-5 w-5 text-primary" />
         </div>
         <h1 className="font-serif text-2xl font-bold text-center mb-1">Admin Login</h1>
-        <p className="text-sm text-muted-foreground text-center mb-8">The Luminous Path — Dashboard</p>
+        <p className="text-sm text-muted-foreground text-center mb-8">Uncommon Denominators — Dashboard</p>
 
         <form onSubmit={handleSubmit} className="space-y-5">
           <div className="space-y-2">

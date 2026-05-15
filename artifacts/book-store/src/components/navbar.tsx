@@ -51,10 +51,10 @@ export function Navbar() {
           <Link href="/" className="flex items-center gap-2.5 group">
             <div className="w-7 h-7 rounded-lg flex items-center justify-center"
               style={{ background: "hsl(42,80%,48%,0.12)", border: "1px solid hsl(42,80%,48%,0.35)" }}>
-              <span className="font-display text-xs font-bold text-primary">L</span>
+              <span className="font-display text-xs font-bold text-primary">U</span>
             </div>
             <span className={`font-display text-xs font-bold tracking-[0.14em] uppercase transition-colors ${onHero ? "text-white/80" : "text-foreground"} group-hover:text-primary`}>
-              The Luminous Path
+              Uncommon Denominators
             </span>
           </Link>
 
