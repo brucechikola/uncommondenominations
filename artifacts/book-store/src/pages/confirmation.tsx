@@ -246,26 +246,25 @@ export default function Confirmation() {
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.75 }}
           className="no-print flex flex-col sm:flex-row gap-3 justify-center">
           <Link href="/">
-            <Button variant="outline" className="font-sans tracking-[0.12em] uppercase w-full sm:w-auto"
-              style={{ fontSize: "0.68rem", height: "2.75rem", borderColor: CARD_BORDER, color: TEXT_MUTED, background: "transparent" }}>
+            <Button variant="outline" className="font-sans uppercase w-full sm:w-auto"
+              style={{ height: "2.75rem", color: TEXT_MUTED, background: "transparent" }}>
               Back to Home
             </Button>
           </Link>
           <motion.div whileHover={{ scale: 1.02, y: -1 }} whileTap={{ scale: 0.98 }}>
             <Button onClick={() => window.print()}
               variant="outline"
-              className="font-sans tracking-[0.12em] uppercase w-full sm:w-auto flex items-center gap-2"
-              style={{ fontSize: "0.68rem", height: "2.75rem", borderColor: "hsl(42,78%,46%,0.35)",
-                color: GOLD, background: "transparent" }}>
+              className="font-sans uppercase w-full sm:w-auto flex items-center gap-2"
+              style={{ height: "2.75rem", color: GOLD, background: "transparent" }}>
               <Printer className="h-3.5 w-3.5" />
               Print Receipt
             </Button>
           </motion.div>
           <Link href="/shop">
             <motion.div whileHover={{ scale: 1.02, y: -1 }} whileTap={{ scale: 0.98 }}>
-              <Button className="font-sans tracking-[0.12em] uppercase border-0 w-full sm:w-auto"
-                style={{ fontSize: "0.68rem", height: "2.75rem",
-                  background: GOLD, color: "#fff", fontWeight: 700, boxShadow: "0 4px 20px hsl(42,78%,46%,0.25)" }}>
+              <Button className="font-sans uppercase w-full sm:w-auto"
+                style={{ height: "2.75rem",
+                  background: GOLD, color: "#fff", fontWeight: 700, boxShadow: "0 4px 20px rgba(141,107,61,0.25)" }}>
                 Order Another Copy
               </Button>
             </motion.div>

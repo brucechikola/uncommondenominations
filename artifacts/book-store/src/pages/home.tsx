@@ -444,8 +444,8 @@ export default function Home() {
               <Link href="/shop">
                 <motion.div whileHover={{ scale: 1.03, y: -1 }} whileTap={{ scale: 0.97 }}>
                   <Button size="lg" onClick={() => setProductType("paperback")}
-                    className="font-sans tracking-[0.13em] uppercase border-0 w-full sm:w-auto"
-                    style={{ fontSize: "0.69rem", height: "3rem", padding: "0 2.2rem",
+                    className="font-sans uppercase w-full sm:w-auto"
+                    style={{ height: "3rem", padding: "0 2.2rem",
                       background: "#8d6b3d", color: "#fff", fontWeight: 700,
                       boxShadow: "0 4px 28px rgba(141,107,61,0.32), inset 0 1px 0 rgba(176,138,88,0.28)" }}>
                     Buy Paperback — K400
@@ -455,9 +455,9 @@ export default function Home() {
               <Link href="/shop">
                 <motion.div whileHover={{ scale: 1.03, y: -1 }} whileTap={{ scale: 0.97 }}>
                   <Button size="lg" variant="outline" onClick={() => setProductType("hardcover")}
-                    className="font-sans tracking-[0.13em] uppercase w-full sm:w-auto"
-                    style={{ fontSize: "0.69rem", height: "3rem", padding: "0 2.2rem",
-                      borderColor: "hsl(40,22%,88%,0.11)", color: "hsl(40,22%,60%)", background: "transparent" }}>
+                    className="font-sans uppercase w-full sm:w-auto"
+                    style={{ height: "3rem", padding: "0 2.2rem",
+                      color: "hsl(40,22%,60%)", background: "transparent" }}>
                     Hardcover — K500
                   </Button>
                 </motion.div>
@@ -841,9 +841,8 @@ export default function Home() {
                   <Link href="/shop">
                     <Button
                       onClick={() => setProductType("paperback")}
-                      className="w-full font-display tracking-[0.14em] uppercase border-0"
+                      className="w-full font-display uppercase"
                       style={{
-                        fontSize:   "0.7rem",
                         height:     "3rem",
                         background: "#8d6b3d",
                         color:      "#fff",
@@ -933,9 +932,8 @@ export default function Home() {
                   <Link href="/shop">
                     <Button
                       onClick={() => setProductType("hardcover")}
-                      className="w-full font-display tracking-[0.14em] uppercase border-0 shadow-xl"
+                      className="w-full font-display uppercase shadow-xl"
                       style={{
-                        fontSize:   "0.7rem",
                         height:     "3rem",
                         background: "#8d6b3d",
                         color:      "#fff",

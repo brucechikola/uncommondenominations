@@ -270,13 +270,13 @@ export default function Payment() {
                   <div className="h-px mb-6" style={{ background: CARD_BORDER }} />
 
                   <motion.div whileHover={{ scale: 1.015, y: -1 }} whileTap={{ scale: 0.98 }}>
-                    <Button size="lg" className="w-full border-0 font-sans tracking-[0.14em] uppercase"
+                    <Button size="lg" className="w-full font-sans uppercase"
                       onClick={handlePay}
                       disabled={!selectedMethod || (isMobileMoney && !phone)}
-                      style={{ fontSize: "0.7rem", height: "3rem",
+                      style={{ height: "3rem",
                         background: selectedMethod ? GOLD : "hsl(220,38%,12%)",
                         color: selectedMethod ? "#fff" : TEXT_DIM, fontWeight: selectedMethod ? 700 : undefined,
-                        boxShadow: selectedMethod ? "0 4px 24px hsl(42,78%,46%,0.28)" : "none",
+                        boxShadow: selectedMethod ? "0 4px 24px rgba(141,107,61,0.28)" : "none",
                         transition: "all 0.2s" }}>
                       Pay K{order?.totalAmount ?? 0}
                     </Button>
@@ -349,8 +349,8 @@ export default function Payment() {
                     <span style={{ color: GOLD }}>0979 697 853</span>.
                   </p>
                   <Button onClick={() => setStage("select")}
-                    className="font-sans tracking-[0.14em] uppercase border-0"
-                    style={{ background: GOLD, color: "#fff", fontWeight: 700, boxShadow: "0 4px 20px hsl(42,78%,46%,0.25)" }}>
+                    className="font-sans uppercase"
+                    style={{ background: GOLD, color: "#fff", fontWeight: 700, boxShadow: "0 4px 20px rgba(141,107,61,0.25)" }}>
                     Try Again
                   </Button>
                 </motion.div>

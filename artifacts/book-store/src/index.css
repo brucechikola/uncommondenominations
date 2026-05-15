@@ -144,6 +144,10 @@
 }
 
 /* ── Print receipt ─────────────────────────────────────────────── */
+/* ── Global tracking reset ─────────────────────────────────── */
+/* Unlayered rules beat @layer utilities in CSS cascade */
+* { letter-spacing: 0; }
+
 @media print {
   * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
 

@@ -188,12 +188,12 @@ export default function Checkout() {
               <div className="h-px my-2" style={{ background: CARD_BORDER }} />
 
               <motion.div whileHover={{ scale: 1.015, y: -1 }} whileTap={{ scale: 0.98 }}>
-                <Button type="submit" size="lg" className="w-full border-0 font-sans tracking-[0.14em] uppercase"
+                <Button type="submit" size="lg" className="w-full font-sans uppercase"
                   disabled={!productType || createOrder.isPending}
-                  style={{ fontSize: "0.7rem", height: "3rem",
+                  style={{ height: "3rem",
                     background: productType ? GOLD : "hsl(220,38%,12%)",
                     color: productType ? "#fff" : TEXT_DIM, fontWeight: productType ? 700 : undefined,
-                    boxShadow: productType ? "0 4px 24px hsl(42,78%,46%,0.28)" : "none",
+                    boxShadow: productType ? "0 4px 24px rgba(141,107,61,0.28)" : "none",
                     transition: "all 0.2s" }}>
                   {createOrder.isPending ? "Placing order…" : "Proceed to Payment →"}
                 </Button>

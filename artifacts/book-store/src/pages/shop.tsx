@@ -188,10 +188,10 @@ export default function Shop() {
 
                 <Link href="/checkout">
                   <motion.div whileHover={{ scale: 1.02, y: -1 }} whileTap={{ scale: 0.97 }}>
-                    <Button size="lg" className="w-full font-sans tracking-[0.14em] uppercase border-0"
-                      style={{ fontSize: "0.7rem", height: "3rem",
+                    <Button size="lg" className="w-full font-sans uppercase"
+                      style={{ height: "3rem",
                         background: GOLD, color: "#fff", fontWeight: 700,
-                        boxShadow: "0 4px 24px hsl(42,78%,46%,0.28), inset 0 1px 0 hsl(44,90%,68%,0.25)" }}>
+                        boxShadow: "0 4px 24px rgba(141,107,61,0.28), inset 0 1px 0 rgba(176,138,88,0.25)" }}>
                       Proceed to Checkout →
                     </Button>
                   </motion.div>

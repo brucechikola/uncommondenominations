@@ -55,7 +55,7 @@ export function Navbar() {
               style={{ background: "rgba(141,107,61,0.12)", border: "1px solid rgba(141,107,61,0.35)" }}>
               <span className="font-display text-xs font-bold text-primary">U</span>
             </div>
-            <span className="font-display text-xs font-bold tracking-[0.14em] uppercase transition-colors text-white/80 group-hover:text-primary">
+            <span className="font-display text-xs font-bold uppercase transition-colors text-white/80 group-hover:text-primary">
               Uncommon Denominators
             </span>
           </Link>
@@ -64,7 +64,7 @@ export function Navbar() {
           <nav className="hidden md:flex items-center gap-6">
             {NAV_LINKS.map(({ href, label }) => (
               <Link key={href} href={href}
-                className={`font-sans text-[0.7rem] font-medium tracking-[0.1em] uppercase transition-colors ${
+                className={`font-sans text-[0.85rem] font-medium uppercase transition-colors ${
                   isCurrent(href) ? "text-primary" : "text-white/70 hover:text-white"
                 }`}>
                 {label}
@@ -76,7 +76,7 @@ export function Navbar() {
           <div className="flex items-center gap-3">
             <Link href="/shop">
               <Button size="sm"
-                className="hidden md:flex font-display text-[0.65rem] tracking-[0.1em] uppercase px-5 h-9 transition-all"
+                className="hidden md:flex font-display uppercase px-5 h-9 transition-all"
                 style={{ background: "#8d6b3d", color: "#fff", fontWeight: 700, boxShadow: "0 2px 12px rgba(141,107,61,0.35)" }}>
                 {cartProduct ? (
                   <><ShoppingCart className="h-3.5 w-3.5 mr-1.5" />{cartQuantity} in cart</>
@@ -100,12 +100,12 @@ export function Navbar() {
           <nav className="container mx-auto px-6 py-6 flex flex-col gap-4">
             {NAV_LINKS.map(({ href, label }) => (
               <Link key={href} href={href} onClick={() => setMobileOpen(false)}
-                className={`font-display text-xs tracking-widest uppercase py-2 border-b border-border/50 ${isCurrent(href) ? "text-primary" : "text-muted-foreground"}`}>
+                className={`font-display text-sm uppercase py-2 border-b border-border/50 ${isCurrent(href) ? "text-primary" : "text-muted-foreground"}`}>
                 {label}
               </Link>
             ))}
             <Link href="/shop" onClick={() => setMobileOpen(false)}>
-              <Button className="w-full mt-2 font-display text-[0.65rem] tracking-widest uppercase"
+              <Button className="w-full mt-2 font-display uppercase"
                 style={{ background: "#8d6b3d", color: "#fff", fontWeight: 700 }}>
                 Order Now
               </Button>
