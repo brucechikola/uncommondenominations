@@ -841,7 +841,7 @@ export default function Home() {
                   <Link href="/shop">
                     <Button
                       onClick={() => setProductType("paperback")}
-                      className="w-full font-display uppercase"
+                      className="w-full uppercase"
                       style={{
                         height:     "3rem",
                         background: "#8d6b3d",
@@ -932,7 +932,7 @@ export default function Home() {
                   <Link href="/shop">
                     <Button
                       onClick={() => setProductType("hardcover")}
-                      className="w-full font-display uppercase shadow-xl"
+                      className="w-full uppercase shadow-xl"
                       style={{
                         height:     "3rem",
                         background: "#8d6b3d",

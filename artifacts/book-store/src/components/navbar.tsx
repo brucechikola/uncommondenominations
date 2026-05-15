@@ -55,7 +55,7 @@ export function Navbar() {
               style={{ background: "rgba(141,107,61,0.12)", border: "1px solid rgba(141,107,61,0.35)" }}>
               <span className="font-display text-xs font-bold text-primary">U</span>
             </div>
-            <span className="font-display text-xs font-bold uppercase transition-colors text-white/80 group-hover:text-primary">
+            <span className="font-sans text-xs font-bold uppercase transition-colors text-white/80 group-hover:text-primary">
               Uncommon Denominators
             </span>
           </Link>
@@ -76,7 +76,7 @@ export function Navbar() {
           <div className="flex items-center gap-3">
             <Link href="/shop">
               <Button size="sm"
-                className="hidden md:flex font-display uppercase px-5 h-9 transition-all"
+                className="hidden md:flex uppercase px-5 h-9 transition-all"
                 style={{ background: "#8d6b3d", color: "#fff", fontWeight: 700, boxShadow: "0 2px 12px rgba(141,107,61,0.35)" }}>
                 {cartProduct ? (
                   <><ShoppingCart className="h-3.5 w-3.5 mr-1.5" />{cartQuantity} in cart</>
@@ -105,7 +105,7 @@ export function Navbar() {
               </Link>
             ))}
             <Link href="/shop" onClick={() => setMobileOpen(false)}>
-              <Button className="w-full mt-2 font-display uppercase"
+              <Button className="w-full mt-2 uppercase"
                 style={{ background: "#8d6b3d", color: "#fff", fontWeight: 700 }}>
                 Order Now
               </Button>

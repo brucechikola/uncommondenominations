@@ -256,7 +256,7 @@ export default function AboutAuthor() {
             </p>
             <Link href="/shop">
               <motion.div whileHover={{ scale: 1.03, y: -1 }} whileTap={{ scale: 0.97 }} className="inline-block">
-                <Button className="font-display uppercase"
+                <Button className="uppercase"
                   style={{ height: "3rem", padding: "0 3rem",
                     background: GOLD, color: "#fff", fontWeight: 700, boxShadow: "0 4px 28px rgba(141,107,61,0.3)" }}>
                   Order Your Copy

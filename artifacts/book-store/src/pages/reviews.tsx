@@ -288,7 +288,7 @@ export default function Reviews() {
 
                 <motion.div whileHover={{ scale: 1.02, y: -1 }} whileTap={{ scale: 0.97 }} className="inline-block">
                   <Button type="submit" disabled={createReview.isPending || !name || !comment}
-                    className="font-display uppercase"
+                    className="uppercase"
                     style={{ height: "3rem", padding: "0 2.5rem",
                       background: GOLD, color: "#fff", fontWeight: 700, boxShadow: "0 4px 20px rgba(141,107,61,0.25)",
                       opacity: (createReview.isPending || !name || !comment) ? 0.55 : 1 }}>
