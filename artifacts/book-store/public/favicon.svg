@@ -1,3 +1,22 @@
 <svg width="180" height="180" viewBox="0 0 180 180" fill="none" xmlns="http://www.w3.org/2000/svg">
-<rect width="180" height="180" rx="36" fill="#FF3C00"/>
+  <!-- Navy rounded square backdrop -->
+  <rect width="180" height="180" rx="38" fill="#060f1e"/>
+  <!-- Subtle gold border -->
+  <rect x="1.5" y="1.5" width="177" height="177" rx="36.5" stroke="#8d6b3d" stroke-width="3" fill="none" stroke-opacity="0.5"/>
+
+  <!-- Open book — left page -->
+  <path d="M34 52 C34 49 37 46 40 46 L86 46 L86 122 L40 122 C37 122 34 119 34 116 Z"
+    fill="none" stroke="#8d6b3d" stroke-width="7" stroke-linejoin="round"/>
+  <!-- Open book — right page -->
+  <path d="M146 52 C146 49 143 46 140 46 L94 46 L94 122 L140 122 C143 122 146 119 146 116 Z"
+    fill="none" stroke="#8d6b3d" stroke-width="7" stroke-linejoin="round"/>
+  <!-- Spine -->
+  <line x1="90" y1="46" x2="90" y2="122" stroke="#8d6b3d" stroke-width="7"/>
+
+  <!-- Fraction bar (the "denominator" motif) -->
+  <line x1="52" y1="142" x2="128" y2="142" stroke="#8d6b3d" stroke-width="8" stroke-linecap="round"/>
+  <!-- Dot above fraction bar (numerator) -->
+  <circle cx="90" cy="132" r="6" fill="#8d6b3d"/>
+  <!-- Dot below fraction bar (denominator) -->
+  <circle cx="90" cy="152" r="6" fill="#8d6b3d"/>
 </svg>
