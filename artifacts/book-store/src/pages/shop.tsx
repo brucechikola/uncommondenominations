@@ -24,7 +24,7 @@ export default function Shop() {
             Shop
           </motion.p>
           <motion.h1 initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.07 }}
-            className="font-display text-5xl lg:text-6xl font-bold mb-4" style={{ color: "hsl(40,28%,93%)" }}>
+            className="font-display text-3xl lg:text-4xl font-bold mb-4" style={{ color: "hsl(40,28%,93%)" }}>
             Choose Your Edition
           </motion.h1>
           <motion.p initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.14 }}

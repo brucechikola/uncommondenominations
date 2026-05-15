@@ -266,7 +266,7 @@ function StatItem({
       <div
         className="font-display font-bold leading-none"
         style={{
-          fontSize: "clamp(2.2rem,4.5vw,3.5rem)",
+          fontSize: "clamp(1.6rem,2.8vw,2.2rem)",
           color: "hsl(42,78%,56%)",
           letterSpacing: "-0.01em",
         }}
@@ -410,35 +410,35 @@ export default function Home() {
             {/* Giant title */}
             <motion.div variants={fadeUp} className="mb-6">
               <h1
-                className="font-display font-bold leading-[0.9]"
-                style={{ letterSpacing: "0.03em" }}
+                className="font-display font-bold leading-[1.0]"
+                style={{ letterSpacing: "0.01em" }}
               >
                 <span
                   className="block"
                   style={{
-                    fontSize: "clamp(3.6rem,8.5vw,7.5rem)",
+                    fontSize: "clamp(2.4rem,5vw,4rem)",
                     color: "hsl(40,22%,90%)",
                   }}
                 >
-                  THE
+                  The
                 </span>
                 <span
                   className="block gold-shimmer"
                   style={{
-                    fontSize: "clamp(3.6rem,8.5vw,7.5rem)",
+                    fontSize: "clamp(2.4rem,5vw,4rem)",
                     WebkitTextFillColor: "transparent",
                   }}
                 >
-                  LUMINOUS
+                  Luminous
                 </span>
                 <span
                   className="block"
                   style={{
-                    fontSize: "clamp(3.6rem,8.5vw,7.5rem)",
+                    fontSize: "clamp(2.4rem,5vw,4rem)",
                     color: "hsl(40,22%,90%)",
                   }}
                 >
-                  PATH
+                  Path
                 </span>
               </h1>
             </motion.div>
@@ -634,7 +634,7 @@ export default function Home() {
             <motion.h2
               variants={fadeUp}
               className="font-display font-bold text-foreground mb-5"
-              style={{ fontSize: "clamp(2rem,4.5vw,3.4rem)", lineHeight: 1.05 }}
+              style={{ fontSize: "clamp(1.7rem,3vw,2.4rem)", lineHeight: 1.15 }}
             >
               A Book That Demands to Be{" "}
               <span className="gold-shimmer" style={{ WebkitTextFillColor: "transparent" }}>
@@ -725,7 +725,7 @@ export default function Home() {
               variants={fadeUp}
               className="font-display font-bold"
               style={{
-                fontSize: "clamp(2.2rem,5vw,4rem)",
+                fontSize: "clamp(1.7rem,3vw,2.4rem)",
                 color: "hsl(40,22%,92%)",
               }}
             >
@@ -980,7 +980,7 @@ export default function Home() {
             <motion.h2
               variants={fadeUp}
               className="font-display font-bold text-foreground mb-5"
-              style={{ fontSize: "clamp(2.2rem,4.5vw,3.4rem)" }}
+              style={{ fontSize: "clamp(1.7rem,3vw,2.4rem)" }}
             >
               Dr. Amara Zulu
             </motion.h2>
@@ -1048,7 +1048,7 @@ export default function Home() {
                 variants={fadeUp}
                 className="font-display font-bold"
                 style={{
-                  fontSize: "clamp(2.2rem,5vw,4rem)",
+                  fontSize: "clamp(1.7rem,3vw,2.4rem)",
                   color: "hsl(40,22%,92%)",
                 }}
               >
@@ -1164,7 +1164,7 @@ export default function Home() {
             <motion.h2
               variants={fadeUp}
               className="font-display font-bold text-foreground"
-              style={{ fontSize: "clamp(2.2rem,5vw,4rem)" }}
+              style={{ fontSize: "clamp(1.7rem,3vw,2.4rem)" }}
             >
               Delivered to Your Door
             </motion.h2>
