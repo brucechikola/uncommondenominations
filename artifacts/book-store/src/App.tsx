@@ -3,7 +3,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { useEffect } from "react";
-import { useTrackVisitor } from "@workspace/api-client-react";
+import { useTrackVisitor, setAuthTokenGetter } from "@workspace/api-client-react";
 import { useAdminAuthStore } from "@/lib/store";
 
 import { PublicLayout } from "@/components/public-layout";
@@ -23,19 +23,9 @@ import AdminDashboard from "@/pages/admin/dashboard";
 
 const queryClient = new QueryClient();
 
-// Attach auth token to all requests
-const originalFetch = window.fetch;
-window.fetch = async (input: RequestInfo | URL, init?: RequestInit) => {
-  const token = useAdminAuthStore.getState().token;
-  if (token) {
-    init = init ?? {};
-    init.headers = {
-      ...init.headers,
-      Authorization: `Bearer ${token}`,
-    };
-  }
-  return originalFetch(input, init);
-};
+// Register a token getter so the API client injects Authorization headers
+// correctly — avoids the Headers-spread bug that dropped Content-Type.
+setAuthTokenGetter(() => useAdminAuthStore.getState().token);
 
 function VisitorTracker() {
   const [location] = useLocation();
