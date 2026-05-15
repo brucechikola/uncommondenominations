@@ -18,8 +18,14 @@ import Confirmation from "@/pages/confirmation";
 import Reviews from "@/pages/reviews";
 import Contact from "@/pages/contact";
 import Terms from "@/pages/terms";
-import AdminLogin from "@/pages/admin/login";
+
+import AdminLogin    from "@/pages/admin/login";
 import AdminDashboard from "@/pages/admin/dashboard";
+import AdminOrders   from "@/pages/admin/orders";
+import AdminReviews  from "@/pages/admin/reviews";
+import AdminMessages from "@/pages/admin/messages";
+import AdminPayments from "@/pages/admin/payments";
+import AdminSettings from "@/pages/admin/settings";
 
 const queryClient = new QueryClient();
 
@@ -44,8 +50,13 @@ function Router() {
     <>
       <VisitorTracker />
       <Switch>
-        <Route path="/admin/login" component={AdminLogin} />
-        <Route path="/admin" component={AdminDashboard} />
+        <Route path="/admin/login"    component={AdminLogin} />
+        <Route path="/admin/orders"   component={AdminOrders} />
+        <Route path="/admin/reviews"  component={AdminReviews} />
+        <Route path="/admin/messages" component={AdminMessages} />
+        <Route path="/admin/payments" component={AdminPayments} />
+        <Route path="/admin/settings" component={AdminSettings} />
+        <Route path="/admin"          component={AdminDashboard} />
         <Route>
           <PublicLayout>
             <Switch>
