@@ -43,6 +43,13 @@ router.post("/payments", async (req, res): Promise<void> => {
     accountName: parsed.data.accountName ?? null,
   }).returning();
 
+  // Cash on delivery — order is confirmed and awaiting delivery, payment collected later
+  if (parsed.data.method === "cash_on_delivery") {
+    await db.update(ordersTable)
+      .set({ status: "awaiting_delivery" })
+      .where(eq(ordersTable.id, parsed.data.orderId));
+  }
+
   res.status(201).json({
     ...payment,
     amount: Number(payment.amount),
@@ -99,7 +106,7 @@ router.patch("/payments/:id/simulate", async (req, res): Promise<void> => {
 
   if (parsed.data.outcome === "successful") {
     await db.update(ordersTable)
-      .set({ status: "confirmed" })
+      .set({ status: "awaiting_delivery" })
       .where(eq(ordersTable.id, payment.orderId));
   }
 

@@ -52,13 +52,14 @@ const D = {
 };
 
 const STATUS_COLORS: Record<string, string> = {
-  pending:    "bg-yellow-400/15 text-yellow-300 border border-yellow-400/30",
-  confirmed:  "bg-blue-400/15 text-blue-300 border border-blue-400/30",
-  shipped:    "bg-indigo-400/15 text-indigo-300 border border-indigo-400/30",
-  delivered:  "bg-emerald-400/15 text-emerald-300 border border-emerald-400/30",
-  cancelled:  "bg-red-400/15 text-red-300 border border-red-400/30",
-  successful: "bg-emerald-400/15 text-emerald-300 border border-emerald-400/30",
-  failed:     "bg-red-400/15 text-red-300 border border-red-400/30",
+  pending:           "bg-yellow-400/15 text-yellow-300 border border-yellow-400/30",
+  confirmed:         "bg-blue-400/15 text-blue-300 border border-blue-400/30",
+  awaiting_delivery: "bg-orange-400/15 text-orange-300 border border-orange-400/30",
+  shipped:           "bg-indigo-400/15 text-indigo-300 border border-indigo-400/30",
+  delivered:         "bg-emerald-400/15 text-emerald-300 border border-emerald-400/30",
+  cancelled:         "bg-red-400/15 text-red-300 border border-red-400/30",
+  successful:        "bg-emerald-400/15 text-emerald-300 border border-emerald-400/30",
+  failed:            "bg-red-400/15 text-red-300 border border-red-400/30",
 };
 
 const PAYMENT_METHOD_META: Record<string, { label: string; color: string; abbr: string }> = {
@@ -66,10 +67,11 @@ const PAYMENT_METHOD_META: Record<string, { label: string; color: string; abbr: 
   mtn_money:       { label: "MTN MoMo",        color: "#eab308", abbr: "MTN"  },
   zamtel_money:    { label: "Zamtel Kwacha",   color: "#22c55e", abbr: "ZM"   },
   visa_mastercard: { label: "Visa/Mastercard", color: "#3b82f6", abbr: "CARD" },
-  bank_transfer:   { label: "Bank Transfer",  color: "#6366f1", abbr: "BNK"  },
+  bank_transfer:    { label: "Bank Transfer",   color: "#6366f1", abbr: "BNK"  },
+  cash_on_delivery: { label: "Cash on Delivery", color: "#f59e0b", abbr: "COD"  },
 };
 
-const ORDER_STATUSES = ["pending", "confirmed", "shipped", "delivered", "cancelled"] as const;
+const ORDER_STATUSES = ["pending", "confirmed", "awaiting_delivery", "shipped", "delivered", "cancelled"] as const;
 type Tab = "overview" | "orders" | "reviews" | "contacts" | "payments" | "settings";
 const PAGE_SIZE = 15;
 

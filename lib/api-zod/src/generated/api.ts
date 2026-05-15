@@ -92,7 +92,7 @@ export const GetOrderResponse = zod.object({
   "productType": zod.string(),
   "quantity": zod.number(),
   "totalAmount": zod.number(),
-  "status": zod.enum(['pending', 'confirmed', 'shipped', 'delivered', 'cancelled']),
+  "status": zod.enum(['pending', 'confirmed', 'awaiting_delivery', 'shipped', 'delivered', 'cancelled']),
   "notes": zod.string().nullish(),
   "createdAt": zod.string(),
   "payment": zod.object({
@@ -286,7 +286,7 @@ export const ListAdminOrdersResponse = zod.object({
   "productType": zod.string(),
   "quantity": zod.number(),
   "totalAmount": zod.number(),
-  "status": zod.enum(['pending', 'confirmed', 'shipped', 'delivered', 'cancelled']),
+  "status": zod.enum(['pending', 'confirmed', 'awaiting_delivery', 'shipped', 'delivered', 'cancelled']),
   "notes": zod.string().nullish(),
   "createdAt": zod.string(),
   "payment": zod.object({
@@ -471,7 +471,7 @@ export const UpdateOrderStatusParams = zod.object({
 })
 
 export const UpdateOrderStatusBody = zod.object({
-  "status": zod.enum(['pending', 'confirmed', 'shipped', 'delivered', 'cancelled'])
+  "status": zod.enum(['pending', 'confirmed', 'awaiting_delivery', 'shipped', 'delivered', 'cancelled'])
 })
 
 export const UpdateOrderStatusResponse = zod.object({
@@ -484,7 +484,7 @@ export const UpdateOrderStatusResponse = zod.object({
   "productType": zod.string(),
   "quantity": zod.number(),
   "totalAmount": zod.number(),
-  "status": zod.enum(['pending', 'confirmed', 'shipped', 'delivered', 'cancelled']),
+  "status": zod.enum(['pending', 'confirmed', 'awaiting_delivery', 'shipped', 'delivered', 'cancelled']),
   "notes": zod.string().nullish(),
   "createdAt": zod.string(),
   "payment": zod.object({

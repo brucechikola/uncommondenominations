@@ -514,7 +514,7 @@ router.patch("/admin/payment-settings/:channelId", requireAdmin, async (req, res
   const [updated] = await db
     .update(paymentSettingsTable)
     .set({ enabled })
-    .where(eq(paymentSettingsTable.channelId, channelId))
+    .where(eq(paymentSettingsTable.channelId, channelId as string))
     .returning();
   if (!updated) {
     res.status(404).json({ error: "Channel not found" });
