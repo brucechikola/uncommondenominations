@@ -29,12 +29,14 @@ export function Navbar() {
 
   const isCurrent = (p: string) => location === p;
 
-  /* Purchase pages sit on a fixed dark canvas — always treat as scrolled for styling */
-  const isDarkPage = ["/shop", "/checkout", "/payment", "/confirmation"].includes(location);
+  /* Only the home page hero gets a transparent navbar that transitions on scroll.
+     Every other page shows the glass backdrop immediately for consistent styling. */
+  const isHome    = location === "/";
+  const showGlass = scrolled || !isHome;
 
-  /* Text is blue before the user scrolls; once the backdrop appears it flips to white */
-  const linkColor  = (scrolled || isDarkPage) ? WHITE  : BLUE;
-  const muteColor  = (scrolled || isDarkPage) ? WHITE2 : BLUE;
+  /* Text is soft blue before glass appears (home hero only); white once glass is active */
+  const linkColor = showGlass ? WHITE  : BLUE;
+  const muteColor = showGlass ? WHITE2 : BLUE;
 
   return (
     <>
@@ -44,10 +46,10 @@ export function Navbar() {
         transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
         className="fixed top-0 left-0 right-0 z-50 w-full transition-all duration-300"
         style={{
-          background:   scrolled ? "hsl(222,58%,6%,0.88)"          : "transparent",
-          borderBottom: scrolled ? "1px solid hsl(220,38%,18%,0.6)" : "1px solid transparent",
-          boxShadow:    scrolled ? "0 4px 32px rgba(0,0,0,0.4)"     : "none",
-          backdropFilter: scrolled ? "blur(18px) saturate(1.4)"     : "none",
+          background:     showGlass ? "hsl(222,58%,6%,0.88)"          : "transparent",
+          borderBottom:   showGlass ? "1px solid hsl(220,38%,18%,0.6)" : "1px solid transparent",
+          boxShadow:      showGlass ? "0 4px 32px rgba(0,0,0,0.4)"     : "none",
+          backdropFilter: showGlass ? "blur(18px) saturate(1.4)"       : "none",
         }}
       >
         <div className="container mx-auto flex h-14 items-center justify-between px-6">
