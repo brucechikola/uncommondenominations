@@ -24,6 +24,7 @@ import {
   type AdminPayment,
   type ListAdminReviewsApproved,
 } from "@workspace/api-client-react";
+import { fmtMoney, fmtDate } from "@/components/purchase-ui";
 import { useQueryClient } from "@tanstack/react-query";
 import { useState, useEffect, useRef } from "react";
 import { AnimatePresence, motion } from "framer-motion";
@@ -220,7 +221,7 @@ function OrderPanel({
   };
 
   return (
-    <SlidePanel open title={`Order #${order.id}`} subtitle={new Date(order.createdAt).toLocaleString()} onClose={onClose}>
+    <SlidePanel open title={`Order #${order.id}`} subtitle={fmtDate(order.createdAt)} onClose={onClose}>
       <div className="flex gap-2 flex-wrap">
         <a href={`tel:${order.phone}`}
           className={cn("flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors", D.accentBg, "text-white hover:opacity-90")}>
@@ -245,8 +246,8 @@ function OrderPanel({
         <p className={cn("text-xs font-semibold uppercase mb-3", D.muted)}>Order Details</p>
         <Field label="Edition" value={<span className="capitalize">{order.productType}</span>} />
         <Field label="Quantity" value={order.quantity} />
-        <Field label="Total Amount" value={<span className={D.accent}>K{order.totalAmount}</span>} accent />
-        <Field label="Date" value={new Date(order.createdAt).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" })} />
+        <Field label="Total Amount" value={<span className={D.accent}>{fmtMoney(order.totalAmount)}</span>} accent />
+        <Field label="Date" value={fmtDate(order.createdAt)} />
       </div>
 
       <div className={cn("rounded-xl p-4", D.card, "border", D.border)}>
@@ -285,7 +286,7 @@ function ReviewPanel({
   const [confirmDelete, setConfirmDelete] = useState(false);
 
   return (
-    <SlidePanel open title={`Review by ${review.reviewerName}`} subtitle={new Date(review.createdAt).toLocaleDateString()} onClose={onClose}>
+    <SlidePanel open title={`Review by ${review.reviewerName}`} subtitle={fmtDate(review.createdAt)} onClose={onClose}>
       <div className="flex items-center gap-3">
         <span className={cn("px-3 py-1 rounded-full text-xs font-medium",
           review.approved ? "bg-emerald-400/15 text-emerald-300 border border-emerald-400/30"
@@ -304,7 +305,7 @@ function ReviewPanel({
         {review.reviewerTitle && <Field label="Title / Occupation" value={review.reviewerTitle} />}
         <Field label="Edition" value={<span className="capitalize">{review.productType ?? "—"}</span>} />
         <Field label="Rating" value={`${review.rating} / 5`} />
-        <Field label="Submitted" value={new Date(review.createdAt).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" })} />
+        <Field label="Submitted" value={fmtDate(review.createdAt)} />
       </div>
 
       <div className={cn("rounded-xl p-4", D.card, "border", D.border)}>
@@ -349,7 +350,7 @@ function ReviewPanel({
 /* ─── Contact detail panel ──────────────────────────────────── */
 function ContactPanel({ contact, onClose }: { contact: ContactMessage; onClose: () => void }) {
   return (
-    <SlidePanel open title={`Message from ${contact.name}`} subtitle={new Date(contact.createdAt).toLocaleString()} onClose={onClose}>
+    <SlidePanel open title={`Message from ${contact.name}`} subtitle={fmtDate(contact.createdAt)} onClose={onClose}>
       <div className="flex gap-2 flex-wrap">
         <a href={`mailto:${contact.email}`}
           className={cn("flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors", D.accentBg, "text-white hover:opacity-90")}>
@@ -367,7 +368,7 @@ function ContactPanel({ contact, onClose }: { contact: ContactMessage; onClose: 
         <Field label="Name" value={contact.name} />
         <Field label="Email" value={<a href={`mailto:${contact.email}`} className={cn(D.accent, "hover:underline")}>{contact.email}</a>} />
         {contact.phone && <Field label="Phone" value={<a href={`tel:${contact.phone}`} className={cn(D.muted, "hover:underline")}>{contact.phone}</a>} />}
-        <Field label="Received" value={new Date(contact.createdAt).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric", hour: "2-digit", minute: "2-digit" } as Intl.DateTimeFormatOptions)} />
+        <Field label="Received" value={fmtDate(contact.createdAt)} />
       </div>
 
       <div className={cn("rounded-xl p-4", D.card, "border", D.border)}>
@@ -382,7 +383,7 @@ function ContactPanel({ contact, onClose }: { contact: ContactMessage; onClose: 
 function PaymentPanel({ payment, onClose }: { payment: AdminPayment; onClose: () => void }) {
   const meta = PAYMENT_METHOD_META[payment.method];
   return (
-    <SlidePanel open title={`Transaction #${payment.id}`} subtitle={new Date(payment.createdAt).toLocaleString()} onClose={onClose}>
+    <SlidePanel open title={`Transaction #${payment.id}`} subtitle={fmtDate(payment.createdAt)} onClose={onClose}>
       <div className="flex items-center gap-3">
         <span className={cn("px-3 py-1 rounded-full text-xs font-medium capitalize border", STATUS_COLORS[payment.status] ?? "bg-white/10 text-slate-400")}>
           {payment.status}
@@ -400,13 +401,13 @@ function PaymentPanel({ payment, onClose }: { payment: AdminPayment; onClose: ()
 
       <div className={cn("rounded-xl p-4", D.card, "border", D.border)}>
         <p className={cn("text-xs font-semibold uppercase mb-3", D.muted)}>Transaction</p>
-        <Field label="Amount" value={<span className={cn("font-bold", D.accent)}>K{payment.amount}</span>} accent />
+        <Field label="Amount" value={<span className={cn("font-bold", D.accent)}>{fmtMoney(payment.amount)}</span>} accent />
         <Field label="Reference" value={<span className="font-mono text-xs">{payment.reference}</span>} />
         <Field label="Method" value={meta?.label ?? payment.method} />
-        <Field label="Status" value={<span className="capitalize">{payment.status}</span>} />
+        <Field label="Status" value={<span className="capitalize">{formatStatus(payment.status)}</span>} />
         {payment.phoneNumber && <Field label="Phone Number" value={payment.phoneNumber} />}
         {payment.accountName && <Field label="Account Name" value={payment.accountName} />}
-        <Field label="Date" value={new Date(payment.createdAt).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric", hour: "2-digit", minute: "2-digit" } as Intl.DateTimeFormatOptions)} />
+        <Field label="Date" value={fmtDate(payment.createdAt)} />
       </div>
 
       {(payment.orderName || payment.orderPhone) && (
@@ -533,13 +534,13 @@ export default function AdminDashboard() {
       ID: o.id, "Full Name": o.fullName, Phone: o.phone,
       Edition: o.productType, Quantity: o.quantity,
       "Total (K)": o.totalAmount, City: o.city, Status: o.status,
-      Date: new Date(o.createdAt).toLocaleDateString(),
+      Date: fmtDate(o.createdAt),
     })), "orders.xlsx");
   };
 
   const statCards = [
     { label: "Total Orders", value: stats?.totalOrders ?? "—", icon: ShoppingBag, color: "text-blue-400" },
-    { label: "Total Revenue", value: stats ? `K${stats.totalRevenue}` : "—", icon: TrendingUp, color: "text-[#b08a58]" },
+    { label: "Total Revenue", value: stats ? fmtMoney(stats.totalRevenue) : "—", icon: TrendingUp, color: "text-[#b08a58]" },
     { label: "Total Visitors", value: stats?.totalVisitors ?? "—", icon: Users, color: "text-purple-400" },
     { label: "Total Buyers", value: stats?.totalBuyers ?? "—", icon: BookOpen, color: "text-emerald-400" },
   ];
@@ -637,12 +638,12 @@ export default function AdminDashboard() {
                       <td className={cn("px-4 py-3 font-medium whitespace-nowrap", D.text)}>{order.fullName}</td>
                       <td className={cn("px-4 py-3 capitalize", D.muted)}>{order.productType}</td>
                       <td className={cn("px-4 py-3", D.muted)}>{order.quantity}</td>
-                      <td className={cn("px-4 py-3 font-semibold", D.accent)}>K{order.totalAmount}</td>
+                      <td className={cn("px-4 py-3 font-semibold", D.accent)}>{fmtMoney(order.totalAmount)}</td>
                       <td className={cn("px-4 py-3", D.muted)}>{order.city}</td>
                       <td className="px-4 py-3">
                         <span className={cn("px-2 py-0.5 rounded-full text-xs font-medium", STATUS_COLORS[order.status] ?? "bg-white/10 text-slate-400")}>{formatStatus(order.status)}</span>
                       </td>
-                      <td className={cn("px-4 py-3 text-xs whitespace-nowrap", D.muted)}>{new Date(order.createdAt).toLocaleDateString()}</td>
+                      <td className={cn("px-4 py-3 text-xs whitespace-nowrap", D.muted)}>{fmtDate(order.createdAt)}</td>
                       <td className="px-4 py-3"><ChevronRight className={cn("h-4 w-4", D.muted)} /></td>
                     </tr>
                   ))}
@@ -705,12 +706,12 @@ export default function AdminDashboard() {
                       <td className={cn("px-4 py-3 font-mono text-xs", D.muted)}>{order.phone}</td>
                       <td className={cn("px-4 py-3 capitalize", D.muted)}>{order.productType}</td>
                       <td className={cn("px-4 py-3", D.muted)}>{order.quantity}</td>
-                      <td className={cn("px-4 py-3 font-semibold", D.accent)}>K{order.totalAmount}</td>
+                      <td className={cn("px-4 py-3 font-semibold", D.accent)}>{fmtMoney(order.totalAmount)}</td>
                       <td className={cn("px-4 py-3", D.muted)}>{order.city}</td>
                       <td className="px-4 py-3">
                         <span className={cn("px-2 py-0.5 rounded-full text-xs font-medium", STATUS_COLORS[order.status] ?? "bg-white/10 text-slate-400")}>{formatStatus(order.status)}</span>
                       </td>
-                      <td className={cn("px-4 py-3 text-xs whitespace-nowrap", D.muted)}>{new Date(order.createdAt).toLocaleDateString()}</td>
+                      <td className={cn("px-4 py-3 text-xs whitespace-nowrap", D.muted)}>{fmtDate(order.createdAt)}</td>
                       <td className="px-4 py-3"><ChevronRight className={cn("h-4 w-4", D.muted)} /></td>
                     </tr>
                   ))}
@@ -808,7 +809,7 @@ export default function AdminDashboard() {
                         </div>
                       </div>
                       <div className="flex items-center gap-2 flex-shrink-0">
-                        <span className={cn("text-xs whitespace-nowrap", D.muted)}>{new Date(contact.createdAt).toLocaleDateString()}</span>
+                        <span className={cn("text-xs whitespace-nowrap", D.muted)}>{fmtDate(contact.createdAt)}</span>
                         <ChevronRight className={cn("h-4 w-4", D.muted)} />
                       </div>
                     </div>
@@ -881,14 +882,14 @@ export default function AdminDashboard() {
                             <span className={cn("text-xs", D.muted)}>{p.method}</span>
                           )}
                         </td>
-                        <td className={cn("px-4 py-3 font-semibold", D.accent)}>K{p.amount}</td>
+                        <td className={cn("px-4 py-3 font-semibold", D.accent)}>{fmtMoney(p.amount)}</td>
                         <td className={cn("px-4 py-3 font-mono text-xs", D.muted)}>{p.reference}</td>
                         <td className="px-4 py-3">
                           <span className={cn("px-2 py-0.5 rounded-full text-xs font-medium", STATUS_COLORS[p.status] ?? "bg-white/10 text-slate-400")}>
                             {formatStatus(p.status)}
                           </span>
                         </td>
-                        <td className={cn("px-4 py-3 text-xs whitespace-nowrap", D.muted)}>{new Date(p.createdAt).toLocaleDateString()}</td>
+                        <td className={cn("px-4 py-3 text-xs whitespace-nowrap", D.muted)}>{fmtDate(p.createdAt)}</td>
                         <td className="px-4 py-3"><ChevronRight className={cn("h-4 w-4", D.muted)} /></td>
                       </tr>
                     );

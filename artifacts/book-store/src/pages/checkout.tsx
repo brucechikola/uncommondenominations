@@ -7,7 +7,7 @@ import { useForm } from "react-hook-form";
 import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
 import { StepIndicator, MiniBook,
-  PAGE_BG, CARD_BG, CARD_BORDER, GOLD, TEXT_PRIMARY, TEXT_MUTED, TEXT_DIM } from "@/components/purchase-ui";
+  PAGE_BG, CARD_BG, CARD_BORDER, GOLD, TEXT_PRIMARY, TEXT_MUTED, TEXT_DIM, fmtMoney } from "@/components/purchase-ui";
 
 interface CheckoutForm {
   fullName: string;
@@ -238,7 +238,7 @@ export default function Checkout() {
                           {p.type}
                         </span>
                         <span className="font-display font-bold text-base" style={{ color: GOLD }}>
-                          K{p.priceKwacha}
+                          {fmtMoney(p.priceKwacha)}
                         </span>
                       </div>
                     </button>
@@ -274,7 +274,7 @@ export default function Checkout() {
                     Total
                   </span>
                   <span className="font-display text-2xl font-bold" style={{ color: GOLD }}>
-                    K{total}
+                    {fmtMoney(total)}
                   </span>
                 </div>
 

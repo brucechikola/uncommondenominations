@@ -113,3 +113,14 @@ export const GOLD = "#8d6b3d";
 export const TEXT_PRIMARY = "hsl(40,24%,90%)";
 export const TEXT_MUTED = "hsl(220,16%,48%)";
 export const TEXT_DIM = "hsl(220,14%,32%)";
+
+const ordinal = (n: number) => {
+  const v = n % 100;
+  return n + (["th","st","nd","rd"][(v - 20) % 10] ?? ["th","st","nd","rd"][v] ?? "th");
+};
+export const fmtMoney = (n: number | string) =>
+  `K${Number(n).toLocaleString("en-ZM")}`;
+export const fmtDate = (d: string | Date) => {
+  const dt = new Date(d);
+  return `${ordinal(dt.getDate())} ${dt.toLocaleDateString("en-GB", { month: "short" })} ${dt.getFullYear()}`;
+};

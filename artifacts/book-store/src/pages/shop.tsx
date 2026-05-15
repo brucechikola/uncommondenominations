@@ -5,7 +5,7 @@ import { useCartStore } from "@/lib/store";
 import { ShieldCheck, Truck, Phone } from "lucide-react";
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
-import { PAGE_BG, CARD_BG, CARD_BORDER, GOLD, TEXT_PRIMARY, TEXT_MUTED, TEXT_DIM } from "@/components/purchase-ui";
+import { PAGE_BG, CARD_BG, CARD_BORDER, GOLD, TEXT_PRIMARY, TEXT_MUTED, TEXT_DIM, fmtMoney } from "@/components/purchase-ui";
 
 const fadeUp = { hidden: { opacity: 0, y: 16 }, visible: { opacity: 1, y: 0 } };
 const stagger = { hidden: {}, visible: { transition: { staggerChildren: 0.07 } } };
@@ -96,7 +96,7 @@ export default function Shop() {
                           </p>
                           <p className="font-display text-[2.6rem] font-bold leading-none"
                             style={{ color: GOLD }}>
-                            K{product.priceKwacha}
+                            {fmtMoney(product.priceKwacha)}
                           </p>
                         </div>
                         <div className="flex flex-col items-end gap-2">
@@ -160,7 +160,7 @@ export default function Shop() {
                     <p className="font-sans text-[0.62rem] tracking-[0.18em] uppercase font-semibold capitalize mb-1"
                       style={{ color: TEXT_PRIMARY }}>{productType}</p>
                     <p className="font-sans text-[0.72rem]" style={{ color: TEXT_MUTED }}>
-                      K{selectedProduct?.priceKwacha} per copy
+                      {fmtMoney(selectedProduct?.priceKwacha ?? 0)} per copy
                     </p>
                   </div>
                   <div className="flex items-center gap-3">
@@ -183,7 +183,7 @@ export default function Shop() {
                 <div className="flex items-center justify-between py-5 mb-6"
                   style={{ borderTop: `1px solid ${CARD_BORDER}`, borderBottom: `1px solid ${CARD_BORDER}` }}>
                   <span className="font-sans text-[0.6rem] tracking-[0.18em] uppercase" style={{ color: TEXT_DIM }}>Total</span>
-                  <span className="font-display text-3xl font-bold" style={{ color: GOLD }}>K{total}</span>
+                  <span className="font-display text-3xl font-bold" style={{ color: GOLD }}>{fmtMoney(total)}</span>
                 </div>
 
                 <Link href="/checkout">

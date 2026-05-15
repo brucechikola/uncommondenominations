@@ -15,6 +15,7 @@ import {
   type Variants,
 } from "framer-motion";
 import { useRef, useEffect } from "react";
+import { fmtMoney } from "@/components/purchase-ui";
 
 /* ─────────────────────── animation presets ────────────────────── */
 const EASE = [0.22, 1, 0.36, 1] as const;
@@ -810,7 +811,7 @@ export default function Home() {
                       color: "hsl(42,78%,56%)",
                     }}
                   >
-                    K{paperback.priceKwacha}
+                    {fmtMoney(paperback.priceKwacha)}
                   </div>
                   <p
                     className="font-serif leading-relaxed mb-6"
@@ -901,7 +902,7 @@ export default function Home() {
                       color: "hsl(42,80%,60%)",
                     }}
                   >
-                    K{hardcover.priceKwacha}
+                    {fmtMoney(hardcover.priceKwacha)}
                   </div>
                   <p
                     className="font-serif leading-relaxed mb-6"

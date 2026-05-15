@@ -4,7 +4,7 @@ import { useCartStore } from "@/lib/store";
 import { useGetOrder, useGetPayment, getGetOrderQueryKey, getGetPaymentQueryKey } from "@workspace/api-client-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useEffect, useState } from "react";
-import { PAGE_BG, CARD_BG, CARD_BORDER, GOLD, TEXT_PRIMARY, TEXT_MUTED, TEXT_DIM } from "@/components/purchase-ui";
+import { PAGE_BG, CARD_BG, CARD_BORDER, GOLD, TEXT_PRIMARY, TEXT_MUTED, TEXT_DIM, fmtMoney, fmtDate } from "@/components/purchase-ui";
 import { StepIndicator } from "@/components/purchase-ui";
 import { Package, Phone, Truck, Download, Loader2 } from "lucide-react";
 
@@ -155,7 +155,7 @@ async function generateReceiptPdf(params: {
   doc.setFont("helvetica", "bold");
   doc.setFontSize(15);
   doc.setTextColor(...GOLD_C);
-  doc.text(`K${params.totalAmount}`, MARGIN + CW - 5, y + 9.5, { align: "right" });
+  doc.text(`K${Number(params.totalAmount).toLocaleString("en-ZM")}`, MARGIN + CW - 5, y + 9.5, { align: "right" });
   y += 22;
 
   // ── Footer ───────────────────────────────────────────────────────────────
@@ -198,9 +198,7 @@ export default function Confirmation() {
     return () => clearTimeout(timer);
   }, [clearCart]);
 
-  const issuedDate = new Date().toLocaleDateString("en-ZM", {
-    year: "numeric", month: "long", day: "numeric",
-  });
+  const issuedDate = fmtDate(new Date());
 
   const methodLabel = payment?.method
     ? payment.method.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase())
@@ -384,7 +382,7 @@ export default function Confirmation() {
                   <span className="font-sans text-[0.65rem] uppercase tracking-[0.14em] font-semibold"
                     style={{ color: TEXT_DIM }}>Total Paid</span>
                   <span className="font-display text-2xl font-bold" style={{ color: GOLD }}>
-                    K{order.totalAmount}
+                    {fmtMoney(order.totalAmount)}
                   </span>
                 </div>
               )}

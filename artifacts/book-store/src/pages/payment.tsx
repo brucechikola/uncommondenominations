@@ -8,7 +8,7 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Loader2, Smartphone, CreditCard, Landmark, Check, X, PackageCheck } from "lucide-react";
 import { StepIndicator, MiniBook,
-  PAGE_BG, CARD_BG, CARD_BORDER, GOLD, TEXT_PRIMARY, TEXT_MUTED, TEXT_DIM } from "@/components/purchase-ui";
+  PAGE_BG, CARD_BG, CARD_BORDER, GOLD, TEXT_PRIMARY, TEXT_MUTED, TEXT_DIM, fmtMoney } from "@/components/purchase-ui";
 
 const ALL_METHODS = [
   { id: "airtel_money",      label: "Airtel Money",      accent: "hsl(0,82%,52%)",    bg: "hsl(0,70%,10%)",    abbr: "A",   network: "Airtel",  tab: "mobile" },
@@ -157,9 +157,9 @@ export default function Payment() {
   };
 
   const payBtnLabel = (() => {
-    if (activeTab === "cod")  return `Confirm Order — K${order?.totalAmount ?? 0}`;
-    if (activeTab === "bank") return `Confirm Order — K${order?.totalAmount ?? 0}`;
-    return `Pay K${order?.totalAmount ?? 0}`;
+    if (activeTab === "cod")  return `Confirm Order — ${fmtMoney(order?.totalAmount ?? 0)}`;
+    if (activeTab === "bank") return `Confirm Order — ${fmtMoney(order?.totalAmount ?? 0)}`;
+    return `Pay ${fmtMoney(order?.totalAmount ?? 0)}`;
   })();
 
   return (
@@ -185,7 +185,7 @@ export default function Payment() {
               <p className="font-serif text-sm mb-8" style={{ color: TEXT_MUTED }}>
                 Order #{order.id} — <span className="capitalize">{order.productType}</span> ×{order.quantity}
                 {" — "}
-                <span className="font-semibold" style={{ color: TEXT_PRIMARY }}>K{order.totalAmount}</span>
+                <span className="font-semibold" style={{ color: TEXT_PRIMARY }}>{fmtMoney(order.totalAmount)}</span>
               </p>
             )}
             {!order && <div className="mb-8" />}
@@ -626,7 +626,7 @@ export default function Payment() {
                     ))}
                     <div className="flex justify-between items-center pt-4" style={{ borderTop: `1px solid ${CARD_BORDER}` }}>
                       <span className="font-sans text-[0.65rem] uppercase tracking-[0.14em]" style={{ color: TEXT_DIM }}>Total</span>
-                      <span className="font-display text-2xl font-bold" style={{ color: GOLD }}>K{order.totalAmount}</span>
+                      <span className="font-display text-2xl font-bold" style={{ color: GOLD }}>{fmtMoney(order.totalAmount)}</span>
                     </div>
                     {activeTab === "cod" && (
                       <p className="font-sans text-[0.62rem] pt-2 leading-relaxed" style={{ color: TEXT_DIM }}>
