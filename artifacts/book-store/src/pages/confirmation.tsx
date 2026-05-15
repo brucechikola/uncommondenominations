@@ -2,13 +2,13 @@ import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
 import { useCartStore } from "@/lib/store";
 import { useGetOrder, useGetPayment, getGetOrderQueryKey, getGetPaymentQueryKey } from "@workspace/api-client-react";
-import { motion } from "framer-motion";
-import { useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { useEffect, useState } from "react";
 import { PAGE_BG, CARD_BG, CARD_BORDER, GOLD, TEXT_PRIMARY, TEXT_MUTED, TEXT_DIM } from "@/components/purchase-ui";
 import { StepIndicator } from "@/components/purchase-ui";
-import { Package, Phone, Truck, Download } from "lucide-react";
+import { Package, Phone, Truck, Download, Loader2 } from "lucide-react";
 
-function buildReceiptHtml(params: {
+async function generateReceiptPdf(params: {
   orderId: number;
   fullName: string;
   phone: string;
@@ -23,185 +23,161 @@ function buildReceiptHtml(params: {
   paymentReference: string;
   paymentStatus: string;
   issuedDate: string;
-}): string {
-  const {
-    orderId, fullName, phone, email, deliveryAddress, city,
-    productType, quantity, totalAmount, notes,
-    paymentMethod, paymentReference, paymentStatus, issuedDate,
-  } = params;
+}): Promise<void> {
+  const { jsPDF } = await import("jspdf");
+  const doc = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
 
-  const rows: [string, string][] = [
-    ["Order ID",         `#${orderId}`],
-    ["Customer Name",    fullName],
-    ["Phone",            phone],
-    ["Email",            email],
-    ["Delivery Address", deliveryAddress],
-    ["City",             city],
-    ["Edition",          productType.charAt(0).toUpperCase() + productType.slice(1)],
-    ["Quantity",         String(quantity)],
-    ...(notes ? [["Notes", notes] as [string, string]] : []),
-    ["Payment Method",   paymentMethod],
-    ["Payment Reference",paymentReference],
-    ["Payment Status",   paymentStatus.charAt(0).toUpperCase() + paymentStatus.slice(1)],
+  const PW = 210;
+  const MARGIN = 20;
+  const CW = PW - MARGIN * 2;
+
+  const NAVY   = [13,  26,  56]  as [number, number, number];
+  const GOLD_C = [184, 134, 11]  as [number, number, number];
+  const GREY   = [102, 102, 102] as [number, number, number];
+  const LIGHT  = [237, 232, 223] as [number, number, number];
+  const GREEN  = [26,  122, 70]  as [number, number, number];
+  const GBG    = [230, 244, 236] as [number, number, number];
+
+  let y = MARGIN;
+
+  // ── Header bar ──────────────────────────────────────────────────────────
+  doc.setFillColor(...NAVY);
+  doc.rect(0, 0, PW, 22, "F");
+
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(11);
+  doc.setTextColor(255, 255, 255);
+  doc.text("UNCOMMON DENOMINATORS", MARGIN, 13);
+
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(7);
+  doc.setTextColor(180, 180, 200);
+  doc.text("by Mwanalushi & Nalishebo  ·  LIBROS Academic Publishing", MARGIN, 18.5);
+
+  // PAID badge
+  if (params.paymentStatus === "successful") {
+    doc.setFillColor(...GBG);
+    doc.roundedRect(PW - MARGIN - 22, 7, 18, 8, 1.5, 1.5, "F");
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(7);
+    doc.setTextColor(...GREEN);
+    doc.text("PAID", PW - MARGIN - 13, 12.5, { align: "center" });
+  }
+
+  y = 34;
+
+  // ── Title ────────────────────────────────────────────────────────────────
+  doc.setFont("times", "bold");
+  doc.setFontSize(26);
+  doc.setTextColor(...NAVY);
+  doc.text("Purchase Receipt", MARGIN, y);
+  y += 7;
+
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(8.5);
+  doc.setTextColor(...GREY);
+  doc.text(`Issued ${params.issuedDate}`, MARGIN, y);
+  y += 3;
+
+  // Gold divider
+  doc.setDrawColor(...GOLD_C);
+  doc.setLineWidth(0.6);
+  doc.line(MARGIN, y + 3, MARGIN + CW, y + 3);
+  y += 10;
+
+  // ── Helper to draw a row ─────────────────────────────────────────────────
+  function drawRow(label: string, value: string, highlight = false) {
+    doc.setFillColor(...LIGHT);
+    doc.rect(MARGIN, y - 4.5, CW, 8, "F");
+
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(9);
+    doc.setTextColor(...GREY);
+    doc.text(label, MARGIN + 3, y);
+
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(9);
+    doc.setTextColor(highlight ? GOLD_C[0] : NAVY[0], highlight ? GOLD_C[1] : NAVY[1], highlight ? GOLD_C[2] : NAVY[2]);
+    doc.text(value, MARGIN + CW - 3, y, { align: "right" });
+
+    doc.setDrawColor(220, 215, 205);
+    doc.setLineWidth(0.15);
+    doc.line(MARGIN, y + 3.5, MARGIN + CW, y + 3.5);
+    y += 9;
+  }
+
+  const rows: [string, string, boolean?][] = [
+    ["Order ID",         `#${params.orderId}`,                  false],
+    ["Customer Name",    params.fullName,                        false],
+    ["Phone",            params.phone,                           false],
+    ["Email",            params.email,                           false],
+    ["Delivery Address", `${params.deliveryAddress}, ${params.city}`, false],
+    ["Edition",          params.productType.charAt(0).toUpperCase() + params.productType.slice(1), false],
+    ["Quantity",         String(params.quantity),                false],
+    ...(params.notes ? [["Notes", params.notes, false] as [string, string, boolean]] : []),
+    ["Payment Method",   params.paymentMethod,                   false],
+    ["Payment Reference",params.paymentReference,                false],
+    ["Payment Status",   params.paymentStatus.charAt(0).toUpperCase() + params.paymentStatus.slice(1), false],
   ];
 
-  return `<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Receipt — Order #${orderId}</title>
-  <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    body {
-      font-family: Georgia, "Times New Roman", serif;
-      background: #fff;
-      color: #1a1a1a;
-      padding: 3rem 3.5rem;
-      max-width: 680px;
-      margin: 0 auto;
+  // Alternate row shading
+  let alt = false;
+  for (const [label, value] of rows) {
+    if (alt) {
+      doc.setFillColor(248, 246, 241);
+      doc.rect(MARGIN, y - 4.5, CW, 8, "F");
+    } else {
+      doc.setFillColor(255, 255, 255);
+      doc.rect(MARGIN, y - 4.5, CW, 8, "F");
     }
-    /* ── Header ── */
-    .header {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-      padding-bottom: 1.25rem;
-      margin-bottom: 1.75rem;
-      border-bottom: 2px solid #c8a84b;
-    }
-    .logo {
-      font-family: Georgia, serif;
-      font-size: 1.05rem;
-      font-weight: 700;
-      letter-spacing: 0.08em;
-      color: #0d1a38;
-      text-transform: uppercase;
-    }
-    .logo-sub {
-      font-size: 0.65rem;
-      letter-spacing: 0.22em;
-      text-transform: uppercase;
-      color: #999;
-      margin-top: 0.3rem;
-    }
-    .badge-paid {
-      display: inline-block;
-      padding: 0.22rem 0.75rem;
-      background: #e6f4ec;
-      color: #1a7a46;
-      border: 1px solid #a8d8bc;
-      border-radius: 3px;
-      font-family: Arial, sans-serif;
-      font-size: 0.62rem;
-      font-weight: 700;
-      letter-spacing: 0.16em;
-      text-transform: uppercase;
-    }
-    /* ── Title block ── */
-    .title-block { margin-bottom: 1.75rem; }
-    .title-block h1 {
-      font-size: 1.65rem;
-      font-weight: 700;
-      color: #0d1a38;
-      margin-bottom: 0.25rem;
-    }
-    .issued {
-      font-size: 0.75rem;
-      color: #888;
-      font-style: italic;
-    }
-    /* ── Rows ── */
-    .rows { margin-bottom: 1.5rem; }
-    .row {
-      display: flex;
-      justify-content: space-between;
-      align-items: baseline;
-      padding: 0.6rem 0;
-      border-bottom: 1px solid #ede8df;
-      font-size: 0.875rem;
-      gap: 1rem;
-    }
-    .row:first-child { border-top: 1px solid #ede8df; }
-    .row-label { color: #777; flex-shrink: 0; }
-    .row-value { font-weight: 600; color: #111; text-align: right; font-family: Arial, sans-serif; }
-    .row-value.mono { font-family: "Courier New", monospace; font-size: 0.8rem; }
-    /* ── Total ── */
-    .total {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 1.1rem 0 0;
-      border-top: 2px solid #0d1a38;
-      margin-bottom: 2.5rem;
-    }
-    .total-label {
-      font-size: 0.95rem;
-      font-weight: 700;
-      color: #0d1a38;
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-    }
-    .total-amount {
-      font-size: 1.5rem;
-      font-weight: 700;
-      color: #b8860b;
-    }
-    /* ── Footer ── */
-    .footer {
-      padding-top: 1.2rem;
-      border-top: 1px solid #ede8df;
-      font-size: 0.72rem;
-      color: #aaa;
-      text-align: center;
-      line-height: 1.7;
-    }
-    .footer strong { color: #888; }
-    @media print {
-      body { padding: 2rem 2.5rem; }
-    }
-  </style>
-</head>
-<body>
-  <div class="header">
-    <div>
-      <div class="logo">Uncommon Denominators</div>
-      <div class="logo-sub">by Mwanalushi &amp; Nalishebo &nbsp;·&nbsp; LIBROS Academic Publishing</div>
-    </div>
-    ${paymentStatus === "successful" ? '<span class="badge-paid">Paid</span>' : ""}
-  </div>
+    drawRow(label, value);
+    alt = !alt;
+  }
 
-  <div class="title-block">
-    <h1>Purchase Receipt</h1>
-    <p class="issued">Issued ${issuedDate}</p>
-  </div>
+  y += 3;
 
-  <div class="rows">
-    ${rows.map(([label, value]) => {
-      const isMono = label === "Payment Reference" || label === "Order ID";
-      return `<div class="row">
-      <span class="row-label">${label}</span>
-      <span class="row-value${isMono ? " mono" : ""}">${value}</span>
-    </div>`;
-    }).join("\n    ")}
-  </div>
+  // ── Total block ──────────────────────────────────────────────────────────
+  doc.setFillColor(...NAVY);
+  doc.rect(MARGIN, y, CW, 14, "F");
 
-  <div class="total">
-    <span class="total-label">Total Paid</span>
-    <span class="total-amount">K${totalAmount}</span>
-  </div>
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(10);
+  doc.setTextColor(255, 255, 255);
+  doc.text("TOTAL PAID", MARGIN + 5, y + 9);
 
-  <div class="footer">
-    <strong>Uncommon Denominators</strong> — Mwanalushi &amp; Nalishebo<br />
-    LIBROS Academic Publishing &nbsp;·&nbsp; For delivery enquiries call or WhatsApp <strong>0979 697 853</strong><br />
-    Thank you for your order. Your copy is on its way!
-  </div>
-</body>
-</html>`;
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(15);
+  doc.setTextColor(...GOLD_C);
+  doc.text(`K${params.totalAmount}`, MARGIN + CW - 5, y + 9.5, { align: "right" });
+  y += 22;
+
+  // ── Footer ───────────────────────────────────────────────────────────────
+  const footerY = 280;
+  doc.setDrawColor(...LIGHT);
+  doc.setLineWidth(0.3);
+  doc.line(MARGIN, footerY - 4, MARGIN + CW, footerY - 4);
+
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(7.5);
+  doc.setTextColor(...GREY);
+  doc.text(
+    "Uncommon Denominators  ·  Mwanalushi & Nalishebo  ·  LIBROS Academic Publishing",
+    PW / 2, footerY, { align: "center" },
+  );
+  doc.text(
+    "For delivery enquiries call or WhatsApp 0979 697 853",
+    PW / 2, footerY + 5, { align: "center" },
+  );
+  doc.setFont("helvetica", "bolditalic");
+  doc.setTextColor(...GOLD_C);
+  doc.text("Thank you for your order!", PW / 2, footerY + 10, { align: "center" });
+
+  doc.save(`receipt-order-${params.orderId}.pdf`);
 }
 
 export default function Confirmation() {
   const { currentOrderId, currentPaymentId, clearCart } = useCartStore();
+  const [downloading, setDownloading] = useState(false);
 
   const { data: order } = useGetOrder(currentOrderId!, {
     query: { enabled: !!currentOrderId, queryKey: getGetOrderQueryKey(currentOrderId!) },
@@ -223,40 +199,37 @@ export default function Confirmation() {
     ? payment.method.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase())
     : "";
 
-  function handleDownloadReceipt() {
+  const canDownload = !!(order && payment) && !downloading;
+
+  async function handleDownload() {
     if (!order || !payment) return;
-    const html = buildReceiptHtml({
-      orderId:          order.id,
-      fullName:         order.fullName,
-      phone:            order.phone,
-      email:            order.email,
-      deliveryAddress:  order.deliveryAddress,
-      city:             order.city,
-      productType:      order.productType,
-      quantity:         order.quantity,
-      totalAmount:      order.totalAmount,
-      notes:            order.notes,
-      paymentMethod:    methodLabel,
-      paymentReference: payment.reference,
-      paymentStatus:    payment.status,
-      issuedDate,
-    });
-
-    const win = window.open("", "_blank", "width=780,height=900");
-    if (!win) return;
-    win.document.write(html);
-    win.document.close();
-    win.focus();
-    setTimeout(() => win.print(), 400);
+    setDownloading(true);
+    try {
+      await generateReceiptPdf({
+        orderId:          order.id,
+        fullName:         order.fullName,
+        phone:            order.phone,
+        email:            order.email,
+        deliveryAddress:  order.deliveryAddress,
+        city:             order.city,
+        productType:      order.productType,
+        quantity:         order.quantity,
+        totalAmount:      order.totalAmount,
+        notes:            order.notes,
+        paymentMethod:    methodLabel,
+        paymentReference: payment.reference,
+        paymentStatus:    payment.status,
+        issuedDate,
+      });
+    } finally {
+      setDownloading(false);
+    }
   }
-
-  const canDownload = !!(order && payment);
 
   return (
     <div style={{ minHeight: "100svh", background: PAGE_BG, position: "relative" }}
       className="pt-[4.5rem] pb-24 overflow-hidden">
 
-      {/* Atmospheric glow */}
       <div className="absolute top-[8%] left-1/2 -translate-x-1/2 pointer-events-none" style={{ zIndex: 0 }}>
         <div style={{
           width: "700px", height: "600px",
@@ -319,7 +292,6 @@ export default function Confirmation() {
             className="rounded-2xl mb-10"
             style={{ background: CARD_BG, border: `1px solid ${CARD_BORDER}` }}>
 
-            {/* Header */}
             <div className="flex items-center justify-between px-7 py-4"
               style={{ borderBottom: `1px solid ${CARD_BORDER}` }}>
               <div className="flex items-center gap-3">
@@ -332,22 +304,41 @@ export default function Confirmation() {
                   </span>
                 )}
               </div>
+
+              {/* Download button with loader */}
               <motion.button
                 whileHover={{ scale: canDownload ? 1.05 : 1 }}
                 whileTap={{ scale: canDownload ? 0.96 : 1 }}
-                onClick={handleDownloadReceipt}
+                onClick={handleDownload}
                 disabled={!canDownload}
-                className="flex items-center gap-2 rounded-full px-3.5 py-2 transition-colors disabled:opacity-40"
+                className="flex items-center gap-2 rounded-full px-3.5 py-2 transition-colors disabled:opacity-50"
                 style={{
                   background: "hsl(42,78%,46%,0.1)",
                   border: "1px solid hsl(42,78%,46%,0.25)",
                   color: GOLD,
                   cursor: canDownload ? "pointer" : "default",
+                  minWidth: "9rem",
+                  justifyContent: "center",
                 }}>
-                <Download className="h-3.5 w-3.5" />
-                <span className="font-sans text-[0.62rem] tracking-[0.12em] uppercase font-semibold">
-                  Download Receipt
-                </span>
+                <AnimatePresence mode="wait">
+                  {downloading ? (
+                    <motion.span key="loading" className="flex items-center gap-2"
+                      initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+                      <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                      <span className="font-sans text-[0.62rem] tracking-[0.12em] uppercase font-semibold">
+                        Downloading…
+                      </span>
+                    </motion.span>
+                  ) : (
+                    <motion.span key="idle" className="flex items-center gap-2"
+                      initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+                      <Download className="h-3.5 w-3.5" />
+                      <span className="font-sans text-[0.62rem] tracking-[0.12em] uppercase font-semibold">
+                        Download Receipt
+                      </span>
+                    </motion.span>
+                  )}
+                </AnimatePresence>
               </motion.button>
             </div>
 
@@ -355,20 +346,19 @@ export default function Confirmation() {
               <div className="space-y-3.5">
                 {order && (
                   <>
-                    <ReceiptRow label="Order ID"      value={`#${order.id}`} mono />
-                    <ReceiptRow label="Name"          value={order.fullName} />
-                    <ReceiptRow label="Phone"         value={order.phone} />
-                    <ReceiptRow label="Email"         value={order.email} />
-                    <ReceiptRow label="Delivery"      value={`${order.deliveryAddress}, ${order.city}`} />
-                    <ReceiptRow label="Edition"       value={<span className="capitalize">{order.productType}</span>} />
-                    <ReceiptRow label="Quantity"      value={order.quantity} />
+                    <ReceiptRow label="Order ID"    value={`#${order.id}`} mono />
+                    <ReceiptRow label="Name"        value={order.fullName} />
+                    <ReceiptRow label="Phone"       value={order.phone} />
+                    <ReceiptRow label="Email"       value={order.email} />
+                    <ReceiptRow label="Delivery"    value={`${order.deliveryAddress}, ${order.city}`} />
+                    <ReceiptRow label="Edition"     value={<span className="capitalize">{order.productType}</span>} />
+                    <ReceiptRow label="Quantity"    value={order.quantity} />
                     {order.notes && <ReceiptRow label="Notes" value={order.notes} />}
                   </>
                 )}
                 {payment && (
                   <>
-                    <ReceiptRow label="Payment"
-                      value={methodLabel} />
+                    <ReceiptRow label="Payment" value={methodLabel} />
                     <ReceiptRow label="Reference"
                       value={<span className="font-mono text-[0.68rem] px-2 py-0.5 rounded-full"
                         style={{ background: "hsl(220,38%,10%)", color: TEXT_MUTED }}>{payment.reference}</span>} />
@@ -423,13 +413,15 @@ export default function Confirmation() {
             </Button>
           </Link>
           <motion.div whileHover={{ scale: canDownload ? 1.02 : 1, y: canDownload ? -1 : 0 }} whileTap={{ scale: 0.98 }}>
-            <Button onClick={handleDownloadReceipt}
+            <Button onClick={handleDownload}
               disabled={!canDownload}
               variant="outline"
               className="font-sans uppercase w-full sm:w-auto flex items-center gap-2 disabled:opacity-40"
-              style={{ height: "2.75rem", color: GOLD, background: "transparent" }}>
-              <Download className="h-3.5 w-3.5" />
-              Download Receipt
+              style={{ height: "2.75rem", color: GOLD, background: "transparent", minWidth: "11rem" }}>
+              {downloading
+                ? <><Loader2 className="h-3.5 w-3.5 animate-spin" />Downloading…</>
+                : <><Download className="h-3.5 w-3.5" />Download Receipt</>
+              }
             </Button>
           </motion.div>
           <Link href="/shop">
