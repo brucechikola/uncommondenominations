@@ -49,7 +49,7 @@ export function Navbar() {
         <div className="container mx-auto flex h-15 items-center justify-between px-6 h-14">
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2.5 group">
-            <div className="w-7 h-7 rounded-sm flex items-center justify-center"
+            <div className="w-7 h-7 rounded-lg flex items-center justify-center"
               style={{ background: "hsl(42,80%,48%,0.12)", border: "1px solid hsl(42,80%,48%,0.35)" }}>
               <span className="font-display text-xs font-bold text-primary">L</span>
             </div>

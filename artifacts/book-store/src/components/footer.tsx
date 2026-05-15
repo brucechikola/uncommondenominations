@@ -7,7 +7,7 @@ export function Footer() {
         <div className="grid gap-12 md:grid-cols-4 mb-12">
           <div className="md:col-span-2">
             <div className="flex items-center gap-3 mb-5">
-              <div className="w-8 h-8 rounded-sm bg-primary/10 border border-primary/30 flex items-center justify-center">
+              <div className="w-8 h-8 rounded-lg bg-primary/10 border border-primary/30 flex items-center justify-center">
                 <span className="text-primary font-display text-sm font-bold">L</span>
               </div>
               <h3 className="font-display text-sm font-bold tracking-[0.15em] uppercase text-foreground/90">

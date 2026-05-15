@@ -11,7 +11,7 @@ const inputStyle: React.CSSProperties = {
   width: "100%",
   background: "hsl(220,45%,9%)",
   border: `1px solid ${CARD_BORDER}`,
-  borderRadius: "2px",
+  borderRadius: "12px",
   color: TEXT_PRIMARY,
   fontSize: "0.875rem",
   padding: "0.7rem 0.875rem",
@@ -98,7 +98,7 @@ export default function Contact() {
 
             {/* ── Form ── */}
             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1, ease: EASE }}>
-              <div className="rounded-sm p-8" style={{ background: CARD_BG, border: `1px solid ${CARD_BORDER}` }}>
+              <div className="rounded-2xl p-8" style={{ background: CARD_BG, border: `1px solid ${CARD_BORDER}` }}>
                 {done ? (
                   <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }}
                     className="flex flex-col items-center justify-center py-16 text-center gap-5">
@@ -190,7 +190,7 @@ export default function Contact() {
               transition={{ delay: 0.18, ease: EASE }} className="space-y-5">
 
               {/* Contact details */}
-              <div className="rounded-sm p-6" style={{ background: CARD_BG, border: `1px solid ${CARD_BORDER}` }}>
+              <div className="rounded-xl p-6" style={{ background: CARD_BG, border: `1px solid ${CARD_BORDER}` }}>
                 <h3 className="font-sans text-[0.58rem] tracking-[0.26em] uppercase font-bold mb-5" style={{ color: GOLD }}>
                   Contact Details
                 </h3>
@@ -202,7 +202,7 @@ export default function Contact() {
                   ].map(({ icon: Icon, label, content }) => (
                     <div key={label} className="flex items-start gap-3.5"
                       style={{ borderBottom: `1px solid ${CARD_BORDER}`, paddingBottom: "1rem" }}>
-                      <div className="w-8 h-8 rounded-sm flex-shrink-0 flex items-center justify-center"
+                      <div className="w-8 h-8 rounded-full flex-shrink-0 flex items-center justify-center"
                         style={{ background: "hsl(42,78%,46%,0.08)", border: `1px solid hsl(42,78%,46%,0.2)` }}>
                         <Icon className="h-3.5 w-3.5" style={{ color: GOLD }} />
                       </div>
@@ -216,7 +216,7 @@ export default function Contact() {
               </div>
 
               {/* Bulk orders */}
-              <div className="rounded-sm p-6" style={{ background: "hsl(42,78%,46%,0.06)", border: `1px solid hsl(42,78%,46%,0.18)` }}>
+              <div className="rounded-xl p-6" style={{ background: "hsl(42,78%,46%,0.06)", border: `1px solid hsl(42,78%,46%,0.18)` }}>
                 <div className="flex items-center gap-2.5 mb-3">
                   <MessageSquare className="h-4 w-4 flex-shrink-0" style={{ color: GOLD }} />
                   <h3 className="font-sans text-[0.62rem] tracking-[0.18em] uppercase font-bold" style={{ color: GOLD }}>

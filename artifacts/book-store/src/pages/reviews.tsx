@@ -12,7 +12,7 @@ const inputStyle: React.CSSProperties = {
   width: "100%",
   background: "hsl(220,45%,9%)",
   border: `1px solid hsl(220,38%,20%)`,
-  borderRadius: "2px",
+  borderRadius: "12px",
   color: TEXT_PRIMARY,
   fontSize: "0.875rem",
   padding: "0.7rem 0.875rem",
@@ -125,7 +125,7 @@ export default function Reviews() {
                 <motion.div key={review.id}
                   initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }} transition={{ delay: i * 0.06, ease: EASE }}
-                  className="rounded-sm p-7 flex flex-col gap-4"
+                  className="rounded-2xl p-7 flex flex-col gap-4"
                   style={{ background: CARD_BG, border: `1px solid ${CARD_BORDER}` }}>
 
                   {/* Stars */}
@@ -156,7 +156,7 @@ export default function Reviews() {
                         </span>
                       )}
                       {review.productType && (
-                        <span className="font-sans text-[0.6rem] tracking-[0.12em] uppercase px-2 py-0.5 rounded-sm"
+                        <span className="font-sans text-[0.6rem] tracking-[0.12em] uppercase px-2 py-0.5 rounded-full"
                           style={{ background: "hsl(42,78%,46%,0.08)", color: "hsl(42,78%,56%)", border: "1px solid hsl(42,78%,46%,0.18)" }}>
                           {review.productType}
                         </span>
@@ -213,7 +213,7 @@ export default function Reviews() {
           ) : (
             <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }} transition={{ delay: 0.1, ease: EASE }}>
-              <form onSubmit={handleSubmit} className="rounded-sm p-8 space-y-6"
+              <form onSubmit={handleSubmit} className="rounded-2xl p-8 space-y-6"
                 style={{ background: CARD_BG, border: `1px solid ${CARD_BORDER}` }}>
 
                 {/* Star rating */}

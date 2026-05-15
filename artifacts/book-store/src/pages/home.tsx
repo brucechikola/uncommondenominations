@@ -666,7 +666,7 @@ export default function Home() {
                 variants={fadeUp}
                 whileHover={{ y: -4, boxShadow: "0 12px 32px rgba(0,0,0,0.08)" }}
                 transition={{ type: "spring", stiffness: 260 }}
-                className="rounded-sm border border-border p-6 bg-card group cursor-default"
+                className="rounded-2xl border border-border p-6 bg-card group cursor-default"
               >
                 <div className="w-6 h-[2px] bg-primary mb-5 group-hover:w-12 transition-all duration-400 ease-out rounded-full" />
                 <h3 className="font-display text-[0.72rem] font-bold tracking-widest uppercase text-foreground mb-2.5">
@@ -723,7 +723,7 @@ export default function Home() {
                   variants={scaleIn}
                   whileHover={{ y: -6 }}
                   transition={{ type: "spring", stiffness: 220 }}
-                  className="rounded-sm p-9"
+                  className="rounded-2xl p-9"
                   style={{
                     background: "hsl(220,52%,12%)",
                     border: "1px solid hsl(220,38%,22%)",
@@ -794,7 +794,7 @@ export default function Home() {
                   variants={scaleIn}
                   whileHover={{ y: -6 }}
                   transition={{ type: "spring", stiffness: 220 }}
-                  className="rounded-sm p-9 relative overflow-hidden"
+                  className="rounded-2xl p-9 relative overflow-hidden"
                   style={{
                     background:
                       "linear-gradient(145deg, hsl(222,56%,14%), hsl(218,60%,10%))",
@@ -811,7 +811,7 @@ export default function Home() {
                   />
                   <div className="absolute top-4 right-4">
                     <span
-                      className="font-display text-[0.55rem] tracking-[0.2em] uppercase border rounded-sm px-2.5 py-1"
+                      className="font-display text-[0.55rem] tracking-[0.2em] uppercase border rounded-full px-2.5 py-1"
                       style={{
                         color:       "hsl(42,80%,64%)",
                         borderColor: "hsl(42,78%,52%,0.3)",
@@ -890,7 +890,7 @@ export default function Home() {
           <Reveal className="flex justify-center order-2 lg:order-1">
             <motion.div variants={fadeLeft} className="relative">
               <div
-                className="w-64 h-64 lg:w-80 lg:h-80 rounded-sm flex items-center justify-center shadow-2xl"
+                className="w-64 h-64 lg:w-80 lg:h-80 rounded-3xl flex items-center justify-center shadow-2xl"
                 style={{
                   background:
                     "linear-gradient(145deg, hsl(220,52%,13%), hsl(218,58%,10%))",
@@ -924,7 +924,7 @@ export default function Home() {
                 whileInView={{ opacity: 1, x: 0, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: 0.35, duration: 0.55, ease: EASE }}
-                className="absolute -bottom-5 -right-5 rounded-sm px-5 py-4 shadow-xl bg-card border border-border"
+                className="absolute -bottom-5 -right-5 rounded-2xl px-5 py-4 shadow-xl bg-card border border-border"
               >
                 <p className="font-display text-[0.72rem] font-bold tracking-wider text-foreground">
                   PhD Psychology
@@ -1024,7 +1024,7 @@ export default function Home() {
                   viewport={{ once: true }}
                   transition={{ delay: i * 0.12, duration: 0.6, ease: EASE }}
                   whileHover={{ y: -5 }}
-                  className="rounded-sm p-8 flex flex-col"
+                  className="rounded-2xl p-8 flex flex-col"
                   style={{
                     background: "hsl(220,52%,12%)",
                     border: "1px solid hsl(220,38%,21%)",

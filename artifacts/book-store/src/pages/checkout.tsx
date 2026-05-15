@@ -23,7 +23,7 @@ const inputStyle = (err?: boolean): React.CSSProperties => ({
   borderColor: err ? "hsl(0,70%,50%)" : "hsl(220,38%,17%)",
   color: TEXT_PRIMARY,
   height: "3rem",
-  borderRadius: "2px",
+  borderRadius: "12px",
   fontSize: "0.875rem",
   fontFamily: "var(--app-font-sans)",
 });
@@ -204,7 +204,7 @@ export default function Checkout() {
           {/* ── RIGHT: sticky order summary ── */}
           <motion.div initial={{ opacity: 0, x: 16 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.12 }}
             className="lg:sticky lg:top-24 self-start">
-            <div className="rounded-sm overflow-hidden" style={{ background: CARD_BG, border: `1px solid ${CARD_BORDER}` }}>
+            <div className="rounded-2xl overflow-hidden" style={{ background: CARD_BG, border: `1px solid ${CARD_BORDER}` }}>
 
               {/* Book visual */}
               <div className="flex items-center justify-center py-8"
@@ -228,7 +228,7 @@ export default function Checkout() {
                   {[paperback, hardcover].filter(Boolean).map((p) => p && (
                     <button key={p.id} type="button"
                       onClick={() => setProductType(p.type as "paperback" | "hardcover")}
-                      className="w-full text-left rounded-sm p-3.5 transition-all"
+                      className="w-full text-left rounded-xl p-3.5 transition-all"
                       style={{
                         background: productType === p.type ? "hsl(222,52%,11%)" : "transparent",
                         border: `1px solid ${productType === p.type ? GOLD : "hsl(220,38%,14%)"}`,
@@ -252,7 +252,7 @@ export default function Checkout() {
                   </span>
                   <div className="flex items-center gap-2.5">
                     <button type="button" onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                      className="w-7 h-7 rounded-sm flex items-center justify-center font-bold text-sm"
+                      className="w-7 h-7 rounded-full flex items-center justify-center font-bold text-sm"
                       style={{ background: "hsl(220,38%,11%)", border: `1px solid ${CARD_BORDER}`, color: TEXT_MUTED }}>
                       −
                     </button>
@@ -260,7 +260,7 @@ export default function Checkout() {
                       {quantity}
                     </span>
                     <button type="button" onClick={() => setQuantity(quantity + 1)}
-                      className="w-7 h-7 rounded-sm flex items-center justify-center font-bold text-sm"
+                      className="w-7 h-7 rounded-full flex items-center justify-center font-bold text-sm"
                       style={{ background: "hsl(220,38%,11%)", border: `1px solid ${CARD_BORDER}`, color: TEXT_MUTED }}>
                       +
                     </button>

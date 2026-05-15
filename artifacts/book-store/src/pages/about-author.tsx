@@ -65,11 +65,11 @@ export default function AboutAuthor() {
               transition={{ delay: 0.15, duration: 0.7, ease: EASE }}>
               <div className="relative mx-auto" style={{ maxWidth: 320 }}>
                 {/* Decorative frame */}
-                <div className="absolute -inset-3 rounded-sm opacity-30" style={{
+                <div className="absolute -inset-3 rounded-2xl opacity-30" style={{
                   background: `linear-gradient(135deg, ${GOLD}, transparent 60%)`,
                   filter: "blur(12px)",
                 }} />
-                <div className="relative rounded-sm overflow-hidden"
+                <div className="relative rounded-2xl overflow-hidden"
                   style={{ background: CARD_BG, border: `1px solid ${CARD_BORDER}`, aspectRatio: "3/4" }}>
                   {/* Portrait placeholder */}
                   <div className="absolute inset-0 flex flex-col items-center justify-center gap-4">
@@ -128,7 +128,7 @@ export default function AboutAuthor() {
             {/* Sidebar info */}
             <motion.div initial={{ opacity: 0, x: -16 }} whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }} transition={{ ease: EASE }}>
-              <div className="rounded-sm p-6 space-y-5 sticky top-24"
+              <div className="rounded-2xl p-6 space-y-5 sticky top-24"
                 style={{ background: CARD_BG, border: `1px solid ${CARD_BORDER}` }}>
                 <h3 className="font-sans text-[0.58rem] tracking-[0.28em] uppercase font-bold" style={{ color: GOLD }}>
                   At a Glance

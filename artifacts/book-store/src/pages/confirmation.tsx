@@ -151,7 +151,7 @@ export default function Confirmation() {
         {/* ── Receipt card (on-screen version) ── */}
         {(order || payment) && (
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.55 }}
-            className="no-print rounded-sm mb-10"
+            className="no-print rounded-2xl mb-10"
             style={{ background: CARD_BG, border: `1px solid ${CARD_BORDER}` }}>
 
             {/* Card header */}
@@ -171,7 +171,7 @@ export default function Confirmation() {
               <motion.button
                 whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.96 }}
                 onClick={() => window.print()}
-                className="flex items-center gap-2 rounded-sm px-3.5 py-2 transition-colors"
+                className="flex items-center gap-2 rounded-full px-3.5 py-2 transition-colors"
                 style={{
                   background: "hsl(42,78%,46%,0.1)",
                   border: "1px solid hsl(42,78%,46%,0.25)",
@@ -200,7 +200,7 @@ export default function Confirmation() {
                     <ReceiptRow label="Payment Method"
                       value={methodLabel} />
                     <ReceiptRow label="Reference"
-                      value={<span className="font-mono text-[0.68rem] px-2 py-0.5 rounded-sm"
+                      value={<span className="font-mono text-[0.68rem] px-2 py-0.5 rounded-full"
                         style={{ background: "hsl(220,38%,10%)", color: TEXT_MUTED }}>{payment.reference}</span>} />
                   </>
                 )}
@@ -228,10 +228,10 @@ export default function Confirmation() {
             { icon: Phone,   n: 2, title: "We'll Call You",  desc: "Our team contacts you within 24 hours to arrange delivery." },
             { icon: Truck,   n: 3, title: "Fast Delivery",   desc: "Most orders delivered within 2–5 business days." },
           ].map(({ icon: Icon, n, title, desc }) => (
-            <div key={title} className="rounded-sm p-5"
+            <div key={title} className="rounded-xl p-5"
               style={{ background: CARD_BG, border: `1px solid ${CARD_BORDER}` }}>
               <div className="flex items-center gap-3 mb-3">
-                <div className="w-7 h-7 rounded-sm flex items-center justify-center flex-shrink-0"
+                <div className="w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0"
                   style={{ background: "hsl(42,78%,46%,0.1)", border: "1px solid hsl(42,78%,46%,0.2)" }}>
                   <span className="font-sans text-[0.58rem] font-bold" style={{ color: GOLD }}>{n}</span>
                 </div>

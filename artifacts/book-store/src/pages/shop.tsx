@@ -68,7 +68,7 @@ export default function Shop() {
                     transition={{ delay: i * 0.08 }}
                     whileHover={{ y: -3 }}
                     onClick={() => setProductType(product.type as "paperback" | "hardcover")}
-                    className="relative cursor-pointer rounded-sm overflow-hidden transition-all"
+                    className="relative cursor-pointer rounded-2xl overflow-hidden transition-all"
                     style={{
                       background: CARD_BG,
                       border: `1px solid ${selected ? GOLD : CARD_BORDER}`,
@@ -142,7 +142,7 @@ export default function Shop() {
 
           {/* ── Order summary ── */}
           <motion.div layout
-            className="rounded-sm p-8 max-w-xl mx-auto"
+            className="rounded-2xl p-8 max-w-xl mx-auto"
             style={{ background: CARD_BG, border: `1px solid ${CARD_BORDER}` }}>
             <h2 className="font-sans text-[0.6rem] font-bold tracking-[0.28em] uppercase mb-6"
               style={{ color: TEXT_DIM }}>
@@ -165,7 +165,7 @@ export default function Shop() {
                   </div>
                   <div className="flex items-center gap-3">
                     <button onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                      className="w-8 h-8 rounded-sm flex items-center justify-center font-bold text-sm transition-colors"
+                      className="w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm transition-colors"
                       style={{ background: "hsl(220,38%,12%)", border: `1px solid ${CARD_BORDER}`, color: TEXT_MUTED }}>
                       −
                     </button>
@@ -173,7 +173,7 @@ export default function Shop() {
                       {quantity}
                     </span>
                     <button onClick={() => setQuantity(quantity + 1)}
-                      className="w-8 h-8 rounded-sm flex items-center justify-center font-bold text-sm transition-colors"
+                      className="w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm transition-colors"
                       style={{ background: "hsl(220,38%,12%)", border: `1px solid ${CARD_BORDER}`, color: TEXT_MUTED }}>
                       +
                     </button>

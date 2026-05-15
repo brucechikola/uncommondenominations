@@ -25,7 +25,7 @@ const inputStyle: React.CSSProperties = {
   borderColor: "hsl(220,38%,17%)",
   color: TEXT_PRIMARY,
   height: "3rem",
-  borderRadius: "2px",
+  borderRadius: "12px",
   fontSize: "0.875rem",
   fontFamily: "var(--app-font-sans)",
 };
@@ -118,9 +118,9 @@ export default function Payment() {
                 <motion.div key="select" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
 
                   {/* Manual payment notice */}
-                  <div className="flex gap-3.5 rounded-sm p-4 mb-8"
+                  <div className="flex gap-3.5 rounded-xl p-4 mb-8"
                     style={{ background: "hsl(42,60%,10%)", border: "1px solid hsl(42,78%,30%,0.35)" }}>
-                    <div className="mt-0.5 flex-shrink-0 w-8 h-8 rounded-sm flex items-center justify-center"
+                    <div className="mt-0.5 flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center"
                       style={{ background: "hsl(42,78%,46%,0.12)", border: "1px solid hsl(42,78%,46%,0.2)" }}>
                       <span className="text-base">📞</span>
                     </div>
@@ -149,14 +149,14 @@ export default function Payment() {
                       return (
                         <motion.button key={id} type="button" onClick={() => setSelectedMethod(id)}
                           whileHover={{ x: 2 }}
-                          className="w-full text-left rounded-sm flex items-center gap-4 p-4 transition-all"
+                          className="w-full text-left rounded-xl flex items-center gap-4 p-4 transition-all"
                           style={{
                             background: sel ? "hsl(222,52%,11%)" : CARD_BG,
                             border: `1px solid ${sel ? GOLD : CARD_BORDER}`,
                             boxShadow: sel ? `0 0 0 1px ${GOLD}, 0 4px 20px hsl(42,78%,46%,0.06)` : "none",
                           }}>
                           {/* Icon circle */}
-                          <div className="flex-shrink-0 w-10 h-10 rounded-sm flex items-center justify-center"
+                          <div className="flex-shrink-0 w-10 h-10 rounded-xl flex items-center justify-center"
                             style={{
                               background: sel ? `${accent}18` : "hsl(220,38%,11%)",
                               border: `1px solid ${sel ? `${accent}45` : "hsl(220,38%,15%)"}`,
@@ -211,7 +211,7 @@ export default function Payment() {
                         )}
 
                         {selectedMethod === "bank_transfer" && (
-                          <div className="rounded-sm p-5 space-y-2.5"
+                          <div className="rounded-xl p-5 space-y-2.5"
                             style={{ background: "hsl(222,52%,7%)", border: `1px solid ${CARD_BORDER}` }}>
                             <p className="font-sans text-[0.62rem] tracking-[0.18em] uppercase font-semibold mb-3"
                               style={{ color: TEXT_DIM }}>Bank Transfer Details</p>
@@ -362,7 +362,7 @@ export default function Payment() {
           {/* ── RIGHT: sticky order summary ── */}
           <motion.div initial={{ opacity: 0, x: 16 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.12 }}
             className="lg:sticky lg:top-24 self-start hidden lg:block">
-            <div className="rounded-sm overflow-hidden" style={{ background: CARD_BG, border: `1px solid ${CARD_BORDER}` }}>
+            <div className="rounded-2xl overflow-hidden" style={{ background: CARD_BG, border: `1px solid ${CARD_BORDER}` }}>
 
               {/* Book visual */}
               <div className="flex items-center justify-center py-8"

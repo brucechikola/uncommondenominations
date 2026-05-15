@@ -54,14 +54,14 @@ export function MiniBook({ size = 110 }: { size?: number }) {
         position: "absolute", left: -Math.round(size * 0.07), top: 3, bottom: 3,
         width: Math.round(size * 0.07),
         background: "linear-gradient(90deg, hsl(222,62%,5%) 0%, hsl(222,62%,10%) 100%)",
-        borderRadius: "2px 0 0 2px",
+        borderRadius: "8px 0 0 8px",
       }} />
       {/* Cover */}
       <div style={{
         width: "100%", height: "100%", position: "relative", overflow: "hidden",
         background: "linear-gradient(148deg, hsl(222,65%,17%) 0%, hsl(222,60%,12%) 100%)",
         border: "1px solid hsl(220,38%,20%)",
-        borderRadius: 2,
+        borderRadius: 12,
         boxShadow: "-5px 8px 28px hsl(222,60%,3%,0.8), 0 1px 0 hsl(220,38%,26%) inset",
         display: "flex", flexDirection: "column", alignItems: "center",
         justifyContent: "center", padding: "14% 12%",
