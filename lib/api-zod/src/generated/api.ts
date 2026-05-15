@@ -495,3 +495,49 @@ export const ListAdminContactsResponseItem = zod.object({
 export const ListAdminContactsResponse = zod.array(ListAdminContactsResponseItem)
 
 
+/**
+ * @summary Get all payment channel settings
+ */
+export const GetAdminPaymentSettingsResponseItem = zod.object({
+  "id": zod.number(),
+  "channelId": zod.string(),
+  "label": zod.string(),
+  "enabled": zod.boolean(),
+  "sortOrder": zod.number()
+})
+export const GetAdminPaymentSettingsResponse = zod.array(GetAdminPaymentSettingsResponseItem)
+
+
+/**
+ * @summary Enable or disable a payment channel
+ */
+export const UpdatePaymentSettingParams = zod.object({
+  "channelId": zod.coerce.string()
+})
+
+export const UpdatePaymentSettingBody = zod.object({
+  "enabled": zod.boolean()
+})
+
+export const UpdatePaymentSettingResponse = zod.object({
+  "id": zod.number(),
+  "channelId": zod.string(),
+  "label": zod.string(),
+  "enabled": zod.boolean(),
+  "sortOrder": zod.number()
+})
+
+
+/**
+ * @summary Get enabled payment channels (public)
+ */
+export const GetPaymentSettingsResponseItem = zod.object({
+  "id": zod.number(),
+  "channelId": zod.string(),
+  "label": zod.string(),
+  "enabled": zod.boolean(),
+  "sortOrder": zod.number()
+})
+export const GetPaymentSettingsResponse = zod.array(GetPaymentSettingsResponseItem)
+
+

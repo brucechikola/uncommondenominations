@@ -7,6 +7,7 @@ import {
   buyersTable,
   visitorsTable,
   reviewsTable,
+  paymentSettingsTable,
 } from "@workspace/db";
 import { eq, sql, desc, count, sum, and } from "drizzle-orm";
 import bcrypt from "bcryptjs";
@@ -398,6 +399,30 @@ router.patch("/admin/orders/:id/status", requireAdmin, async (req, res): Promise
 router.get("/admin/contacts", requireAdmin, async (_req, res): Promise<void> => {
   const contacts = await db.select().from(contactsTable).orderBy(desc(contactsTable.createdAt));
   res.json(contacts.map(c => ({ ...c, createdAt: c.createdAt.toISOString() })));
+});
+
+router.get("/admin/payment-settings", requireAdmin, async (_req, res): Promise<void> => {
+  const settings = await db.select().from(paymentSettingsTable).orderBy(paymentSettingsTable.sortOrder);
+  res.json(settings);
+});
+
+router.patch("/admin/payment-settings/:channelId", requireAdmin, async (req, res): Promise<void> => {
+  const { channelId } = req.params;
+  const { enabled } = req.body as { enabled: boolean };
+  if (typeof enabled !== "boolean") {
+    res.status(400).json({ error: "enabled must be a boolean" });
+    return;
+  }
+  const [updated] = await db
+    .update(paymentSettingsTable)
+    .set({ enabled })
+    .where(eq(paymentSettingsTable.channelId, channelId))
+    .returning();
+  if (!updated) {
+    res.status(404).json({ error: "Channel not found" });
+    return;
+  }
+  res.json(updated);
 });
 
 export default router;

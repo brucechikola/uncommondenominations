@@ -6,3 +6,4 @@ export * from "./reviews";
 export * from "./visitors";
 export * from "./contacts";
 export * from "./admins";
+export * from "./payment-settings";

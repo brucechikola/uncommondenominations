@@ -2,15 +2,15 @@ import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useCartStore } from "@/lib/store";
-import { useInitiatePayment, useSimulatePayment, useGetOrder } from "@workspace/api-client-react";
-import { getGetOrderQueryKey } from "@workspace/api-client-react";
+import { useInitiatePayment, useSimulatePayment, useGetOrder, useGetPaymentSettings } from "@workspace/api-client-react";
+import { getGetOrderQueryKey, getGetPaymentSettingsQueryKey } from "@workspace/api-client-react";
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Loader2 } from "lucide-react";
 import { StepIndicator, MiniBook,
   PAGE_BG, CARD_BG, CARD_BORDER, GOLD, TEXT_PRIMARY, TEXT_MUTED, TEXT_DIM } from "@/components/purchase-ui";
 
-const METHODS = [
+const ALL_METHODS = [
   { id: "airtel_money",    label: "Airtel Money",       accent: "hsl(0,82%,52%)",    abbr: "A",    subtext: "Airtel mobile wallet" },
   { id: "mtn_money",       label: "MTN Mobile Money",   accent: "hsl(48,100%,48%)",  abbr: "MTN",  subtext: "MTN MoMo account" },
   { id: "zamtel_money",    label: "Zamtel Money",        accent: "hsl(152,62%,44%)",  abbr: "ZM",   subtext: "Zamtel Kwacha wallet" },
@@ -18,7 +18,7 @@ const METHODS = [
   { id: "bank_transfer",   label: "Bank Transfer",       accent: "hsl(220,38%,44%)",  abbr: "BNK",  subtext: "Direct bank transfer" },
 ] as const;
 
-type Method = (typeof METHODS)[number]["id"];
+type Method = (typeof ALL_METHODS)[number]["id"];
 
 const inputStyle: React.CSSProperties = {
   background: "hsl(222,54%,8%)",
@@ -50,6 +50,18 @@ export default function Payment() {
   const { data: order } = useGetOrder(currentOrderId!, {
     query: { enabled: !!currentOrderId, queryKey: getGetOrderQueryKey(currentOrderId!) },
   });
+
+  const { data: enabledSettings } = useGetPaymentSettings({
+    query: { queryKey: getGetPaymentSettingsQueryKey() },
+  });
+
+  const enabledIds = enabledSettings
+    ? new Set((enabledSettings as { channelId: string }[]).map((s) => s.channelId))
+    : null;
+
+  const METHODS = enabledIds
+    ? ALL_METHODS.filter((m) => enabledIds.has(m.id))
+    : ALL_METHODS;
 
   const initiatePayment = useInitiatePayment();
   const simulatePayment = useSimulatePayment();

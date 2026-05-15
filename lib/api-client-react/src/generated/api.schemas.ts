@@ -278,6 +278,18 @@ export interface ContactMessage {
   createdAt: string;
 }
 
+export interface PaymentSetting {
+  id: number;
+  channelId: string;
+  label: string;
+  enabled: boolean;
+  sortOrder: number;
+}
+
+export interface UpdatePaymentSetting {
+  enabled: boolean;
+}
+
 export type ListAdminOrdersParams = {
 status?: string;
 page?: number;

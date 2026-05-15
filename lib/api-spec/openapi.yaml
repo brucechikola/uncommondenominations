@@ -568,6 +568,69 @@ paths:
         "401":
           description: Unauthorized
 
+  /admin/payment-settings:
+    get:
+      operationId: getAdminPaymentSettings
+      tags: [admin]
+      summary: Get all payment channel settings
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Payment channel settings
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/PaymentSetting"
+        "401":
+          description: Unauthorized
+
+  /admin/payment-settings/{channelId}:
+    patch:
+      operationId: updatePaymentSetting
+      tags: [admin]
+      summary: Enable or disable a payment channel
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: channelId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdatePaymentSetting"
+      responses:
+        "200":
+          description: Updated setting
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaymentSetting"
+        "404":
+          description: Not found
+
+  /payment-settings:
+    get:
+      operationId: getPaymentSettings
+      tags: [payments]
+      summary: Get enabled payment channels (public)
+      responses:
+        "200":
+          description: Enabled payment channels
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/PaymentSetting"
+
 components:
   securitySchemes:
     bearerAuth:
@@ -966,3 +1029,25 @@ components:
           type: string
         createdAt:
           type: string
+
+    PaymentSetting:
+      type: object
+      required: [id, channelId, label, enabled, sortOrder]
+      properties:
+        id:
+          type: integer
+        channelId:
+          type: string
+        label:
+          type: string
+        enabled:
+          type: boolean
+        sortOrder:
+          type: integer
+
+    UpdatePaymentSetting:
+      type: object
+      required: [enabled]
+      properties:
+        enabled:
+          type: boolean

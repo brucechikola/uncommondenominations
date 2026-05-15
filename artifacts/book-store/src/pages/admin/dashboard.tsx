@@ -9,12 +9,16 @@ import {
   useApproveReview,
   useDeleteReview,
   useUpdateOrderStatus,
+  useGetAdminPaymentSettings,
+  useUpdatePaymentSetting,
   getListAdminReviewsQueryKey,
   getListAdminOrdersQueryKey,
   getListAdminContactsQueryKey,
+  getGetAdminPaymentSettingsQueryKey,
   type Review,
   type Order,
   type ContactMessage,
+  type PaymentSetting,
 } from "@workspace/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
@@ -22,9 +26,9 @@ import { AnimatePresence, motion } from "framer-motion";
 import * as XLSX from "xlsx";
 import {
   ShoppingBag, Users, Star, TrendingUp, LogOut,
-  Check, Trash2, Download, X, Phone, Mail,
+  Check, Trash2, X, Phone, Mail,
   BookOpen, MessageSquare, FileSpreadsheet, FileText,
-  ChevronRight, Calendar, MapPin, Package, Hash,
+  ChevronRight, Settings, ToggleLeft, ToggleRight,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -51,7 +55,7 @@ const STATUS_COLORS: Record<string, string> = {
 };
 
 const ORDER_STATUSES = ["pending", "confirmed", "shipped", "delivered", "cancelled"] as const;
-type Tab = "overview" | "orders" | "reviews" | "contacts";
+type Tab = "overview" | "orders" | "reviews" | "contacts" | "settings";
 
 /* ─── Slide-over panel ──────────────────────────────────────── */
 function SlidePanel({
@@ -312,6 +316,11 @@ export default function AdminDashboard() {
   const approveReview = useApproveReview();
   const deleteReview = useDeleteReview();
   const updateOrderStatus = useUpdateOrderStatus();
+  const updatePaymentSetting = useUpdatePaymentSetting();
+  const { data: paymentSettings } = useGetAdminPaymentSettings({
+    query: { enabled: tab === "settings", queryKey: getGetAdminPaymentSettingsQueryKey() },
+  });
+  const paymentSettingsList: PaymentSetting[] = Array.isArray(paymentSettings) ? (paymentSettings as PaymentSetting[]) : [];
 
   const orders: Order[] = ordersResult?.orders ?? [];
   const reviewList: Review[] = Array.isArray(reviews) ? (reviews as Review[]) : [];
@@ -330,6 +339,11 @@ export default function AdminDashboard() {
     await queryClient.invalidateQueries({ queryKey: getListAdminOrdersQueryKey() });
     if (selectedOrder?.id === id) setSelectedOrder((o) => o ? { ...o, status } as Order : null);
   };
+  const handleTogglePaymentChannel = async (channelId: string, enabled: boolean) => {
+    await updatePaymentSetting.mutateAsync({ channelId, data: { enabled } });
+    await queryClient.invalidateQueries({ queryKey: getGetAdminPaymentSettingsQueryKey() });
+  };
+
   const handleLogout = () => { logout(); navigate("/"); };
 
   /* ── Export helpers ── */
@@ -392,6 +406,7 @@ export default function AdminDashboard() {
     { id: "orders", label: "Orders", icon: ShoppingBag, count: orders.length },
     { id: "reviews", label: "Reviews", icon: Star, count: reviewList.length },
     { id: "contacts", label: "Messages", icon: MessageSquare, count: contactList.length },
+    { id: "settings", label: "Settings", icon: Settings },
   ];
 
   return (
@@ -619,6 +634,66 @@ export default function AdminDashboard() {
               ))}
               {contactList.length === 0 && <div className={cn("py-12 text-center text-sm", D.muted)}>No messages yet.</div>}
             </div>
+          </div>
+        )}
+
+        {/* ── SETTINGS ── */}
+        {tab === "settings" && (
+          <div className="space-y-6 max-w-xl">
+            <div>
+              <h2 className={cn("font-serif text-xl font-bold", D.text)}>Payment Channels</h2>
+              <p className={cn("text-sm mt-1", D.muted)}>Enable or disable payment methods shown to customers at checkout.</p>
+            </div>
+
+            <div className={cn("rounded-xl border divide-y", D.card, D.border, "divide-[#1e3050]")}>
+              {paymentSettingsList.length === 0 && (
+                <div className={cn("py-10 text-center text-sm", D.muted)}>Loading channels…</div>
+              )}
+              {paymentSettingsList.map((ch) => {
+                const META: Record<string, { color: string; abbr: string; desc: string }> = {
+                  airtel_money:    { color: "#ef4444", abbr: "A",    desc: "Airtel mobile wallet" },
+                  mtn_money:       { color: "#eab308", abbr: "MTN",  desc: "MTN MoMo account" },
+                  zamtel_money:    { color: "#22c55e", abbr: "ZM",   desc: "Zamtel Kwacha wallet" },
+                  visa_mastercard: { color: "#3b82f6", abbr: "CARD", desc: "Debit or credit card" },
+                  bank_transfer:   { color: "#6366f1", abbr: "BNK",  desc: "Direct bank transfer" },
+                };
+                const meta = META[ch.channelId] ?? { color: "#b08a58", abbr: "?", desc: "" };
+                return (
+                  <div key={ch.channelId} className="flex items-center gap-4 px-5 py-4">
+                    {/* Icon */}
+                    <div className="flex-shrink-0 w-10 h-10 rounded-xl flex items-center justify-center"
+                      style={{ background: `${meta.color}18`, border: `1px solid ${meta.color}30` }}>
+                      <span className="font-bold text-[0.48rem]" style={{ color: meta.color }}>{meta.abbr}</span>
+                    </div>
+                    {/* Label */}
+                    <div className="flex-1 min-w-0">
+                      <p className={cn("text-sm font-medium", D.text)}>{ch.label}</p>
+                      <p className={cn("text-xs", D.muted)}>{meta.desc}</p>
+                    </div>
+                    {/* Status badge */}
+                    <span className={cn("text-xs px-2.5 py-1 rounded-full font-medium border",
+                      ch.enabled
+                        ? "bg-emerald-400/10 text-emerald-400 border-emerald-400/20"
+                        : "bg-white/5 text-slate-500 border-white/10")}>
+                      {ch.enabled ? "Active" : "Disabled"}
+                    </span>
+                    {/* Toggle */}
+                    <button
+                      onClick={() => handleTogglePaymentChannel(ch.channelId, !ch.enabled)}
+                      className="flex-shrink-0 transition-opacity hover:opacity-80"
+                      title={ch.enabled ? "Disable channel" : "Enable channel"}>
+                      {ch.enabled
+                        ? <ToggleRight className="h-8 w-8 text-emerald-400" />
+                        : <ToggleLeft className="h-8 w-8 text-slate-600" />}
+                    </button>
+                  </div>
+                );
+              })}
+            </div>
+
+            <p className={cn("text-xs", D.muted)}>
+              Changes take effect immediately — disabled channels disappear from the customer checkout page at once.
+            </p>
           </div>
         )}
       </div>

@@ -40,11 +40,13 @@ import type {
   OrderInput,
   Payment,
   PaymentInput,
+  PaymentSetting,
   PaymentSimulate,
   Product,
   Review,
   ReviewInput,
   UpdateOrderStatusBody,
+  UpdatePaymentSetting,
   VisitorTrack,
   VisitorTrackResult
 } from './api.schemas';
@@ -1942,6 +1944,232 @@ export function useListAdminContacts<TData = Awaited<ReturnType<typeof listAdmin
  ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
 
   const queryOptions = getListAdminContactsQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+
+export const getGetAdminPaymentSettingsUrl = () => {
+
+
+
+
+  return `/api/admin/payment-settings`
+}
+
+/**
+ * @summary Get all payment channel settings
+ */
+export const getAdminPaymentSettings = async ( options?: RequestInit): Promise<PaymentSetting[]> => {
+
+  return customFetch<PaymentSetting[]>(getGetAdminPaymentSettingsUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetAdminPaymentSettingsQueryKey = () => {
+    return [
+    `/api/admin/payment-settings`
+    ] as const;
+    }
+
+
+export const getGetAdminPaymentSettingsQueryOptions = <TData = Awaited<ReturnType<typeof getAdminPaymentSettings>>, TError = ErrorType<void>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getAdminPaymentSettings>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetAdminPaymentSettingsQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getAdminPaymentSettings>>> = ({ signal }) => getAdminPaymentSettings({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getAdminPaymentSettings>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetAdminPaymentSettingsQueryResult = NonNullable<Awaited<ReturnType<typeof getAdminPaymentSettings>>>
+export type GetAdminPaymentSettingsQueryError = ErrorType<void>
+
+
+/**
+ * @summary Get all payment channel settings
+ */
+
+export function useGetAdminPaymentSettings<TData = Awaited<ReturnType<typeof getAdminPaymentSettings>>, TError = ErrorType<void>>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getAdminPaymentSettings>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetAdminPaymentSettingsQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+
+export const getUpdatePaymentSettingUrl = (channelId: string,) => {
+
+
+
+
+  return `/api/admin/payment-settings/${channelId}`
+}
+
+/**
+ * @summary Enable or disable a payment channel
+ */
+export const updatePaymentSetting = async (channelId: string,
+    updatePaymentSetting: UpdatePaymentSetting, options?: RequestInit): Promise<PaymentSetting> => {
+
+  return customFetch<PaymentSetting>(getUpdatePaymentSettingUrl(channelId),
+  {
+    ...options,
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      updatePaymentSetting,)
+  }
+);}
+
+
+
+
+export const getUpdatePaymentSettingMutationOptions = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updatePaymentSetting>>, TError,{channelId: string;data: BodyType<UpdatePaymentSetting>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof updatePaymentSetting>>, TError,{channelId: string;data: BodyType<UpdatePaymentSetting>}, TContext> => {
+
+const mutationKey = ['updatePaymentSetting'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof updatePaymentSetting>>, {channelId: string;data: BodyType<UpdatePaymentSetting>}> = (props) => {
+          const {channelId,data} = props ?? {};
+
+          return  updatePaymentSetting(channelId,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type UpdatePaymentSettingMutationResult = NonNullable<Awaited<ReturnType<typeof updatePaymentSetting>>>
+    export type UpdatePaymentSettingMutationBody = BodyType<UpdatePaymentSetting>
+    export type UpdatePaymentSettingMutationError = ErrorType<void>
+
+    /**
+ * @summary Enable or disable a payment channel
+ */
+export const useUpdatePaymentSetting = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updatePaymentSetting>>, TError,{channelId: string;data: BodyType<UpdatePaymentSetting>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof updatePaymentSetting>>,
+        TError,
+        {channelId: string;data: BodyType<UpdatePaymentSetting>},
+        TContext
+      > => {
+      return useMutation(getUpdatePaymentSettingMutationOptions(options));
+    }
+
+export const getGetPaymentSettingsUrl = () => {
+
+
+
+
+  return `/api/payment-settings`
+}
+
+/**
+ * @summary Get enabled payment channels (public)
+ */
+export const getPaymentSettings = async ( options?: RequestInit): Promise<PaymentSetting[]> => {
+
+  return customFetch<PaymentSetting[]>(getGetPaymentSettingsUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetPaymentSettingsQueryKey = () => {
+    return [
+    `/api/payment-settings`
+    ] as const;
+    }
+
+
+export const getGetPaymentSettingsQueryOptions = <TData = Awaited<ReturnType<typeof getPaymentSettings>>, TError = ErrorType<unknown>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getPaymentSettings>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetPaymentSettingsQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getPaymentSettings>>> = ({ signal }) => getPaymentSettings({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getPaymentSettings>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetPaymentSettingsQueryResult = NonNullable<Awaited<ReturnType<typeof getPaymentSettings>>>
+export type GetPaymentSettingsQueryError = ErrorType<unknown>
+
+
+/**
+ * @summary Get enabled payment channels (public)
+ */
+
+export function useGetPaymentSettings<TData = Awaited<ReturnType<typeof getPaymentSettings>>, TError = ErrorType<unknown>>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getPaymentSettings>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetPaymentSettingsQueryOptions(options)
 
   const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
 
