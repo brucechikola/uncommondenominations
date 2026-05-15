@@ -487,10 +487,10 @@ export default function Home() {
             </motion.div>
           </motion.div>
 
-          {/* ──────────── RIGHT: 3D book showcase ──────────── */}
+          {/* ──────────── RIGHT: book showcase ──────────── */}
           <motion.div ref={panelRef} style={{ y: bookY }}
             onMouseMove={handleBookMouseMove} onMouseLeave={handleBookMouseLeave}
-            className="hidden lg:flex flex-col items-center justify-center relative">
+            className="hidden lg:flex flex-col items-center justify-center relative overflow-hidden">
 
             {/* Panel bg */}
             <div className="absolute inset-0" style={{ background: "hsl(222,58%,5%)" }} />
@@ -499,61 +499,120 @@ export default function Home() {
             <div className="absolute left-0 top-[10%] bottom-[10%] w-px"
               style={{ background: "linear-gradient(180deg, transparent, hsl(42,78%,48%,0.22) 22%, hsl(42,78%,48%,0.22) 78%, transparent)" }} />
 
-            {/* Spotlight cone behind book */}
-            <div className="absolute inset-0 pointer-events-none flex items-center justify-center">
-              <div style={{
-                width: "380px", height: "500px",
-                background: "radial-gradient(ellipse 70% 80% at 50% 48%, hsl(42,78%,50%,0.09) 0%, hsl(222,68%,20%,0.12) 48%, transparent 72%)",
-                filter: "blur(18px)",
-              }} />
-            </div>
+            {/* Deep background bloom */}
+            <div className="absolute inset-0 pointer-events-none" style={{
+              background: "radial-gradient(ellipse 90% 70% at 55% 42%, hsl(42,72%,42%,0.11) 0%, hsl(222,72%,18%,0.18) 45%, transparent 70%)",
+              filter: "blur(32px)",
+            }} />
 
-            {/* Real book photo — mouse spring parallax */}
+            {/* Tight hot spotlight behind book */}
+            <div className="absolute pointer-events-none" style={{
+              top: "8%", left: "50%", transform: "translateX(-50%)",
+              width: "320px", height: "420px",
+              background: "radial-gradient(ellipse 55% 65% at 50% 38%, hsl(42,90%,62%,0.13) 0%, hsl(42,60%,50%,0.06) 50%, transparent 72%)",
+              filter: "blur(12px)",
+            }} />
+
+            {/* Floating gold orbs */}
+            {[
+              { top: "14%", left: "12%", size: 6, opacity: 0.35, delay: 0 },
+              { top: "22%", right: "10%", size: 4, opacity: 0.25, delay: 0.6 },
+              { top: "68%", left: "8%",  size: 5, opacity: 0.3,  delay: 1.1 },
+              { top: "76%", right: "14%",size: 7, opacity: 0.2,  delay: 0.3 },
+            ].map((o, i) => (
+              <motion.div key={i}
+                className="absolute rounded-full pointer-events-none"
+                style={{
+                  top: o.top, left: (o as { left?: string }).left, right: (o as { right?: string }).right,
+                  width: o.size, height: o.size,
+                  background: "hsl(42,90%,62%)",
+                  opacity: o.opacity,
+                  boxShadow: `0 0 ${o.size * 3}px hsl(42,90%,62%,0.6)`,
+                }}
+                animate={{ y: [0, -7, 0], opacity: [o.opacity, o.opacity * 1.7, o.opacity] }}
+                transition={{ duration: 3.8, repeat: Infinity, ease: "easeInOut", delay: o.delay }}
+              />
+            ))}
+
+            {/* Book photo + reflection */}
             <motion.div
-              initial={{ opacity: 0, y: 44, scale: 0.9 }}
+              initial={{ opacity: 0, y: 48, scale: 0.88 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
-              transition={{ delay: 0.18, duration: 1.1, ease: EASE }}
-              className="relative z-10 mb-10"
-              style={{ perspective: "1200px" }}
+              transition={{ delay: 0.18, duration: 1.15, ease: EASE }}
+              className="relative z-10 flex flex-col items-center"
+              style={{ perspective: "1400px" }}
             >
-              <motion.div style={{ rotateY: springRotY, rotateX: springRotX, transformStyle: "preserve-3d" }}>
+              <motion.div style={{ rotateY: springRotY, rotateX: springRotX, transformStyle: "preserve-3d" }}
+                className="relative">
+                {/* Gold rim glow */}
+                <div className="absolute -inset-[3px] rounded-[14px] pointer-events-none" style={{
+                  background: "linear-gradient(135deg, hsl(42,90%,62%,0.45), hsl(42,60%,40%,0.1) 50%, hsl(42,90%,62%,0.3))",
+                  filter: "blur(2px)",
+                  zIndex: -1,
+                }} />
                 <img
                   src={bookPhoto}
                   alt="The Luminous Path — physical book"
                   style={{
-                    width: "clamp(215px,20vw,268px)",
+                    width: "clamp(240px,23vw,305px)",
                     height: "auto",
                     display: "block",
                     borderRadius: "12px",
-                    boxShadow: "0 40px 80px rgba(0,0,0,0.55), 0 12px 28px rgba(0,0,0,0.3)",
+                    boxShadow: "0 48px 96px rgba(0,0,0,0.65), 0 16px 36px rgba(0,0,0,0.4), 0 0 0 1px hsl(42,60%,50%,0.15)",
                   }}
                 />
               </motion.div>
+
+              {/* Mirror reflection */}
+              <div style={{
+                width: "clamp(240px,23vw,305px)",
+                overflow: "hidden",
+                height: "60px",
+                marginTop: "2px",
+                borderRadius: "0 0 12px 12px",
+                flexShrink: 0,
+              }}>
+                <img
+                  src={bookPhoto}
+                  alt=""
+                  aria-hidden="true"
+                  style={{
+                    width: "100%",
+                    display: "block",
+                    transform: "scaleY(-1)",
+                    opacity: 0.18,
+                    maskImage: "linear-gradient(to bottom, rgba(0,0,0,0.5) 0%, transparent 100%)",
+                    WebkitMaskImage: "linear-gradient(to bottom, rgba(0,0,0,0.5) 0%, transparent 100%)",
+                    filter: "blur(1px)",
+                  }}
+                />
+              </div>
             </motion.div>
 
-            {/* Glassmorphism edition price cards */}
+            {/* Edition price strip */}
             <motion.div
               initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.55, duration: 0.7, ease: EASE }}
-              className="relative z-10 flex gap-2.5 w-full max-w-[295px] px-8"
+              transition={{ delay: 0.58, duration: 0.7, ease: EASE }}
+              className="relative z-10 flex gap-2 mt-5 w-full max-w-[305px] px-6"
             >
               {[
                 { label: "Paperback", price: "K400", type: "paperback" as const },
                 { label: "Hardcover", price: "K500", type: "hardcover" as const },
               ].map(({ label, price, type }) => (
                 <Link href="/shop" key={type} className="flex-1">
-                  <motion.div whileHover={{ y: -3 }} onClick={() => setProductType(type)}
-                    className="flex flex-col items-center gap-1 py-3.5 rounded cursor-pointer"
+                  <motion.div whileHover={{ y: -3, borderColor: "hsl(42,78%,50%,0.5)" }}
+                    onClick={() => setProductType(type)}
+                    className="flex flex-col items-center gap-0.5 py-3 rounded-xl cursor-pointer"
                     style={{
-                      background: "hsl(222,55%,10%,0.75)",
-                      border: "1px solid hsl(220,36%,20%,0.7)",
-                      backdropFilter: "blur(14px)",
-                      WebkitBackdropFilter: "blur(14px)",
+                      background: "hsl(222,55%,8%,0.85)",
+                      border: "1px solid hsl(220,36%,18%,0.8)",
+                      backdropFilter: "blur(18px)",
+                      WebkitBackdropFilter: "blur(18px)",
                     }}>
-                    <span className="font-sans text-[0.54rem] tracking-[0.26em] uppercase font-medium"
-                      style={{ color: "hsl(220,18%,42%)" }}>{label}</span>
-                    <span className="font-display font-bold text-[1.12rem]"
-                      style={{ color: "hsl(42,78%,58%)" }}>{price}</span>
+                    <span className="font-sans text-[0.5rem] tracking-[0.28em] uppercase font-semibold"
+                      style={{ color: "hsl(220,18%,38%)" }}>{label}</span>
+                    <span className="font-display font-bold text-[1.18rem]"
+                      style={{ color: "hsl(42,78%,60%)" }}>{price}</span>
                   </motion.div>
                 </Link>
               ))}
