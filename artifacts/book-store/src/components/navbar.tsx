@@ -9,7 +9,6 @@ const NAV_LINKS = [
   { href: "/about-book",   label: "The Book" },
   { href: "/about-author", label: "Author" },
   { href: "/reviews",      label: "Reviews" },
-  { href: "/faq",          label: "FAQ" },
   { href: "/contact",      label: "Contact" },
 ];
 

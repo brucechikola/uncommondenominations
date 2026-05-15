@@ -16,7 +16,6 @@ import Checkout from "@/pages/checkout";
 import Payment from "@/pages/payment";
 import Confirmation from "@/pages/confirmation";
 import Reviews from "@/pages/reviews";
-import FAQ from "@/pages/faq";
 import Contact from "@/pages/contact";
 import Terms from "@/pages/terms";
 import AdminLogin from "@/pages/admin/login";
@@ -68,7 +67,6 @@ function Router() {
               <Route path="/payment" component={Payment} />
               <Route path="/confirmation" component={Confirmation} />
               <Route path="/reviews" component={Reviews} />
-              <Route path="/faq" component={FAQ} />
               <Route path="/contact" component={Contact} />
               <Route path="/terms" component={Terms} />
               <Route component={NotFound} />
