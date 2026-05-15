@@ -54,7 +54,7 @@ async function generateReceiptPdf(params: {
   doc.setTextColor(180, 180, 200);
   doc.text("by Mwanalushi & Nalishebo  ·  LIBROS Academic Publishing", MARGIN, 18.5);
 
-  // PAID badge
+  // PAID / UNPAID badge
   if (params.paymentStatus === "successful") {
     doc.setFillColor(...GBG);
     doc.roundedRect(PW - MARGIN - 22, 7, 18, 8, 1.5, 1.5, "F");
@@ -62,6 +62,13 @@ async function generateReceiptPdf(params: {
     doc.setFontSize(7);
     doc.setTextColor(...GREEN);
     doc.text("PAID", PW - MARGIN - 13, 12.5, { align: "center" });
+  } else if (params.paymentStatus === "pending") {
+    doc.setFillColor(80, 55, 10);
+    doc.roundedRect(PW - MARGIN - 26, 7, 22, 8, 1.5, 1.5, "F");
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(7);
+    doc.setTextColor(230, 160, 40);
+    doc.text("UNPAID", PW - MARGIN - 15, 12.5, { align: "center" });
   }
 
   y = 34;
@@ -297,12 +304,17 @@ export default function Confirmation() {
               <div className="flex items-center gap-3">
                 <h2 className="font-sans text-[0.6rem] font-bold tracking-[0.28em] uppercase"
                   style={{ color: TEXT_DIM }}>Receipt</h2>
-                {payment?.status === "successful" && (
+                {payment?.status === "successful" ? (
                   <span className="font-sans text-[0.54rem] tracking-[0.18em] uppercase font-semibold px-2.5 py-1 rounded-sm"
                     style={{ background: "hsl(152,60%,14%)", border: "1px solid hsl(152,60%,24%)", color: "hsl(152,62%,50%)" }}>
                     Paid
                   </span>
-                )}
+                ) : payment?.status === "pending" ? (
+                  <span className="font-sans text-[0.54rem] tracking-[0.18em] uppercase font-semibold px-2.5 py-1 rounded-sm"
+                    style={{ background: "hsl(38,80%,10%)", border: "1px solid hsl(38,80%,24%)", color: "hsl(38,90%,62%)" }}>
+                    Unpaid
+                  </span>
+                ) : null}
               </div>
 
               {/* Download button with loader */}

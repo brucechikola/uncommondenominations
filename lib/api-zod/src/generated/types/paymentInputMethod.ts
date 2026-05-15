@@ -15,4 +15,5 @@ export const PaymentInputMethod = {
   zamtel_money: 'zamtel_money',
   visa_mastercard: 'visa_mastercard',
   bank_transfer: 'bank_transfer',
+  cash_on_delivery: 'cash_on_delivery',
 } as const;

@@ -788,7 +788,7 @@ components:
           type: integer
         method:
           type: string
-          enum: [airtel_money, mtn_money, zamtel_money, visa_mastercard, bank_transfer]
+          enum: [airtel_money, mtn_money, zamtel_money, visa_mastercard, bank_transfer, cash_on_delivery]
         phoneNumber:
           type: ["string", "null"]
         accountName:

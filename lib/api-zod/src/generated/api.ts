@@ -115,7 +115,7 @@ export const GetOrderResponse = zod.object({
  */
 export const InitiatePaymentBody = zod.object({
   "orderId": zod.number(),
-  "method": zod.enum(['airtel_money', 'mtn_money', 'zamtel_money', 'visa_mastercard', 'bank_transfer']),
+  "method": zod.enum(['airtel_money', 'mtn_money', 'zamtel_money', 'visa_mastercard', 'bank_transfer', 'cash_on_delivery']),
   "phoneNumber": zod.string().nullish(),
   "accountName": zod.string().nullish()
 })
