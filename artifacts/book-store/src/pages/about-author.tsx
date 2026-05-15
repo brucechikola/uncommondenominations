@@ -28,7 +28,7 @@ export default function AboutAuthor() {
     <div style={{ background: PAGE_BG, minHeight: "100svh" }} className="overflow-x-hidden">
 
       {/* ── Hero ── */}
-      <section className="relative pt-28 pb-20 overflow-hidden">
+      <section className="relative pt-20 pb-12 lg:pt-28 lg:pb-20 overflow-hidden">
         <div className="absolute top-0 left-1/2 -translate-x-1/2 pointer-events-none" style={{ zIndex: 0 }}>
           <div style={{
             width: "900px", height: "500px",
@@ -37,8 +37,8 @@ export default function AboutAuthor() {
           }} />
         </div>
 
-        <div className="relative z-10 container mx-auto px-6 max-w-5xl">
-          <div className="grid lg:grid-cols-2 gap-16 items-start">
+        <div className="relative z-10 container mx-auto px-5 sm:px-6 max-w-5xl">
+          <div className="grid lg:grid-cols-2 gap-10 lg:gap-16 items-start">
 
             {/* Monde Mwanalushi */}
             <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, ease: EASE }}>
@@ -77,10 +77,10 @@ export default function AboutAuthor() {
               </div>
             </motion.div>
 
-            {/* Portrait cards */}
+            {/* Portrait cards — hidden on mobile, shown alongside on desktop */}
             <motion.div initial={{ opacity: 0, scale: 0.94 }} animate={{ opacity: 1, scale: 1 }}
               transition={{ delay: 0.15, duration: 0.7, ease: EASE }}
-              className="flex flex-col gap-6 mt-8 lg:mt-16">
+              className="hidden lg:flex flex-col gap-6 mt-8 lg:mt-16">
               {[
                 { initials: "MM", name: "Monde Mwanalushi", role: "Senior Economist · ZIPAR" },
                 { initials: "EN", name: "Eric Nalishebo",   role: "Research Fellow · ZIPAR" },
@@ -132,14 +132,15 @@ export default function AboutAuthor() {
       </section>
 
       {/* ── Bio ── */}
-      <section className="py-24">
-        <div className="container mx-auto px-6 max-w-5xl">
-          <div className="grid lg:grid-cols-[280px,1fr] gap-16">
+      <section className="py-12 lg:py-24">
+        <div className="container mx-auto px-5 sm:px-6 max-w-5xl">
+          <div className="grid lg:grid-cols-[280px,1fr] gap-8 lg:gap-16">
 
-            {/* Sidebar info */}
+            {/* Sidebar info — shows after bio on mobile, left col on desktop */}
             <motion.div initial={{ opacity: 0, x: -16 }} whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true }} transition={{ ease: EASE }}>
-              <div className="rounded-2xl p-6 space-y-5 sticky top-24"
+              viewport={{ once: true }} transition={{ ease: EASE }}
+              className="order-2 lg:order-1">
+              <div className="rounded-2xl p-5 sm:p-6 space-y-4 sm:space-y-5 lg:sticky lg:top-24"
                 style={{ background: CARD_BG, border: `1px solid ${CARD_BORDER}` }}>
                 <h3 className="font-sans text-[0.58rem] tracking-[0.28em] uppercase font-bold" style={{ color: GOLD }}>
                   At a Glance
@@ -159,9 +160,10 @@ export default function AboutAuthor() {
               </div>
             </motion.div>
 
-            {/* Bio copy */}
+            {/* Bio copy — shows first on mobile */}
             <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }} transition={{ ease: EASE }}>
+              viewport={{ once: true }} transition={{ ease: EASE }}
+              className="order-1 lg:order-2">
               <h2 className="font-display font-bold mb-8" style={{ fontSize: "clamp(1.6rem,3vw,2.2rem)", color: TEXT_PRIMARY }}>
                 About the Authors
               </h2>
@@ -210,8 +212,8 @@ export default function AboutAuthor() {
       </section>
 
       {/* ── Timeline ── */}
-      <section className="py-20" style={{ borderTop: `1px solid ${CARD_BORDER}` }}>
-        <div className="container mx-auto px-6 max-w-3xl">
+      <section className="py-12 lg:py-20" style={{ borderTop: `1px solid ${CARD_BORDER}` }}>
+        <div className="container mx-auto px-5 sm:px-6 max-w-3xl">
           <motion.div initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}>
             <p className="font-sans text-[0.6rem] tracking-[0.3em] uppercase font-semibold mb-4 text-center" style={{ color: GOLD }}>
               Research Journey

@@ -359,7 +359,7 @@ export default function Home() {
           {/* ──────────── LEFT: editorial text ──────────── */}
           <motion.div style={{ y: textY, opacity: fadeOp }}
             initial="hidden" animate="visible" variants={stagger}
-            className="flex flex-col justify-center px-8 lg:px-16 xl:px-24 py-16">
+            className="flex flex-col justify-center px-5 sm:px-8 lg:px-16 xl:px-24 py-10 sm:py-16">
 
             {/* Eyebrow row — stars inline */}
             <motion.div variants={fadeUp} className="flex items-center gap-3 mb-10 flex-wrap">
@@ -474,7 +474,7 @@ export default function Home() {
                 { to: 5.0, decimals: 1, prefix: "★ ", label: "Avg Rating" },
               ].map((s, i) => (
                 <div key={s.label} className="flex items-center gap-8">
-                  {i > 0 && <div className="w-px h-8" style={{ background: "hsl(220,38%,16%)" }} />}
+                  {i > 0 && <div className="hidden sm:block w-px h-8" style={{ background: "hsl(220,38%,16%)" }} />}
                   <StatItem {...s} />
                 </div>
               ))}
@@ -668,8 +668,8 @@ export default function Home() {
       </motion.section>
 
       {/* ══════════════════════════════════════ ABOUT BOOK ══ */}
-      <section className="py-28 container mx-auto px-6 lg:px-10">
-        <div className="grid lg:grid-cols-2 gap-16 lg:gap-28 items-center">
+      <section className="py-14 lg:py-28 container mx-auto px-5 sm:px-6 lg:px-10">
+        <div className="grid lg:grid-cols-2 gap-10 lg:gap-28 items-center">
           {/* text */}
           <Reveal>
             <motion.p
@@ -752,12 +752,12 @@ export default function Home() {
 
       {/* ══════════════════════════════════════ EDITIONS (dark) ══ */}
       <section
-        className="py-28 relative"
+        className="py-14 lg:py-28 relative"
         style={{ background: "hsl(220,52%,9%)" }}
       >
 
-        <div className="container mx-auto px-6 lg:px-10">
-          <Reveal className="text-center mb-16">
+        <div className="container mx-auto px-5 sm:px-6 lg:px-10">
+          <Reveal className="text-center mb-8 lg:mb-16">
             <motion.p
               variants={fadeUp}
               className="font-sans text-[0.65rem] tracking-[0.3em] uppercase font-semibold mb-5"
@@ -792,7 +792,7 @@ export default function Home() {
                   variants={scaleIn}
                   whileHover={{ y: -6 }}
                   transition={{ type: "spring", stiffness: 220 }}
-                  className="rounded-2xl p-9"
+                  className="rounded-2xl p-5 sm:p-9"
                   style={{
                     background: "hsl(220,52%,12%)",
                     border: "1px solid hsl(220,38%,22%)",
@@ -863,7 +863,7 @@ export default function Home() {
                   variants={scaleIn}
                   whileHover={{ y: -6 }}
                   transition={{ type: "spring", stiffness: 220 }}
-                  className="rounded-2xl p-9 relative overflow-hidden"
+                  className="rounded-2xl p-5 sm:p-9 relative overflow-hidden"
                   style={{
                     background:
                       "linear-gradient(145deg, hsl(222,56%,14%), hsl(218,60%,10%))",
@@ -953,8 +953,8 @@ export default function Home() {
       </section>
 
       {/* ══════════════════════════════════════ AUTHOR ══ */}
-      <section className="py-28 container mx-auto px-6 lg:px-10">
-        <div className="grid lg:grid-cols-2 gap-16 lg:gap-28 items-center">
+      <section className="py-14 lg:py-28 container mx-auto px-5 sm:px-6 lg:px-10">
+        <div className="grid lg:grid-cols-2 gap-10 lg:gap-28 items-center">
           {/* Portrait */}
           <Reveal className="flex justify-center order-2 lg:order-1">
             <motion.div variants={fadeLeft} className="relative">
@@ -1059,12 +1059,12 @@ export default function Home() {
       {/* ══════════════════════════════════════ REVIEWS (dark) ══ */}
       {topReviews.length > 0 && (
         <section
-          className="py-28 relative overflow-hidden"
+          className="py-14 lg:py-28 relative overflow-hidden"
           style={{ background: "hsl(220,52%,9%)" }}
         >
 
-          <div className="container mx-auto px-6 lg:px-10">
-            <Reveal className="text-center mb-16">
+          <div className="container mx-auto px-5 sm:px-6 lg:px-10">
+            <Reveal className="text-center mb-8 lg:mb-16">
               <motion.p
                 variants={fadeUp}
                 className="font-sans text-[0.65rem] tracking-[0.3em] uppercase font-semibold mb-5"

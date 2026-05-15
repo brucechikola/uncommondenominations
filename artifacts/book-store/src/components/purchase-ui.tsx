@@ -2,18 +2,18 @@
 
 export function StepIndicator({ current }: { current: 1 | 2 | 3 }) {
   const steps = [
-    { n: 1 as const, label: "Your Details" },
-    { n: 2 as const, label: "Payment" },
-    { n: 3 as const, label: "Confirmed" },
+    { n: 1 as const, label: "Your Details", short: "Details" },
+    { n: 2 as const, label: "Payment",      short: "Payment" },
+    { n: 3 as const, label: "Confirmed",    short: "Done"    },
   ];
   return (
-    <div className="flex items-center mb-12">
-      {steps.map(({ n, label }, i) => {
+    <div className="flex items-center mb-8 sm:mb-12">
+      {steps.map(({ n, label, short }, i) => {
         const done   = n < current;
         const active = n === current;
         return (
-          <div key={n} className="flex items-center">
-            <div className="flex items-center gap-2.5">
+          <div key={n} className="flex items-center min-w-0">
+            <div className="flex items-center gap-1.5 sm:gap-2.5 min-w-0">
               <div style={{
                 width: 28, height: 28, borderRadius: "50%", flexShrink: 0,
                 display: "flex", alignItems: "center", justifyContent: "center",
@@ -24,16 +24,25 @@ export function StepIndicator({ current }: { current: 1 | 2 | 3 }) {
               }}>
                 {done ? "✓" : n}
               </div>
-              <span style={{
+              {/* Show short label on active step on mobile; full label on sm+ */}
+              {active && (
+                <span className="sm:hidden" style={{
+                  fontFamily: "var(--app-font-sans)", fontSize: "0.58rem",
+                  fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase" as const,
+                  color: "hsl(42,78%,62%)", whiteSpace: "nowrap",
+                }}>{short}</span>
+              )}
+              <span className="hidden sm:block" style={{
                 fontFamily: "var(--app-font-sans)", fontSize: "0.6rem",
                 fontWeight: active ? 600 : 400,
                 letterSpacing: "0.12em", textTransform: "uppercase" as const,
                 color: active ? "hsl(42,78%,62%)" : done ? "hsl(42,78%,42%)" : "hsl(220,18%,26%)",
+                whiteSpace: "nowrap",
               }}>{label}</span>
             </div>
             {i < 2 && (
               <div style={{
-                width: 36, height: 1, margin: "0 10px",
+                flex: "1 1 10px", minWidth: 10, maxWidth: 40, height: 1, margin: "0 6px",
                 background: done ? "hsl(42,78%,38%,0.4)" : "hsl(220,38%,12%)",
               }} />
             )}
