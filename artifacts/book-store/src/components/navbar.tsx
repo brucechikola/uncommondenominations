@@ -12,6 +12,11 @@ const NAV_LINKS = [
   { href: "/contact",      label: "Contact" },
 ];
 
+/* Blue used before scrolling — visible on all dark-background pages */
+const BLUE   = "hsl(215,80%,68%)";
+const WHITE  = "rgba(255,255,255,0.85)";
+const WHITE2 = "rgba(255,255,255,0.60)";
+
 export function Navbar() {
   const [location]  = useLocation();
   const cartQuantity = useCartStore((s) => s.quantity);
@@ -24,11 +29,12 @@ export function Navbar() {
 
   const isCurrent = (p: string) => location === p;
 
-  /* Dark purchase pages always show the dark navbar (never switches to cream). */
+  /* Purchase pages sit on a fixed dark canvas — always treat as scrolled for styling */
   const isDarkPage = ["/shop", "/checkout", "/payment", "/confirmation"].includes(location);
 
-  /* On hero (home, not scrolled) OR on any purchase page → transparent + light text. */
-  const onHero = (location === "/" && !scrolled) || isDarkPage;
+  /* Text is blue before the user scrolls; once the backdrop appears it flips to white */
+  const linkColor  = (scrolled || isDarkPage) ? WHITE  : BLUE;
+  const muteColor  = (scrolled || isDarkPage) ? WHITE2 : BLUE;
 
   return (
     <>
@@ -38,24 +44,21 @@ export function Navbar() {
         transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
         className="fixed top-0 left-0 right-0 z-50 w-full transition-all duration-300"
         style={{
-          background: scrolled
-            ? "hsl(222,58%,6%,0.88)"
-            : "transparent",
-          borderBottom: scrolled
-            ? "1px solid hsl(220,38%,18%,0.6)"
-            : "1px solid transparent",
-          boxShadow: scrolled ? "0 4px 32px rgba(0,0,0,0.4)" : "none",
-          backdropFilter: scrolled ? "blur(18px) saturate(1.4)" : "none",
+          background:   scrolled ? "hsl(222,58%,6%,0.88)"          : "transparent",
+          borderBottom: scrolled ? "1px solid hsl(220,38%,18%,0.6)" : "1px solid transparent",
+          boxShadow:    scrolled ? "0 4px 32px rgba(0,0,0,0.4)"     : "none",
+          backdropFilter: scrolled ? "blur(18px) saturate(1.4)"     : "none",
         }}
       >
-        <div className="container mx-auto flex h-15 items-center justify-between px-6 h-14">
+        <div className="container mx-auto flex h-14 items-center justify-between px-6">
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2.5 group">
             <div className="w-7 h-7 rounded-lg flex items-center justify-center"
               style={{ background: "rgba(141,107,61,0.12)", border: "1px solid rgba(141,107,61,0.35)" }}>
               <span className="font-display text-xs font-bold text-primary">U</span>
             </div>
-            <span className="font-sans text-xs font-bold uppercase transition-colors text-white/80 group-hover:text-primary">
+            <span className="font-sans text-xs font-bold uppercase transition-colors group-hover:text-primary"
+              style={{ color: muteColor }}>
               Uncommon Denominators
             </span>
           </Link>
@@ -64,9 +67,8 @@ export function Navbar() {
           <nav className="hidden md:flex items-center gap-6">
             {NAV_LINKS.map(({ href, label }) => (
               <Link key={href} href={href}
-                className={`font-sans text-[0.85rem] font-medium uppercase transition-colors ${
-                  isCurrent(href) ? "text-primary" : "text-white/70 hover:text-white"
-                }`}>
+                className="font-sans text-[0.85rem] font-medium uppercase transition-colors hover:text-white"
+                style={{ color: isCurrent(href) ? "#8d6b3d" : linkColor }}>
                 {label}
               </Link>
             ))}
@@ -84,7 +86,8 @@ export function Navbar() {
               </Button>
             </Link>
             <button onClick={() => setMobileOpen(!mobileOpen)}
-              className="md:hidden p-2 transition-colors text-white/60 hover:text-white">
+              className="md:hidden p-2 transition-colors hover:text-white"
+              style={{ color: muteColor }}>
               {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
             </button>
           </div>
