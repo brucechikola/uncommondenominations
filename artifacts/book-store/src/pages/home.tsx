@@ -304,7 +304,7 @@ export default function Home() {
     <div className="overflow-x-hidden">
       {/* ══════════════════════════════════════ HERO ══ */}
       <section ref={heroRef} className="relative overflow-hidden"
-        style={{ minHeight: "100svh", background: "hsl(222,58%,6%)" }}>
+        style={{ minHeight: "100svh", background: "hsl(222,58%,6%)", marginTop: "-56px", paddingTop: "56px" }}>
 
         {/* ── BACKGROUND LAYERS ── */}
         <div className="absolute inset-0 pointer-events-none select-none overflow-hidden">
