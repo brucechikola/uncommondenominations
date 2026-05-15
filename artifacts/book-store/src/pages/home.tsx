@@ -98,150 +98,75 @@ function CountUp({
 }
 
 /* ─────────────────────── book cover ───────────────────────────── */
-function BookCover() {
+function BookCover({ bookWidth = "clamp(220px,24vw,320px)" }: { bookWidth?: string }) {
   return (
     <div className="relative mx-auto w-fit">
-      {/* Cream glow pedestal */}
-      <div
-        className="absolute -inset-10 pointer-events-none"
-        style={{
-          background:
-            "radial-gradient(ellipse 75% 80% at 50% 55%, rgba(245,238,215,0.45) 0%, rgba(245,238,215,0.08) 65%, transparent 100%)",
-          filter: "blur(10px)",
-        }}
-      />
-      {/* Gold ambient pulse */}
+      {/* Layered glow behind book */}
       <motion.div
-        className="absolute -inset-14 rounded-full pointer-events-none"
-        animate={{ opacity: [0.07, 0.14, 0.07] }}
-        transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+        className="absolute pointer-events-none"
+        animate={{ opacity: [0.6, 1, 0.6], scale: [1, 1.04, 1] }}
+        transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
         style={{
-          background:
-            "radial-gradient(ellipse at center, hsl(42,80%,52%) 0%, transparent 65%)",
+          inset: "-60px",
+          background: "radial-gradient(ellipse 80% 70% at 50% 60%, hsl(42,78%,52%,0.10) 0%, hsl(220,60%,30%,0.15) 50%, transparent 80%)",
+          filter: "blur(20px)",
         }}
       />
 
       {/* Book body */}
       <motion.div
-        animate={{ y: [0, -10, 0], rotate: [-0.4, 0.4, -0.4] }}
-        transition={{ duration: 5.5, repeat: Infinity, ease: "easeInOut" }}
+        animate={{ y: [0, -8, 0] }}
+        transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
         className="relative overflow-hidden"
         style={{
-          width: "clamp(200px, 22vw, 300px)",
+          width: bookWidth,
           aspectRatio: "2/3",
-          borderRadius: "2px 4px 4px 2px",
-          background:
-            "linear-gradient(160deg, hsl(222,58%,17%) 0%, hsl(218,60%,11%) 50%, hsl(220,52%,9%) 100%)",
-          boxShadow:
-            "0 50px 90px rgba(0,0,0,0.55), 0 20px 40px rgba(0,0,0,0.3), inset -2px 0 8px rgba(0,0,0,0.4)",
+          borderRadius: "2px 5px 5px 2px",
+          background: "linear-gradient(170deg, hsl(222,60%,18%) 0%, hsl(218,62%,12%) 40%, hsl(220,54%,10%) 100%)",
+          boxShadow: "6px 0 18px rgba(0,0,0,0.35), 0 60px 100px rgba(0,0,0,0.6), 0 24px 48px rgba(0,0,0,0.35), inset -3px 0 12px rgba(0,0,0,0.45)",
         }}
       >
         {/* Gold spine */}
-        <div
-          className="absolute left-0 top-0 bottom-0 w-[5px]"
-          style={{
-            background:
-              "linear-gradient(180deg, hsl(44,88%,62%) 0%, hsl(42,78%,44%) 50%, hsl(44,88%,62%) 100%)",
-          }}
-        />
-        {/* Inner spine shadow */}
-        <div
-          className="absolute left-[5px] top-0 bottom-0 w-[12px]"
-          style={{
-            background:
-              "linear-gradient(90deg, rgba(0,0,0,0.22), transparent)",
-          }}
-        />
+        <div className="absolute left-0 top-0 bottom-0 w-[6px]"
+          style={{ background: "linear-gradient(180deg, hsl(44,90%,65%) 0%, hsl(42,78%,44%) 45%, hsl(44,90%,65%) 100%)" }} />
+        {/* Spine inner shadow */}
+        <div className="absolute left-[6px] top-0 bottom-0 w-[16px]"
+          style={{ background: "linear-gradient(90deg, rgba(0,0,0,0.28), transparent)" }} />
+        {/* Right-edge shadow */}
+        <div className="absolute right-0 top-0 bottom-0 w-[20px]"
+          style={{ background: "linear-gradient(270deg, rgba(0,0,0,0.18), transparent)" }} />
 
         {/* Top rule */}
-        <div className="absolute top-8 left-7 right-5 h-px bg-white/15" />
+        <div className="absolute top-[10%] left-[12%] right-[8%] h-px" style={{ background: "rgba(255,255,255,0.12)" }} />
 
-        {/* Content */}
-        <div className="absolute inset-0 flex flex-col items-center justify-center px-5 text-center gap-[6px]">
-          <p
-            className="font-display font-semibold tracking-[0.32em] uppercase"
-            style={{ fontSize: "clamp(0.42rem,0.9vw,0.55rem)", color: "hsl(42,80%,60%)" }}
-          >
+        {/* Cover content */}
+        <div className="absolute inset-0 flex flex-col items-center justify-center px-[10%] text-center" style={{ gap: "5%" }}>
+          <p className="font-sans font-medium tracking-[0.3em] uppercase"
+            style={{ fontSize: "clamp(0.38rem,0.75vw,0.5rem)", color: "hsl(42,78%,60%)", letterSpacing: "0.35em" }}>
             Dr. Amara Zulu
           </p>
-          <div
-            className="w-6 h-px"
-            style={{ background: "hsl(42,78%,52%,0.5)" }}
-          />
-          <h2
-            className="font-display font-bold text-white leading-[1.1]"
-            style={{
-              fontSize: "clamp(1rem,2.2vw,1.4rem)",
-              letterSpacing: "0.07em",
-            }}
-          >
-            THE
-            <br />
-            LUMINOUS
-            <br />
-            PATH
+          <div className="w-[28%] h-px" style={{ background: "hsl(42,78%,52%,0.45)" }} />
+          <h2 className="font-display font-bold text-white leading-[1.05]"
+            style={{ fontSize: "clamp(0.95rem,2vw,1.35rem)", letterSpacing: "0.06em" }}>
+            THE<br />LUMINOUS<br />PATH
           </h2>
-          <div
-            className="w-6 h-px"
-            style={{ background: "hsl(42,78%,52%,0.5)" }}
-          />
-          <p
-            className="font-serif italic text-white/35"
-            style={{ fontSize: "clamp(0.42rem,0.85vw,0.54rem)" }}
-          >
+          <div className="w-[28%] h-px" style={{ background: "hsl(42,78%,52%,0.45)" }} />
+          <p className="font-serif italic" style={{ fontSize: "clamp(0.36rem,0.72vw,0.48rem)", color: "rgba(255,255,255,0.3)" }}>
             A Guide to Purposeful Living
           </p>
         </div>
 
-        {/* Bottom rule (above gold band) */}
-        <div
-          className="absolute left-0 right-0 h-px"
-          style={{
-            bottom: "22%",
-            background:
-              "linear-gradient(90deg, transparent, hsl(42,80%,58%,0.5), transparent)",
-          }}
-        />
+        {/* Bottom rule */}
+        <div className="absolute left-0 right-0 h-px" style={{ bottom: "22%", background: "linear-gradient(90deg,transparent,hsl(42,80%,55%,0.4),transparent)" }} />
 
         {/* Gold band */}
-        <div
-          className="absolute bottom-0 left-0 right-0 flex items-center justify-center"
-          style={{
-            height: "22%",
-            background:
-              "linear-gradient(135deg, hsl(42,70%,34%), hsl(44,82%,50%), hsl(42,70%,34%))",
-          }}
-        >
-          <p
-            className="font-display font-bold"
-            style={{
-              fontSize: "clamp(0.42rem,0.9vw,0.58rem)",
-              letterSpacing: "0.28em",
-              color: "hsl(220,52%,10%)",
-            }}
-          >
+        <div className="absolute bottom-0 left-0 right-0 flex items-center justify-center"
+          style={{ height: "22%", background: "linear-gradient(135deg, hsl(42,68%,32%), hsl(44,80%,48%), hsl(42,68%,32%))" }}>
+          <p className="font-sans font-bold tracking-[0.28em] uppercase"
+            style={{ fontSize: "clamp(0.38rem,0.78vw,0.52rem)", color: "hsl(220,52%,10%)" }}>
             AMARA ZULU
           </p>
         </div>
-      </motion.div>
-
-      {/* Badge */}
-      <motion.div
-        initial={{ opacity: 0, scale: 0.8, y: 8 }}
-        animate={{ opacity: 1, scale: 1, y: 0 }}
-        transition={{ delay: 1.1, duration: 0.5, ease: EASE }}
-        className="absolute -bottom-5 -right-6 rounded-sm px-4 py-3 shadow-2xl"
-        style={{
-          background: "hsl(42,78%,46%)",
-          color: "hsl(220,52%,10%)",
-        }}
-      >
-        <p className="font-sans text-[0.52rem] font-semibold uppercase tracking-[0.22em] opacity-70 mb-0.5">
-          Delivered across
-        </p>
-        <p className="font-display text-[0.7rem] font-bold tracking-[0.2em] uppercase">
-          All Zambia
-        </p>
       </motion.div>
     </div>
   );
@@ -329,265 +254,226 @@ export default function Home() {
       <section
         ref={heroRef}
         className="relative overflow-hidden"
-        style={{ minHeight: "100svh", background: "hsl(220,52%,9%)" }}
+        style={{ minHeight: "100svh", background: "hsl(220,55%,7%)" }}
       >
-        {/* BG layers */}
-        <motion.div
-          style={{ y: bgY }}
-          className="absolute inset-0 pointer-events-none"
-        >
-          {/* Top-left blue bloom */}
-          <div
-            className="absolute -top-32 -left-32 w-[700px] h-[700px] rounded-full"
-            style={{
-              background:
-                "radial-gradient(circle, hsl(220,60%,26%,0.65) 0%, transparent 70%)",
-            }}
-          />
-          {/* Centre-right gold hint */}
-          <div
-            className="absolute top-1/4 right-1/4 w-[800px] h-[600px] rounded-full"
-            style={{
-              background:
-                "radial-gradient(ellipse, hsl(42,78%,52%,0.04) 0%, transparent 70%)",
-            }}
-          />
-          {/* Grid */}
-          <svg
-            className="absolute inset-0 w-full h-full opacity-[0.022]"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <defs>
-              <pattern
-                id="g"
-                width="72"
-                height="72"
-                patternUnits="userSpaceOnUse"
-              >
-                <path
-                  d="M 72 0 L 0 0 0 72"
-                  fill="none"
-                  stroke="white"
-                  strokeWidth="0.6"
-                />
-              </pattern>
-            </defs>
-            <rect width="100%" height="100%" fill="url(#g)" />
-          </svg>
+        {/* ── Background atmosphere ── */}
+        <motion.div style={{ y: bgY }} className="absolute inset-0 pointer-events-none">
+          {/* Deep blue bloom — top centre */}
+          <div className="absolute -top-40 left-1/2 -translate-x-1/2 w-[900px] h-[700px] rounded-full"
+            style={{ background: "radial-gradient(ellipse, hsl(220,62%,22%,0.7) 0%, transparent 68%)" }} />
+          {/* Gold warmth — right-centre */}
+          <div className="absolute top-[30%] right-[-5%] w-[600px] h-[600px] rounded-full"
+            style={{ background: "radial-gradient(ellipse, hsl(42,78%,50%,0.06) 0%, transparent 70%)" }} />
+          {/* Bottom shadow pool */}
+          <div className="absolute bottom-0 inset-x-0 h-64"
+            style={{ background: "linear-gradient(0deg, hsl(220,55%,5%) 0%, transparent 100%)" }} />
         </motion.div>
 
-        {/* Content grid */}
-        <div className="relative z-10 w-full container mx-auto px-6 lg:px-10 grid lg:grid-cols-2 gap-12 lg:gap-8 items-center"
-          style={{ minHeight: "100svh", paddingTop: "6rem", paddingBottom: "5rem" }}
+        {/* ── Main layout: text left / book right ── */}
+        <div
+          className="relative z-10 grid lg:grid-cols-[1fr_480px] min-h-svh"
+          style={{ paddingTop: "4.5rem" }}
         >
-          {/* ── LEFT: text ── */}
+
+          {/* ── LEFT: editorial text panel ── */}
           <motion.div
             style={{ y: textY, opacity: fadeOp }}
             initial="hidden"
             animate="visible"
             variants={stagger}
+            className="flex flex-col justify-center px-8 lg:px-16 xl:px-24 py-16 lg:py-20"
           >
-            {/* Pill badge */}
-            <motion.div variants={fadeUp} className="mb-8">
-              <span
-                className="inline-flex items-center gap-2.5 font-sans text-[0.65rem] font-medium tracking-[0.28em] uppercase border rounded-sm px-4 py-2"
-                style={{
-                  color:        "hsl(42,80%,66%)",
-                  borderColor:  "hsl(42,78%,52%,0.3)",
-                  background:   "hsl(42,78%,52%,0.07)",
-                }}
-              >
-                <motion.span
-                  className="w-1.5 h-1.5 rounded-full block"
-                  style={{ background: "hsl(42,80%,62%)" }}
-                  animate={{ opacity: [1, 0.3, 1] }}
-                  transition={{ duration: 2, repeat: Infinity }}
-                />
+            {/* Eyebrow */}
+            <motion.div variants={fadeUp} className="mb-10">
+              <span className="inline-flex items-center gap-2.5 font-sans text-[0.6rem] font-semibold tracking-[0.32em] uppercase"
+                style={{ color: "hsl(42,78%,58%)" }}>
+                <motion.span className="w-1.5 h-1.5 rounded-full block" style={{ background: "hsl(42,80%,58%)" }}
+                  animate={{ opacity: [1, 0.25, 1] }} transition={{ duration: 2.4, repeat: Infinity }} />
                 Now Available in Zambia
               </span>
             </motion.div>
 
-            {/* Giant title */}
-            <motion.div variants={fadeUp} className="mb-6">
-              <h1
-                className="font-display font-bold leading-[1.0]"
-                style={{ letterSpacing: "0.01em" }}
-              >
-                <span
-                  className="block"
-                  style={{
-                    fontSize: "clamp(2.4rem,5vw,4rem)",
-                    color: "hsl(40,22%,90%)",
-                  }}
-                >
-                  The
-                </span>
-                <span
-                  className="block gold-shimmer"
-                  style={{
-                    fontSize: "clamp(2.4rem,5vw,4rem)",
-                    WebkitTextFillColor: "transparent",
-                  }}
-                >
+            {/* Title — stacked editorial treatment */}
+            <motion.div variants={fadeUp} className="mb-3">
+              <p className="font-display font-normal italic leading-none mb-1"
+                style={{ fontSize: "clamp(1.1rem,2.2vw,1.5rem)", color: "hsl(40,22%,75%,0.55)", letterSpacing: "0.01em" }}>
+                The
+              </p>
+            </motion.div>
+            <motion.div variants={fadeUp} className="mb-8">
+              <h1 className="font-display font-bold leading-[0.95]" style={{ letterSpacing: "-0.01em" }}>
+                <span className="block" style={{ fontSize: "clamp(3.2rem,6.5vw,5.2rem)", color: "hsl(40,24%,94%)" }}>
                   Luminous
                 </span>
-                <span
-                  className="block"
-                  style={{
-                    fontSize: "clamp(2.4rem,5vw,4rem)",
-                    color: "hsl(40,22%,90%)",
-                  }}
-                >
+                <span className="block gold-shimmer" style={{ fontSize: "clamp(3.2rem,6.5vw,5.2rem)", WebkitTextFillColor: "transparent" }}>
                   Path
                 </span>
               </h1>
             </motion.div>
 
-            {/* Gold rule */}
-            <motion.div variants={fadeUp} className="gold-line-left w-20 mb-6" />
+            {/* Ornament divider */}
+            <motion.div variants={fadeUp} className="flex items-center gap-3 mb-8">
+              <div className="flex-1 max-w-[80px] h-px" style={{ background: "hsl(42,78%,48%,0.4)" }} />
+              <span className="font-sans text-[0.58rem] tracking-[0.4em] uppercase font-medium" style={{ color: "hsl(42,78%,52%,0.7)" }}>
+                A Guide to Purposeful Living
+              </span>
+            </motion.div>
 
-            {/* By-line */}
-            <motion.p
-              variants={fadeUp}
-              className="font-serif italic mb-3"
-              style={{
-                fontSize: "clamp(1rem,1.8vw,1.25rem)",
-                color: "hsl(40,22%,68%)",
-              }}
-            >
+            {/* Author */}
+            <motion.p variants={fadeUp} className="font-serif italic mb-6"
+              style={{ fontSize: "clamp(1rem,1.6vw,1.2rem)", color: "hsl(40,20%,62%)" }}>
               by Dr. Amara Zulu
             </motion.p>
 
             {/* Description */}
-            <motion.p
-              variants={fadeUp}
-              className="font-serif leading-relaxed mb-8 max-w-[440px]"
-              style={{
-                fontSize: "clamp(0.95rem,1.5vw,1.1rem)",
-                color: "hsl(220,15%,60%)",
-              }}
-            >
-              A transformative guide to purposeful living — drawing on African
-              wisdom, modern psychology, and a life lived with extraordinary
-              intention.
+            <motion.p variants={fadeUp} className="font-serif leading-[1.75] mb-8 max-w-[480px]"
+              style={{ fontSize: "clamp(0.95rem,1.4vw,1.05rem)", color: "hsl(220,14%,56%)" }}>
+              A transformative guide to purposeful living — drawing on African wisdom, modern psychology,
+              and a life lived with extraordinary intention.
             </motion.p>
 
-            {/* Testimonial pull-quote */}
-            <motion.blockquote
-              variants={fadeUp}
-              className="border-l-[2px] pl-5 mb-9"
-              style={{ borderColor: "hsl(42,78%,48%,0.45)" }}
-            >
-              <p
-                className="font-serif italic leading-snug mb-1.5"
-                style={{
-                  fontSize: "clamp(0.95rem,1.4vw,1.05rem)",
-                  color: "hsl(40,18%,58%)",
-                }}
-              >
-                "The book Zambia has been waiting for."
-              </p>
-              <footer
-                className="font-sans text-xs tracking-wide"
-                style={{ color: "hsl(220,18%,44%)" }}
-              >
-                — Chanda Mwale, Lusaka
-              </footer>
+            {/* Pull quote */}
+            <motion.blockquote variants={fadeUp} className="flex gap-4 items-start mb-10">
+              <div className="w-[3px] flex-shrink-0 self-stretch rounded-full"
+                style={{ background: "linear-gradient(180deg, hsl(42,78%,52%) 0%, hsl(42,78%,52%,0.15) 100%)" }} />
+              <div>
+                <p className="font-serif italic leading-snug mb-1"
+                  style={{ fontSize: "clamp(0.95rem,1.35vw,1.05rem)", color: "hsl(40,18%,56%)" }}>
+                  "The book Zambia has been waiting for."
+                </p>
+                <footer className="font-sans text-[0.72rem] tracking-wide" style={{ color: "hsl(220,18%,40%)" }}>
+                  — Chanda Mwale, Lusaka
+                </footer>
+              </div>
             </motion.blockquote>
 
             {/* CTA buttons */}
-            <motion.div
-              variants={fadeUp}
-              className="flex flex-col sm:flex-row gap-3 mb-11"
-            >
+            <motion.div variants={fadeUp} className="flex flex-col sm:flex-row gap-3 mb-12">
               <Link href="/shop">
                 <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.97 }}>
-                  <Button
-                    size="lg"
-                    onClick={() => setProductType("paperback")}
-                    className="font-display tracking-[0.13em] uppercase shadow-2xl border-0"
-                    style={{
-                      fontSize:   "0.72rem",
-                      height:     "3.2rem",
-                      padding:    "0 2.2rem",
-                      background: "hsl(42,78%,46%)",
-                      color:      "hsl(220,52%,9%)",
-                      boxShadow:  "0 8px 32px hsl(42,78%,46%,0.32)",
-                    }}
-                  >
+                  <Button size="lg" onClick={() => setProductType("paperback")}
+                    className="font-sans tracking-[0.12em] uppercase border-0 w-full sm:w-auto"
+                    style={{ fontSize: "0.7rem", height: "3rem", padding: "0 2rem",
+                      background: "hsl(42,78%,46%)", color: "hsl(220,52%,8%)",
+                      boxShadow: "0 6px 28px hsl(42,78%,46%,0.28)" }}>
                     Buy Paperback — K400
                   </Button>
                 </motion.div>
               </Link>
               <Link href="/shop">
                 <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.97 }}>
-                  <Button
-                    size="lg"
-                    variant="outline"
-                    onClick={() => setProductType("hardcover")}
-                    className="font-display tracking-[0.13em] uppercase transition-colors"
-                    style={{
-                      fontSize:    "0.72rem",
-                      height:      "3.2rem",
-                      padding:     "0 2.2rem",
-                      borderColor: "hsl(40,22%,88%,0.18)",
-                      color:       "hsl(40,22%,72%)",
-                    }}
-                  >
+                  <Button size="lg" variant="outline" onClick={() => setProductType("hardcover")}
+                    className="font-sans tracking-[0.12em] uppercase w-full sm:w-auto"
+                    style={{ fontSize: "0.7rem", height: "3rem", padding: "0 2rem",
+                      borderColor: "hsl(40,22%,88%,0.14)", color: "hsl(40,22%,68%)",
+                      background: "transparent" }}>
                     Hardcover — K500
                   </Button>
                 </motion.div>
               </Link>
             </motion.div>
 
-            {/* Stats row */}
-            <motion.div
-              variants={fadeUp}
-              className="flex flex-wrap items-end gap-x-10 gap-y-4 pt-8"
-              style={{ borderTop: "1px solid hsl(220,38%,20%)" }}
-            >
-              <StatItem to={6}   suffix="+"       label="Cities served"   />
-              <div className="w-px h-10 self-center" style={{ background: "hsl(220,38%,20%)" }} />
-              <StatItem to={256}                  label="Pages"           />
-              <div className="w-px h-10 self-center" style={{ background: "hsl(220,38%,20%)" }} />
-              <StatItem to={5.0} decimals={1}     label="Star rating" prefix="★ " />
+            {/* Stats */}
+            <motion.div variants={fadeUp} className="flex flex-wrap items-center gap-x-8 gap-y-4 pt-7"
+              style={{ borderTop: "1px solid hsl(220,38%,17%)" }}>
+              {[
+                { to: 6, suffix: "+", label: "Cities Served" },
+                { to: 256, label: "Pages" },
+                { to: 5.0, decimals: 1, prefix: "★ ", label: "Star Rating" },
+              ].map((s, i) => (
+                <div key={s.label} className="flex items-center gap-8">
+                  {i > 0 && <div className="w-px h-8" style={{ background: "hsl(220,38%,18%)" }} />}
+                  <StatItem {...s} />
+                </div>
+              ))}
             </motion.div>
           </motion.div>
 
-          {/* ── RIGHT: book ── */}
-          <motion.div style={{ y: bookY }}>
+          {/* ── RIGHT: book showcase panel ── */}
+          <motion.div
+            style={{ y: bookY }}
+            className="hidden lg:flex flex-col items-center justify-center relative"
+          >
+            {/* Panel bg — slightly different shade for depth */}
+            <div className="absolute inset-0" style={{ background: "hsl(220,55%,6%)" }} />
+            {/* Vertical gold line on left edge of panel */}
+            <div className="absolute left-0 top-[15%] bottom-[15%] w-px"
+              style={{ background: "linear-gradient(180deg, transparent, hsl(42,78%,48%,0.25) 30%, hsl(42,78%,48%,0.25) 70%, transparent)" }} />
+
+            {/* Large radial glow behind book */}
+            <div className="absolute inset-0 pointer-events-none flex items-center justify-center">
+              <div style={{
+                width: "500px", height: "500px",
+                background: "radial-gradient(ellipse, hsl(42,78%,52%,0.07) 0%, hsl(220,60%,28%,0.12) 40%, transparent 70%)",
+                filter: "blur(12px)",
+              }} />
+            </div>
+
+            {/* Book — large */}
             <motion.div
-              initial={{ opacity: 0, x: 40 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.3, duration: 0.9, ease: EASE }}
-              className="flex justify-center items-center"
+              initial={{ opacity: 0, y: 30, scale: 0.94 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              transition={{ delay: 0.25, duration: 1.0, ease: EASE }}
+              className="relative z-10 mb-10"
             >
-              <BookCover />
+              <BookCover bookWidth="clamp(220px,20vw,280px)" />
+            </motion.div>
+
+            {/* Edition price cards */}
+            <motion.div
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.6, duration: 0.7, ease: EASE }}
+              className="relative z-10 flex gap-3 w-full max-w-[320px] px-6"
+            >
+              {[
+                { label: "Paperback", price: "K400", type: "paperback" as const },
+                { label: "Hardcover", price: "K500", type: "hardcover" as const },
+              ].map(({ label, price, type }) => (
+                <Link href="/shop" key={type} className="flex-1">
+                  <motion.div
+                    whileHover={{ y: -2, borderColor: "hsl(42,78%,46%,0.5)" }}
+                    onClick={() => setProductType(type)}
+                    className="flex flex-col items-center gap-1 py-3 px-2 rounded cursor-pointer transition-colors"
+                    style={{ background: "hsl(220,52%,10%)", border: "1px solid hsl(220,40%,18%)" }}
+                  >
+                    <span className="font-sans text-[0.6rem] tracking-[0.22em] uppercase font-medium" style={{ color: "hsl(220,18%,46%)" }}>
+                      {label}
+                    </span>
+                    <span className="font-display font-bold text-lg" style={{ color: "hsl(42,78%,56%)" }}>
+                      {price}
+                    </span>
+                  </motion.div>
+                </Link>
+              ))}
+            </motion.div>
+
+            {/* Stars */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.9, duration: 0.6 }}
+              className="relative z-10 flex items-center gap-2 mt-5"
+            >
+              <div className="flex gap-0.5">
+                {[1,2,3,4,5].map(i => (
+                  <Star key={i} className="h-3 w-3 fill-current" style={{ color: "hsl(42,78%,52%)" }} />
+                ))}
+              </div>
+              <span className="font-sans text-[0.65rem] tracking-wide" style={{ color: "hsl(220,18%,42%)" }}>
+                5.0 · Nationwide delivery
+              </span>
             </motion.div>
           </motion.div>
         </div>
 
         {/* Scroll cue */}
         <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 2.2 }}
-          className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2"
+          initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 2.5 }}
+          className="absolute bottom-7 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2"
         >
-          <span
-            className="font-sans tracking-[0.3em] uppercase"
-            style={{ fontSize: "0.58rem", color: "hsl(220,18%,38%)" }}
-          >
-            Scroll
-          </span>
-          <motion.div
-            animate={{ y: [0, 6, 0] }}
-            transition={{ repeat: Infinity, duration: 1.6, ease: "easeInOut" }}
-          >
-            <ChevronDown
-              className="h-4 w-4"
-              style={{ color: "hsl(42,78%,46%,0.5)" }}
-            />
+          <motion.div animate={{ y: [0, 5, 0] }} transition={{ repeat: Infinity, duration: 1.8, ease: "easeInOut" }}>
+            <ChevronDown className="h-4 w-4" style={{ color: "hsl(42,78%,46%,0.4)" }} />
           </motion.div>
         </motion.div>
       </section>
