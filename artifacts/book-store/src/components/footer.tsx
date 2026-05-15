@@ -2,36 +2,63 @@ import { Link } from "wouter";
 
 export function Footer() {
   return (
-    <footer className="border-t bg-card py-12 md:py-16">
-      <div className="container mx-auto grid gap-8 md:grid-cols-4">
-        <div className="md:col-span-2">
-          <h3 className="font-serif text-2xl font-bold">The Luminous Path</h3>
-          <p className="mt-4 text-sm text-muted-foreground max-w-sm">
-            A journey into purpose, leadership, and the enduring human spirit by Dr. Amara Zulu. 
-            Available in Paperback and Hardcover across Zambia.
-          </p>
+    <footer className="border-t border-white/8 bg-[hsl(220,52%,5%)] py-16">
+      <div className="container mx-auto px-6">
+        <div className="grid gap-12 md:grid-cols-4 mb-12">
+          <div className="md:col-span-2">
+            <div className="flex items-center gap-3 mb-5">
+              <div className="w-8 h-8 rounded-sm bg-primary/10 border border-primary/30 flex items-center justify-center">
+                <span className="text-primary font-display text-sm font-bold">L</span>
+              </div>
+              <h3 className="font-display text-sm font-bold tracking-[0.15em] uppercase text-foreground/90">
+                The Luminous Path
+              </h3>
+            </div>
+            <p className="text-sm text-muted-foreground leading-relaxed max-w-xs">
+              A journey into purpose, leadership, and the enduring human spirit by Dr. Amara Zulu.
+              Available in Paperback and Hardcover across Zambia.
+            </p>
+            <div className="mt-6 gold-line w-24" />
+            <p className="mt-4 text-xs text-muted-foreground/60 font-sans">
+              To order by phone: <a href="tel:0962219419" className="text-primary hover:underline">0962 219 419</a>
+            </p>
+          </div>
+          <div>
+            <h4 className="font-display text-xs font-bold tracking-[0.2em] uppercase text-primary mb-5">Explore</h4>
+            <ul className="space-y-3 text-sm text-muted-foreground">
+              {[
+                ["/shop", "Shop"],
+                ["/about-book", "About the Book"],
+                ["/about-author", "About Dr. Zulu"],
+                ["/reviews", "Reader Reviews"],
+              ].map(([href, label]) => (
+                <li key={href}>
+                  <Link href={href} className="hover:text-primary transition-colors tracking-wide">{label}</Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+          <div>
+            <h4 className="font-display text-xs font-bold tracking-[0.2em] uppercase text-primary mb-5">Support</h4>
+            <ul className="space-y-3 text-sm text-muted-foreground">
+              {[
+                ["/faq", "FAQ"],
+                ["/contact", "Contact Us"],
+                ["/terms", "Terms & Privacy"],
+                ["/admin/login", "Admin"],
+              ].map(([href, label]) => (
+                <li key={href}>
+                  <Link href={href} className="hover:text-primary transition-colors tracking-wide">{label}</Link>
+                </li>
+              ))}
+            </ul>
+          </div>
         </div>
-        <div>
-          <h4 className="font-semibold mb-4">Explore</h4>
-          <ul className="space-y-2 text-sm text-muted-foreground">
-            <li><Link href="/shop" className="hover:text-primary">Shop</Link></li>
-            <li><Link href="/about-book" className="hover:text-primary">About the Book</Link></li>
-            <li><Link href="/about-author" className="hover:text-primary">About Dr. Zulu</Link></li>
-            <li><Link href="/reviews" className="hover:text-primary">Reviews</Link></li>
-          </ul>
+        <div className="gold-line mb-6" />
+        <div className="flex flex-col md:flex-row items-center justify-between gap-3 text-xs text-muted-foreground/50 font-sans">
+          <p>&copy; {new Date().getFullYear()} Dr. Amara Zulu. All rights reserved.</p>
+          <p>Published in Zambia · Delivered Nationwide</p>
         </div>
-        <div>
-          <h4 className="font-semibold mb-4">Support</h4>
-          <ul className="space-y-2 text-sm text-muted-foreground">
-            <li><Link href="/faq" className="hover:text-primary">FAQ</Link></li>
-            <li><Link href="/contact" className="hover:text-primary">Contact Us</Link></li>
-            <li><Link href="/terms" className="hover:text-primary">Terms & Privacy</Link></li>
-            <li><Link href="/admin/login" className="hover:text-primary">Admin</Link></li>
-          </ul>
-        </div>
-      </div>
-      <div className="container mx-auto mt-12 border-t pt-8 text-center text-xs text-muted-foreground">
-        <p>&copy; {new Date().getFullYear()} Dr. Amara Zulu. All rights reserved.</p>
       </div>
     </footer>
   );
