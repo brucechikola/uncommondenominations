@@ -52,15 +52,36 @@ export function Navbar() {
       >
         <div className="container mx-auto flex h-14 items-center justify-between px-6">
           {/* Logo */}
-          <Link href="/" className="flex items-center gap-2.5 group">
-            <div className="w-7 h-7 rounded-lg flex items-center justify-center"
-              style={{ background: "rgba(141,107,61,0.12)", border: "1px solid rgba(141,107,61,0.35)" }}>
-              <span className="font-display text-xs font-bold text-primary">U</span>
+          <Link href="/" className="flex items-center gap-3 group">
+            {/* Book + fraction mark SVG */}
+            <svg width="34" height="34" viewBox="0 0 34 34" fill="none" xmlns="http://www.w3.org/2000/svg">
+              {/* Outer rounded square backdrop */}
+              <rect width="34" height="34" rx="7" fill="rgba(141,107,61,0.13)" stroke="rgba(141,107,61,0.38)" strokeWidth="1"/>
+              {/* Open book — left page */}
+              <path d="M7 10.5 C7 10 7.5 9.5 8 9.5 L16 9.5 L16 23 L8 23 C7.5 23 7 22.5 7 22 Z"
+                fill="none" stroke="#8d6b3d" strokeWidth="1.4" strokeLinejoin="round"/>
+              {/* Open book — right page */}
+              <path d="M27 10.5 C27 10 26.5 9.5 26 9.5 L18 9.5 L18 23 L26 23 C26.5 23 27 22.5 27 22 Z"
+                fill="none" stroke="#8d6b3d" strokeWidth="1.4" strokeLinejoin="round"/>
+              {/* Spine */}
+              <line x1="17" y1="9.5" x2="17" y2="23" stroke="#8d6b3d" strokeWidth="1.4"/>
+              {/* Fraction bar underneath — the "denominator" */}
+              <line x1="10" y1="26.5" x2="24" y2="26.5" stroke="#8d6b3d" strokeWidth="1.5" strokeLinecap="round"/>
+              {/* Dot above (numerator) */}
+              <circle cx="17" cy="24.5" r="1.1" fill="#8d6b3d"/>
+              {/* Dot below (denominator) */}
+              <circle cx="17" cy="28.5" r="1.1" fill="#8d6b3d"/>
+            </svg>
+            <div className="flex flex-col leading-tight">
+              <span className="font-display text-[0.78rem] font-bold tracking-wide uppercase transition-colors group-hover:text-primary"
+                style={{ color: muteColor }}>
+                Uncommon
+              </span>
+              <span className="font-display text-[0.78rem] font-bold tracking-wide uppercase transition-colors group-hover:text-primary"
+                style={{ color: muteColor, opacity: 0.75 }}>
+                Denominators
+              </span>
             </div>
-            <span className="font-sans text-xs font-bold uppercase transition-colors group-hover:text-primary"
-              style={{ color: muteColor }}>
-              Uncommon Denominators
-            </span>
           </Link>
 
           {/* Desktop nav */}
