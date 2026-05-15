@@ -142,3 +142,46 @@
 .section-dark-to-light {
   background: linear-gradient(180deg, hsl(220,52%,9%) 0%, hsl(220,52%,9%) 85%, hsl(40,28%,96%) 100%);
 }
+
+/* ── Print receipt ─────────────────────────────────────────────── */
+@media print {
+  * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+
+  /* Hide everything by default */
+  body > * { display: none !important; }
+  #root     { display: block !important; }
+
+  /* Hide all page chrome except the receipt wrapper */
+  #root > * { display: none !important; }
+  #print-root { display: block !important; }
+
+  /* Hide everything inside the page except #print-receipt */
+  .no-print { display: none !important; }
+  #print-receipt { display: block !important; }
+
+  /* Receipt card print styles */
+  #print-receipt {
+    position: fixed !important;
+    inset: 0 !important;
+    margin: 0 !important;
+    padding: 2.5rem 3rem !important;
+    background: #fff !important;
+    color: #111 !important;
+    font-family: Georgia, serif !important;
+    border: none !important;
+    box-shadow: none !important;
+  }
+
+  #print-receipt .pr-header   { border-bottom: 2px solid #c8a84b; padding-bottom: 1rem; margin-bottom: 1.5rem; }
+  #print-receipt .pr-logo     { font-size: 1.1rem; font-weight: 700; letter-spacing: 0.06em; color: #0d1a38; }
+  #print-receipt .pr-subtitle { font-size: 0.7rem; letter-spacing: 0.24em; text-transform: uppercase; color: #888; margin-top: 0.2rem; }
+  #print-receipt .pr-title    { font-size: 1.5rem; font-weight: 700; color: #0d1a38; margin-bottom: 0.25rem; }
+  #print-receipt .pr-row      { display: flex; justify-content: space-between; padding: 0.55rem 0; border-bottom: 1px solid #e8e2d8; font-size: 0.875rem; }
+  #print-receipt .pr-row-label { color: #666; }
+  #print-receipt .pr-row-value { font-weight: 600; color: #111; }
+  #print-receipt .pr-total    { display: flex; justify-content: space-between; padding: 1rem 0 0; font-size: 1.1rem; font-weight: 700; color: #0d1a38; }
+  #print-receipt .pr-total-amount { color: #b8860b; }
+  #print-receipt .pr-footer   { margin-top: 2.5rem; padding-top: 1rem; border-top: 1px solid #e8e2d8; font-size: 0.75rem; color: #999; text-align: center; }
+  #print-receipt .pr-status   { display: inline-block; padding: 0.2rem 0.7rem; border-radius: 2px; font-size: 0.68rem; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; }
+  #print-receipt .pr-status-paid { background: #e6f4ec; color: #1a7a46; border: 1px solid #a8d8bc; }
+}
