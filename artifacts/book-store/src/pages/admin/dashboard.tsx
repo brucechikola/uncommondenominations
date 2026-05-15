@@ -72,6 +72,7 @@ const PAYMENT_METHOD_META: Record<string, { label: string; color: string; abbr: 
 };
 
 const ORDER_STATUSES = ["pending", "confirmed", "awaiting_delivery", "shipped", "delivered", "cancelled"] as const;
+const formatStatus = (s: string) => s.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase());
 type Tab = "overview" | "orders" | "reviews" | "contacts" | "payments" | "settings";
 const PAGE_SIZE = 15;
 
@@ -257,7 +258,7 @@ function OrderPanel({
                 status === s
                   ? STATUS_COLORS[s]
                   : "bg-white/5 text-slate-400 border-white/10 hover:border-white/20")}>
-              {s}
+              {formatStatus(s)}
             </button>
           ))}
         </div>
@@ -266,7 +267,7 @@ function OrderPanel({
             status !== order.status
               ? cn(D.accentBg, "text-white hover:opacity-90")
               : "bg-white/5 text-slate-500 cursor-not-allowed")}>
-          {saving ? "Saving…" : status === order.status ? "No changes" : `Save — Mark as ${status}`}
+          {saving ? "Saving…" : status === order.status ? "No changes" : `Save — Mark as ${formatStatus(status)}`}
         </button>
       </div>
     </SlidePanel>
@@ -639,7 +640,7 @@ export default function AdminDashboard() {
                       <td className={cn("px-4 py-3 font-semibold", D.accent)}>K{order.totalAmount}</td>
                       <td className={cn("px-4 py-3", D.muted)}>{order.city}</td>
                       <td className="px-4 py-3">
-                        <span className={cn("px-2 py-0.5 rounded-full text-xs font-medium capitalize", STATUS_COLORS[order.status] ?? "bg-white/10 text-slate-400")}>{order.status}</span>
+                        <span className={cn("px-2 py-0.5 rounded-full text-xs font-medium", STATUS_COLORS[order.status] ?? "bg-white/10 text-slate-400")}>{formatStatus(order.status)}</span>
                       </td>
                       <td className={cn("px-4 py-3 text-xs whitespace-nowrap", D.muted)}>{new Date(order.createdAt).toLocaleDateString()}</td>
                       <td className="px-4 py-3"><ChevronRight className={cn("h-4 w-4", D.muted)} /></td>
@@ -682,7 +683,7 @@ export default function AdminDashboard() {
                 onChange={(e) => setOrdersStatus(e.target.value)}
                 className={cn("px-3 py-2 text-sm rounded-lg border bg-[#131e2e] outline-none", D.border, D.sub)}>
                 <option value="">All statuses</option>
-                {ORDER_STATUSES.map((s) => <option key={s} value={s} className="capitalize">{s.charAt(0).toUpperCase() + s.slice(1)}</option>)}
+                {ORDER_STATUSES.map((s) => <option key={s} value={s}>{formatStatus(s)}</option>)}
               </select>
             </div>
 
@@ -707,7 +708,7 @@ export default function AdminDashboard() {
                       <td className={cn("px-4 py-3 font-semibold", D.accent)}>K{order.totalAmount}</td>
                       <td className={cn("px-4 py-3", D.muted)}>{order.city}</td>
                       <td className="px-4 py-3">
-                        <span className={cn("px-2 py-0.5 rounded-full text-xs font-medium capitalize", STATUS_COLORS[order.status] ?? "bg-white/10 text-slate-400")}>{order.status}</span>
+                        <span className={cn("px-2 py-0.5 rounded-full text-xs font-medium", STATUS_COLORS[order.status] ?? "bg-white/10 text-slate-400")}>{formatStatus(order.status)}</span>
                       </td>
                       <td className={cn("px-4 py-3 text-xs whitespace-nowrap", D.muted)}>{new Date(order.createdAt).toLocaleDateString()}</td>
                       <td className="px-4 py-3"><ChevronRight className={cn("h-4 w-4", D.muted)} /></td>
@@ -883,8 +884,8 @@ export default function AdminDashboard() {
                         <td className={cn("px-4 py-3 font-semibold", D.accent)}>K{p.amount}</td>
                         <td className={cn("px-4 py-3 font-mono text-xs", D.muted)}>{p.reference}</td>
                         <td className="px-4 py-3">
-                          <span className={cn("px-2 py-0.5 rounded-full text-xs font-medium capitalize", STATUS_COLORS[p.status] ?? "bg-white/10 text-slate-400")}>
-                            {p.status}
+                          <span className={cn("px-2 py-0.5 rounded-full text-xs font-medium", STATUS_COLORS[p.status] ?? "bg-white/10 text-slate-400")}>
+                            {formatStatus(p.status)}
                           </span>
                         </td>
                         <td className={cn("px-4 py-3 text-xs whitespace-nowrap", D.muted)}>{new Date(p.createdAt).toLocaleDateString()}</td>
