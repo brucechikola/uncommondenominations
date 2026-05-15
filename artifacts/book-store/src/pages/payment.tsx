@@ -166,8 +166,10 @@ export default function Payment() {
     <div style={{ minHeight: "100svh", background: PAGE_BG, position: "relative" }}
       className="pt-[4.5rem] pb-24">
 
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[900px] h-[420px] pointer-events-none"
-        style={{ background: "radial-gradient(ellipse, hsl(222,65%,13%,0.7) 0%, transparent 65%)", zIndex: 0 }} />
+      <div className="absolute inset-x-0 top-0 h-[420px] overflow-hidden pointer-events-none" style={{ zIndex: 0 }}>
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[900px] h-[420px]"
+          style={{ background: "radial-gradient(ellipse, hsl(222,65%,13%,0.7) 0%, transparent 65%)" }} />
+      </div>
 
       <div className="relative z-10 container mx-auto px-6 pt-14 max-w-5xl">
         <motion.div initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }}>
