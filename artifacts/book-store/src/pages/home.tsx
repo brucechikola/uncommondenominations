@@ -9,6 +9,7 @@ import {
   useTransform,
   useInView,
   useMotionValue,
+  useSpring,
   animate,
   type Variants,
 } from "framer-motion";
@@ -172,6 +173,38 @@ function BookCover({ bookWidth = "clamp(220px,24vw,320px)" }: { bookWidth?: stri
   );
 }
 
+/* ─────────────────────── particles ────────────────────────────── */
+const PARTICLES = [
+  { id:0,  x:"6%",  y:"18%", s:2.4, dur:9,  del:0   },
+  { id:1,  x:"13%", y:"8%",  s:1.6, dur:11, del:1.8 },
+  { id:2,  x:"19%", y:"28%", s:2.8, dur:8,  del:0.6 },
+  { id:3,  x:"27%", y:"12%", s:1.4, dur:13, del:3.1 },
+  { id:4,  x:"34%", y:"6%",  s:2.0, dur:10, del:1.2 },
+  { id:5,  x:"41%", y:"22%", s:1.8, dur:7,  del:2.4 },
+  { id:6,  x:"48%", y:"10%", s:2.2, dur:12, del:0.3 },
+  { id:7,  x:"55%", y:"16%", s:1.5, dur:9,  del:4.0 },
+  { id:8,  x:"62%", y:"25%", s:2.6, dur:11, del:1.5 },
+  { id:9,  x:"69%", y:"8%",  s:1.9, dur:8,  del:2.8 },
+  { id:10, x:"76%", y:"19%", s:2.1, dur:14, del:0.9 },
+  { id:11, x:"83%", y:"11%", s:1.7, dur:10, del:3.5 },
+  { id:12, x:"90%", y:"24%", s:2.3, dur:7,  del:1.1 },
+  { id:13, x:"9%",  y:"35%", s:1.5, dur:12, del:5.2 },
+  { id:14, x:"23%", y:"42%", s:2.0, dur:9,  del:0.4 },
+  { id:15, x:"37%", y:"38%", s:1.3, dur:11, del:2.7 },
+  { id:16, x:"52%", y:"45%", s:2.5, dur:8,  del:4.6 },
+  { id:17, x:"68%", y:"33%", s:1.8, dur:13, del:1.9 },
+  { id:18, x:"79%", y:"41%", s:2.2, dur:10, del:3.3 },
+  { id:19, x:"88%", y:"36%", s:1.6, dur:7,  del:0.7 },
+  { id:20, x:"16%", y:"55%", s:2.0, dur:9,  del:6.1 },
+  { id:21, x:"44%", y:"58%", s:1.4, dur:12, del:2.2 },
+];
+
+/* slide-up from clip (used for individual title words) */
+const slideUp: Variants = {
+  hidden:  { y: "105%", opacity: 0 },
+  visible: { y: "0%",   opacity: 1, transition: { duration: 0.75, ease: [0.22, 1, 0.36, 1] } },
+};
+
 /* ─────────────────────── stat item ────────────────────────────── */
 function StatItem({
   to,
@@ -229,6 +262,24 @@ export default function Home() {
   const bookY  = useTransform(scrollYProgress, [0, 1], ["0%",   "7%"]);
   const fadeOp = useTransform(scrollYProgress, [0.5, 0.9], [1, 0]);
 
+  /* Book mouse-parallax */
+  const panelRef   = useRef<HTMLDivElement>(null);
+  const bookRotX   = useMotionValue(1.5);
+  const bookRotY   = useMotionValue(-10);
+  const springRotX = useSpring(bookRotX, { stiffness: 50, damping: 18 });
+  const springRotY = useSpring(bookRotY, { stiffness: 50, damping: 18 });
+
+  function handleBookMouseMove(e: React.MouseEvent<HTMLDivElement>) {
+    const el = panelRef.current;
+    if (!el) return;
+    const { left, top, width, height } = el.getBoundingClientRect();
+    const cx = ((e.clientX - left) / width  - 0.5) * 2;
+    const cy = ((e.clientY - top)  / height - 0.5) * 2;
+    bookRotY.set(-10 + cx * 8);
+    bookRotX.set(1.5 + cy * -5);
+  }
+  function handleBookMouseLeave() { bookRotY.set(-10); bookRotX.set(1.5); }
+
   const reasons = [
     {
       title: "African Wisdom",
@@ -251,122 +302,168 @@ export default function Home() {
   return (
     <div className="overflow-x-hidden">
       {/* ══════════════════════════════════════ HERO ══ */}
-      <section
-        ref={heroRef}
-        className="relative overflow-hidden"
-        style={{ minHeight: "100svh", background: "hsl(220,55%,7%)" }}
-      >
-        {/* ── Background atmosphere ── */}
-        <motion.div style={{ y: bgY }} className="absolute inset-0 pointer-events-none">
-          {/* Deep blue bloom — top centre */}
-          <div className="absolute -top-40 left-1/2 -translate-x-1/2 w-[900px] h-[700px] rounded-full"
-            style={{ background: "radial-gradient(ellipse, hsl(220,62%,22%,0.7) 0%, transparent 68%)" }} />
-          {/* Gold warmth — right-centre */}
-          <div className="absolute top-[30%] right-[-5%] w-[600px] h-[600px] rounded-full"
-            style={{ background: "radial-gradient(ellipse, hsl(42,78%,50%,0.06) 0%, transparent 70%)" }} />
-          {/* Bottom shadow pool */}
-          <div className="absolute bottom-0 inset-x-0 h-64"
-            style={{ background: "linear-gradient(0deg, hsl(220,55%,5%) 0%, transparent 100%)" }} />
-        </motion.div>
+      <section ref={heroRef} className="relative overflow-hidden"
+        style={{ minHeight: "100svh", background: "hsl(222,58%,6%)" }}>
 
-        {/* ── Main layout: text left / book right ── */}
-        <div
-          className="relative z-10 grid lg:grid-cols-[1fr_480px] min-h-svh"
-          style={{ paddingTop: "4.5rem" }}
-        >
+        {/* ── BACKGROUND LAYERS ── */}
+        <div className="absolute inset-0 pointer-events-none select-none overflow-hidden">
 
-          {/* ── LEFT: editorial text panel ── */}
-          <motion.div
-            style={{ y: textY, opacity: fadeOp }}
-            initial="hidden"
-            animate="visible"
-            variants={stagger}
-            className="flex flex-col justify-center px-8 lg:px-16 xl:px-24 py-16 lg:py-20"
-          >
-            {/* Eyebrow */}
-            <motion.div variants={fadeUp} className="mb-10">
-              <span className="inline-flex items-center gap-2.5 font-sans text-[0.6rem] font-semibold tracking-[0.32em] uppercase"
-                style={{ color: "hsl(42,78%,58%)" }}>
-                <motion.span className="w-1.5 h-1.5 rounded-full block" style={{ background: "hsl(42,80%,58%)" }}
-                  animate={{ opacity: [1, 0.25, 1] }} transition={{ duration: 2.4, repeat: Infinity }} />
-                Now Available in Zambia
-              </span>
+          {/* Film grain via inline SVG noise filter */}
+          <svg className="absolute inset-0 w-full h-full" style={{ opacity: 0.038 }} xmlns="http://www.w3.org/2000/svg">
+            <filter id="hero-noise">
+              <feTurbulence type="fractalNoise" baseFrequency="0.72" numOctaves="4" stitchTiles="stitch" />
+              <feColorMatrix type="saturate" values="0" />
+            </filter>
+            <rect width="100%" height="100%" filter="url(#hero-noise)" />
+          </svg>
+
+          {/* Giant "LUMINOUS" watermark in outlined type */}
+          <div className="absolute inset-0 flex items-center overflow-hidden">
+            <span style={{
+              fontFamily: "var(--app-font-display)", fontWeight: 900,
+              fontSize: "21vw", lineHeight: 1,
+              color: "transparent",
+              WebkitTextStroke: "1px hsl(42,80%,52%,0.052)",
+              letterSpacing: "0.07em", whiteSpace: "nowrap", userSelect: "none",
+              transform: "translateX(-1vw) translateY(8%)",
+            }}>LUMINOUS</span>
+          </div>
+
+          {/* Atmospheric light blooms (parallax) */}
+          <motion.div style={{ y: bgY }} className="absolute inset-0">
+            <div className="absolute -top-28 left-1/2 -translate-x-1/2 rounded-full"
+              style={{ width: "1100px", height: "750px",
+                background: "radial-gradient(ellipse, hsl(222,65%,18%,0.8) 0%, transparent 65%)" }} />
+            <div className="absolute top-[18%] right-0 rounded-full"
+              style={{ width: "520px", height: "620px",
+                background: "radial-gradient(ellipse 70% 80% at 80% 50%, hsl(42,78%,50%,0.07) 0%, transparent 68%)" }} />
+            <div className="absolute bottom-0 inset-x-0 h-56"
+              style={{ background: "linear-gradient(0deg, hsl(222,58%,5%) 0%, transparent 100%)" }} />
+          </motion.div>
+
+          {/* Floating gold particles */}
+          {PARTICLES.map(p => (
+            <motion.span key={p.id} className="absolute rounded-full"
+              style={{ left: p.x, top: p.y, width: p.s, height: p.s, background: "hsl(44,84%,64%)" }}
+              animate={{ y: [0, -65, 0], opacity: [0, 0.55, 0] }}
+              transition={{ duration: p.dur, delay: p.del, repeat: Infinity, ease: "easeInOut" }} />
+          ))}
+        </div>
+
+        {/* ── MAIN GRID: text | book ── */}
+        <div className="relative z-10 grid lg:grid-cols-[1fr_460px]"
+          style={{ minHeight: "100svh", paddingTop: "4.5rem" }}>
+
+          {/* ──────────── LEFT: editorial text ──────────── */}
+          <motion.div style={{ y: textY, opacity: fadeOp }}
+            initial="hidden" animate="visible" variants={stagger}
+            className="flex flex-col justify-center px-8 lg:px-16 xl:px-24 py-16">
+
+            {/* Eyebrow row — stars inline */}
+            <motion.div variants={fadeUp} className="flex items-center gap-3 mb-10 flex-wrap">
+              <div className="flex items-center gap-2">
+                <motion.span className="w-1.5 h-1.5 rounded-full block flex-shrink-0"
+                  style={{ background: "hsl(42,80%,58%)" }}
+                  animate={{ opacity: [1, 0.18, 1] }} transition={{ duration: 2.2, repeat: Infinity }} />
+                <span className="font-sans text-[0.57rem] font-semibold tracking-[0.36em] uppercase"
+                  style={{ color: "hsl(42,78%,60%)" }}>Bestselling · Zambia 2024</span>
+              </div>
+              <div className="w-px h-3 flex-shrink-0" style={{ background: "hsl(220,38%,22%)" }} />
+              <div className="flex items-center gap-1.5">
+                <div className="flex gap-0.5">
+                  {[1,2,3,4,5].map(i => <Star key={i} className="h-2.5 w-2.5 fill-current" style={{ color: "hsl(42,78%,54%)" }} />)}
+                </div>
+                <span className="font-sans text-[0.57rem] font-medium" style={{ color: "hsl(220,14%,48%)" }}>5.0</span>
+              </div>
             </motion.div>
 
-            {/* Title — stacked editorial treatment */}
-            <motion.div variants={fadeUp} className="mb-3">
-              <p className="font-display font-normal italic leading-none mb-1"
-                style={{ fontSize: "clamp(1.1rem,2.2vw,1.5rem)", color: "hsl(40,22%,75%,0.55)", letterSpacing: "0.01em" }}>
+            {/* "The" — italic prefix */}
+            <motion.div variants={fadeUp} className="mb-1">
+              <p className="font-display italic font-normal leading-none"
+                style={{ fontSize: "clamp(1rem,2vw,1.4rem)", color: "hsl(40,22%,72%,0.42)", letterSpacing: "0.02em" }}>
                 The
               </p>
             </motion.div>
-            <motion.div variants={fadeUp} className="mb-8">
-              <h1 className="font-display font-bold leading-[0.95]" style={{ letterSpacing: "-0.01em" }}>
-                <span className="block" style={{ fontSize: "clamp(3.2rem,6.5vw,5.2rem)", color: "hsl(40,24%,94%)" }}>
-                  Luminous
-                </span>
-                <span className="block gold-shimmer" style={{ fontSize: "clamp(3.2rem,6.5vw,5.2rem)", WebkitTextFillColor: "transparent" }}>
-                  Path
-                </span>
+
+            {/* Main title — per-word clip-path slide-up */}
+            <motion.div variants={stagger} className="mb-9">
+              <h1 className="font-display font-bold leading-[0.92]" style={{ letterSpacing: "-0.015em" }}>
+                <div style={{ overflow: "hidden" }}>
+                  <motion.span className="block" variants={slideUp}
+                    style={{
+                      fontSize: "clamp(3.8rem,7.5vw,6.2rem)",
+                      color: "hsl(40,24%,96%)",
+                      textShadow: "0 0 90px hsl(222,72%,44%,0.4), 0 0 180px hsl(222,65%,36%,0.2)",
+                    }}>Luminous</motion.span>
+                </div>
+                <div style={{ overflow: "hidden" }}>
+                  <motion.span className="block" variants={slideUp}
+                    style={{
+                      fontSize: "clamp(3.8rem,7.5vw,6.2rem)",
+                      background: "linear-gradient(118deg, hsl(44,92%,72%) 0%, hsl(42,78%,50%) 38%, hsl(44,90%,66%) 68%, hsl(42,76%,48%) 100%)",
+                      WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text",
+                    }}>Path</motion.span>
+                </div>
               </h1>
             </motion.div>
 
-            {/* Ornament divider */}
-            <motion.div variants={fadeUp} className="flex items-center gap-3 mb-8">
-              <div className="flex-1 max-w-[80px] h-px" style={{ background: "hsl(42,78%,48%,0.4)" }} />
-              <span className="font-sans text-[0.58rem] tracking-[0.4em] uppercase font-medium" style={{ color: "hsl(42,78%,52%,0.7)" }}>
-                A Guide to Purposeful Living
-              </span>
+            {/* Ornament rule */}
+            <motion.div variants={fadeUp} className="flex items-center gap-4 mb-6">
+              <div className="h-px w-10 flex-shrink-0" style={{ background: "hsl(42,78%,50%,0.55)" }} />
+              <span className="font-sans text-[0.56rem] tracking-[0.4em] uppercase font-semibold flex-shrink-0"
+                style={{ color: "hsl(42,78%,54%,0.6)" }}>A Guide to Purposeful Living</span>
+              <div className="h-px flex-1" style={{ background: "hsl(42,78%,48%,0.1)" }} />
             </motion.div>
 
             {/* Author */}
-            <motion.p variants={fadeUp} className="font-serif italic mb-6"
-              style={{ fontSize: "clamp(1rem,1.6vw,1.2rem)", color: "hsl(40,20%,62%)" }}>
+            <motion.p variants={fadeUp} className="font-serif italic mb-5"
+              style={{ fontSize: "clamp(1rem,1.5vw,1.14rem)", color: "hsl(40,20%,58%)" }}>
               by Dr. Amara Zulu
             </motion.p>
 
             {/* Description */}
-            <motion.p variants={fadeUp} className="font-serif leading-[1.75] mb-8 max-w-[480px]"
-              style={{ fontSize: "clamp(0.95rem,1.4vw,1.05rem)", color: "hsl(220,14%,56%)" }}>
-              A transformative guide to purposeful living — drawing on African wisdom, modern psychology,
-              and a life lived with extraordinary intention.
+            <motion.p variants={fadeUp} className="font-serif leading-[1.8] mb-8 max-w-[500px]"
+              style={{ fontSize: "clamp(0.9rem,1.3vw,1rem)", color: "hsl(220,14%,50%)" }}>
+              A transformative guide to purposeful living — drawing on African wisdom,
+              modern psychology, and a life lived with extraordinary intention.
             </motion.p>
 
-            {/* Pull quote */}
-            <motion.blockquote variants={fadeUp} className="flex gap-4 items-start mb-10">
-              <div className="w-[3px] flex-shrink-0 self-stretch rounded-full"
-                style={{ background: "linear-gradient(180deg, hsl(42,78%,52%) 0%, hsl(42,78%,52%,0.15) 100%)" }} />
-              <div>
-                <p className="font-serif italic leading-snug mb-1"
-                  style={{ fontSize: "clamp(0.95rem,1.35vw,1.05rem)", color: "hsl(40,18%,56%)" }}>
-                  "The book Zambia has been waiting for."
-                </p>
-                <footer className="font-sans text-[0.72rem] tracking-wide" style={{ color: "hsl(220,18%,40%)" }}>
-                  — Chanda Mwale, Lusaka
-                </footer>
+            {/* Pull quote — with oversized decorative mark */}
+            <motion.div variants={fadeUp} className="relative mb-10 pl-3">
+              <span className="absolute font-display italic font-bold"
+                style={{ top: "-0.5em", left: "-0.1em", fontSize: "5.5rem", lineHeight: 1,
+                  color: "hsl(42,78%,50%,0.1)", userSelect: "none", pointerEvents: "none" }}>"</span>
+              <p className="font-serif italic leading-snug relative z-10"
+                style={{ fontSize: "clamp(0.96rem,1.38vw,1.06rem)", color: "hsl(40,18%,56%)" }}>
+                "The book Zambia has been waiting for."
+              </p>
+              <div className="flex items-center gap-2 mt-2">
+                <div className="h-px w-5" style={{ background: "hsl(42,78%,48%,0.35)" }} />
+                <span className="font-sans text-[0.67rem] tracking-wide" style={{ color: "hsl(220,18%,36%)" }}>
+                  Chanda Mwale, Lusaka
+                </span>
               </div>
-            </motion.blockquote>
+            </motion.div>
 
             {/* CTA buttons */}
             <motion.div variants={fadeUp} className="flex flex-col sm:flex-row gap-3 mb-12">
               <Link href="/shop">
-                <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.97 }}>
+                <motion.div whileHover={{ scale: 1.03, y: -1 }} whileTap={{ scale: 0.97 }}>
                   <Button size="lg" onClick={() => setProductType("paperback")}
-                    className="font-sans tracking-[0.12em] uppercase border-0 w-full sm:w-auto"
-                    style={{ fontSize: "0.7rem", height: "3rem", padding: "0 2rem",
-                      background: "hsl(42,78%,46%)", color: "hsl(220,52%,8%)",
-                      boxShadow: "0 6px 28px hsl(42,78%,46%,0.28)" }}>
+                    className="font-sans tracking-[0.13em] uppercase border-0 w-full sm:w-auto"
+                    style={{ fontSize: "0.69rem", height: "3rem", padding: "0 2.2rem",
+                      background: "hsl(42,78%,46%)", color: "hsl(222,58%,7%)",
+                      boxShadow: "0 4px 28px hsl(42,78%,46%,0.32), inset 0 1px 0 hsl(44,90%,68%,0.28)" }}>
                     Buy Paperback — K400
                   </Button>
                 </motion.div>
               </Link>
               <Link href="/shop">
-                <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.97 }}>
+                <motion.div whileHover={{ scale: 1.03, y: -1 }} whileTap={{ scale: 0.97 }}>
                   <Button size="lg" variant="outline" onClick={() => setProductType("hardcover")}
-                    className="font-sans tracking-[0.12em] uppercase w-full sm:w-auto"
-                    style={{ fontSize: "0.7rem", height: "3rem", padding: "0 2rem",
-                      borderColor: "hsl(40,22%,88%,0.14)", color: "hsl(40,22%,68%)",
-                      background: "transparent" }}>
+                    className="font-sans tracking-[0.13em] uppercase w-full sm:w-auto"
+                    style={{ fontSize: "0.69rem", height: "3rem", padding: "0 2.2rem",
+                      borderColor: "hsl(40,22%,88%,0.11)", color: "hsl(40,22%,60%)", background: "transparent" }}>
                     Hardcover — K500
                   </Button>
                 </motion.div>
@@ -375,106 +472,106 @@ export default function Home() {
 
             {/* Stats */}
             <motion.div variants={fadeUp} className="flex flex-wrap items-center gap-x-8 gap-y-4 pt-7"
-              style={{ borderTop: "1px solid hsl(220,38%,17%)" }}>
+              style={{ borderTop: "1px solid hsl(220,38%,14%)" }}>
               {[
-                { to: 6, suffix: "+", label: "Cities Served" },
-                { to: 256, label: "Pages" },
-                { to: 5.0, decimals: 1, prefix: "★ ", label: "Star Rating" },
+                { to: 6,   suffix: "+",     label: "Cities Served" },
+                { to: 256,                  label: "Pages"         },
+                { to: 5.0, decimals: 1, prefix: "★ ", label: "Avg Rating" },
               ].map((s, i) => (
                 <div key={s.label} className="flex items-center gap-8">
-                  {i > 0 && <div className="w-px h-8" style={{ background: "hsl(220,38%,18%)" }} />}
+                  {i > 0 && <div className="w-px h-8" style={{ background: "hsl(220,38%,16%)" }} />}
                   <StatItem {...s} />
                 </div>
               ))}
             </motion.div>
           </motion.div>
 
-          {/* ── RIGHT: book showcase panel ── */}
-          <motion.div
-            style={{ y: bookY }}
-            className="hidden lg:flex flex-col items-center justify-center relative"
-          >
-            {/* Panel bg — slightly different shade for depth */}
-            <div className="absolute inset-0" style={{ background: "hsl(220,55%,6%)" }} />
-            {/* Vertical gold line on left edge of panel */}
-            <div className="absolute left-0 top-[15%] bottom-[15%] w-px"
-              style={{ background: "linear-gradient(180deg, transparent, hsl(42,78%,48%,0.25) 30%, hsl(42,78%,48%,0.25) 70%, transparent)" }} />
+          {/* ──────────── RIGHT: 3D book showcase ──────────── */}
+          <motion.div ref={panelRef} style={{ y: bookY }}
+            onMouseMove={handleBookMouseMove} onMouseLeave={handleBookMouseLeave}
+            className="hidden lg:flex flex-col items-center justify-center relative">
 
-            {/* Large radial glow behind book */}
+            {/* Panel bg */}
+            <div className="absolute inset-0" style={{ background: "hsl(222,58%,5%)" }} />
+
+            {/* Gold vertical separator */}
+            <div className="absolute left-0 top-[10%] bottom-[10%] w-px"
+              style={{ background: "linear-gradient(180deg, transparent, hsl(42,78%,48%,0.22) 22%, hsl(42,78%,48%,0.22) 78%, transparent)" }} />
+
+            {/* Spotlight cone behind book */}
             <div className="absolute inset-0 pointer-events-none flex items-center justify-center">
               <div style={{
-                width: "500px", height: "500px",
-                background: "radial-gradient(ellipse, hsl(42,78%,52%,0.07) 0%, hsl(220,60%,28%,0.12) 40%, transparent 70%)",
-                filter: "blur(12px)",
+                width: "380px", height: "500px",
+                background: "radial-gradient(ellipse 70% 80% at 50% 48%, hsl(42,78%,50%,0.09) 0%, hsl(222,68%,20%,0.12) 48%, transparent 72%)",
+                filter: "blur(18px)",
               }} />
             </div>
 
-            {/* Book — large */}
+            {/* 3D book — mouse spring parallax */}
             <motion.div
-              initial={{ opacity: 0, y: 30, scale: 0.94 }}
+              initial={{ opacity: 0, y: 44, scale: 0.9 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
-              transition={{ delay: 0.25, duration: 1.0, ease: EASE }}
+              transition={{ delay: 0.18, duration: 1.1, ease: EASE }}
               className="relative z-10 mb-10"
+              style={{ perspective: "1200px" }}
             >
-              <BookCover bookWidth="clamp(220px,20vw,280px)" />
+              <motion.div style={{ rotateY: springRotY, rotateX: springRotX, transformStyle: "preserve-3d" }}>
+                <BookCover bookWidth="clamp(215px,20vw,268px)" />
+              </motion.div>
             </motion.div>
 
-            {/* Edition price cards */}
+            {/* Glassmorphism edition price cards */}
             <motion.div
-              initial={{ opacity: 0, y: 16 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.6, duration: 0.7, ease: EASE }}
-              className="relative z-10 flex gap-3 w-full max-w-[320px] px-6"
+              initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.55, duration: 0.7, ease: EASE }}
+              className="relative z-10 flex gap-2.5 w-full max-w-[295px] px-8"
             >
               {[
                 { label: "Paperback", price: "K400", type: "paperback" as const },
                 { label: "Hardcover", price: "K500", type: "hardcover" as const },
               ].map(({ label, price, type }) => (
                 <Link href="/shop" key={type} className="flex-1">
-                  <motion.div
-                    whileHover={{ y: -2, borderColor: "hsl(42,78%,46%,0.5)" }}
-                    onClick={() => setProductType(type)}
-                    className="flex flex-col items-center gap-1 py-3 px-2 rounded cursor-pointer transition-colors"
-                    style={{ background: "hsl(220,52%,10%)", border: "1px solid hsl(220,40%,18%)" }}
-                  >
-                    <span className="font-sans text-[0.6rem] tracking-[0.22em] uppercase font-medium" style={{ color: "hsl(220,18%,46%)" }}>
-                      {label}
-                    </span>
-                    <span className="font-display font-bold text-lg" style={{ color: "hsl(42,78%,56%)" }}>
-                      {price}
-                    </span>
+                  <motion.div whileHover={{ y: -3 }} onClick={() => setProductType(type)}
+                    className="flex flex-col items-center gap-1 py-3.5 rounded cursor-pointer"
+                    style={{
+                      background: "hsl(222,55%,10%,0.75)",
+                      border: "1px solid hsl(220,36%,20%,0.7)",
+                      backdropFilter: "blur(14px)",
+                      WebkitBackdropFilter: "blur(14px)",
+                    }}>
+                    <span className="font-sans text-[0.54rem] tracking-[0.26em] uppercase font-medium"
+                      style={{ color: "hsl(220,18%,42%)" }}>{label}</span>
+                    <span className="font-display font-bold text-[1.12rem]"
+                      style={{ color: "hsl(42,78%,58%)" }}>{price}</span>
                   </motion.div>
                 </Link>
               ))}
             </motion.div>
 
-            {/* Stars */}
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.9, duration: 0.6 }}
-              className="relative z-10 flex items-center gap-2 mt-5"
-            >
-              <div className="flex gap-0.5">
-                {[1,2,3,4,5].map(i => (
-                  <Star key={i} className="h-3 w-3 fill-current" style={{ color: "hsl(42,78%,52%)" }} />
-                ))}
+            {/* Rating */}
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}
+              transition={{ delay: 0.95, duration: 0.6 }}
+              className="relative z-10 flex items-center gap-2 mt-4">
+              <div className="flex gap-[2px]">
+                {[1,2,3,4,5].map(i => <Star key={i} className="h-2.5 w-2.5 fill-current" style={{ color: "hsl(42,78%,52%)" }} />)}
               </div>
-              <span className="font-sans text-[0.65rem] tracking-wide" style={{ color: "hsl(220,18%,42%)" }}>
+              <span className="font-sans text-[0.58rem] tracking-wide" style={{ color: "hsl(220,16%,38%)" }}>
                 5.0 · Nationwide delivery
               </span>
             </motion.div>
           </motion.div>
         </div>
 
-        {/* Scroll cue */}
-        <motion.div
-          initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 2.5 }}
-          className="absolute bottom-7 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2"
-        >
-          <motion.div animate={{ y: [0, 5, 0] }} transition={{ repeat: Infinity, duration: 1.8, ease: "easeInOut" }}>
-            <ChevronDown className="h-4 w-4" style={{ color: "hsl(42,78%,46%,0.4)" }} />
+        {/* Scroll cue — horizontal + label */}
+        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 2.8 }}
+          className="absolute bottom-7 left-8 lg:left-16 xl:left-24 flex items-center gap-3">
+          <motion.div animate={{ x: [0, 5, 0] }} transition={{ repeat: Infinity, duration: 2.2, ease: "easeInOut" }}>
+            <ChevronDown className="h-3.5 w-3.5" style={{ color: "hsl(220,18%,32%)", transform: "rotate(-90deg)" }} />
           </motion.div>
+          <span className="font-sans text-[0.52rem] tracking-[0.38em] uppercase" style={{ color: "hsl(220,18%,30%)" }}>
+            Scroll to explore
+          </span>
+          <div className="h-px max-w-[36px] w-full" style={{ background: "hsl(220,38%,16%)" }} />
         </motion.div>
       </section>
 
