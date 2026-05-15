@@ -25,9 +25,11 @@ export function Navbar() {
 
   const isCurrent = (p: string) => location === p;
 
-  /* On hero (dark) the navbar is transparent with light text.
-     Once scrolled, it becomes the cream card with navy text. */
-  const onHero = location === "/" && !scrolled;
+  /* Dark purchase pages always show the dark navbar (never switches to cream). */
+  const isDarkPage = ["/shop", "/checkout", "/payment", "/confirmation"].includes(location);
+
+  /* On hero (home, not scrolled) OR on any purchase page → transparent + light text. */
+  const onHero = (location === "/" && !scrolled) || isDarkPage;
 
   return (
     <>
