@@ -1,0 +1,111 @@
+Build a unique, premium, modern book sales website for an authored book.
+
+The website must not look AI-generated or generic. It should feel custom-designed, clean, elegant, trustworthy, and attractive, with a strong editorial/book-launch style. The design should be mobile-first, fast, responsive, and suitable for both ordinary buyers and high-net-worth customers.
+
+Tech stack:
+- Frontend: React
+- State management: Zustand
+- Backend: Node.js with Express
+- Database: PostgreSQL
+- Styling: Tailwind CSS
+- Charts/statistics: modern dashboard charts
+- Authentication: Admin login with secure session/JWT authentication
+
+Book products:
+- Paperback: K400
+- Hardcover: K500
+- Delivery available after purchase
+- Manual payment number: 0962 219 419
+
+Payment methods to support:
+- Airtel Money
+- MTN Mobile Money
+- Zamtel Money
+- Visa/Mastercard card payment
+- Bank transfer option
+- Full end-to-end payment simulation for all methods
+
+Website pages:
+1. Home
+2. About the Book
+3. About the Author
+4. Buy Book / Shop
+5. Checkout
+6. Payment Confirmation
+7. Reviews / Testimonials
+8. FAQ
+9. Contact
+10. Terms and Privacy
+11. Admin Login
+12. Admin Dashboard
+
+Homepage requirements:
+- Large hero section with book cover
+- Strong headline and short book description
+- Paperback and hardcover price cards
+- Clear “Buy Paperback” and “Buy Hardcover” buttons
+- Author story section
+- Testimonials section
+- Why read this book section
+- Delivery information
+- Trust badges for secure payment and mobile money
+- Clean call-to-action sections
+
+Checkout requirements:
+- Buyer details form:
+  - Full name
+  - Phone number
+  - Email
+  - Delivery address
+  - City/town
+  - Product type: Paperback or Hardcover
+  - Quantity
+- Order summary
+- Payment method selector
+- Payment simulation screen
+- Transaction reference generator
+- Payment status: pending, successful, failed
+- Confirmation page
+- Email/SMS receipt simulation
+- Store buyer and order details in PostgreSQL
+
+Admin dashboard requirements:
+- Secure admin login
+- View total page visitors
+- View total buyers
+- View total orders
+- View total revenue
+- View paperback vs hardcover sales
+- View payment method statistics
+- View pending, successful, and failed payments
+- View buyer list
+- View order details
+- View daily/weekly/monthly sales stats
+- View visitor analytics
+- Export buyers/orders as CSV
+- Clean modern dashboard UI
+
+Design direction:
+Use a minimal editorial layout with a white or soft neutral background, one strong accent color, beautiful spacing, large book visuals, elegant typography, rounded cards, soft shadows, subtle animations, and premium CTA buttons. The design must feel handcrafted, not like a template. Avoid clutter. Make it highly readable, attractive, and conversion-focused.
+
+Functional requirements:
+- Fully responsive React frontend
+- Zustand store for cart, checkout, payment state, and admin dashboard state
+- Node.js REST API
+- PostgreSQL database schema for:
+  - users/admins
+  - visitors
+  - products
+  - buyers
+  - orders
+  - payments
+  - analytics
+- Visitor tracking middleware/API
+- Payment simulation APIs
+- Admin authentication APIs
+- Proper validation and error handling
+- Clean folder structure
+- Production-ready code style
+- Clear setup instructions
+
+The final result should be a complete working full-stack book sales platform with a beautiful customer-facing website, checkout flow, simulated payments, and an admin dashboard for monitoring visitors, buyers, sales, and payment statistics.

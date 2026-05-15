@@ -3,20 +3,34 @@ info:
   # Do not change the title, if the title changes, the import paths will be broken
   title: Api
   version: 0.1.0
-  description: API specification
+  description: Book sales platform API
 servers:
   - url: /api
     description: Base API path
 tags:
   - name: health
     description: Health operations
+  - name: products
+    description: Book products
+  - name: orders
+    description: Order management
+  - name: payments
+    description: Payment processing
+  - name: reviews
+    description: Customer reviews
+  - name: visitors
+    description: Visitor tracking
+  - name: contact
+    description: Contact form
+  - name: admin
+    description: Admin operations
+
 paths:
   /healthz:
     get:
       operationId: healthCheck
       tags: [health]
       summary: Health check
-      description: Returns server health status
       responses:
         "200":
           description: Healthy
@@ -24,13 +38,931 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+
+  /products:
+    get:
+      operationId: listProducts
+      tags: [products]
+      summary: List all book products
+      responses:
+        "200":
+          description: List of products
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Product"
+
+  /products/{id}:
+    get:
+      operationId: getProduct
+      tags: [products]
+      summary: Get a product by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Product found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Product"
+        "404":
+          description: Not found
+
+  /orders:
+    post:
+      operationId: createOrder
+      tags: [orders]
+      summary: Create a new order
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/OrderInput"
+      responses:
+        "201":
+          description: Order created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Order"
+        "400":
+          description: Validation error
+
+  /orders/{id}:
+    get:
+      operationId: getOrder
+      tags: [orders]
+      summary: Get an order by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Order found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Order"
+        "404":
+          description: Not found
+
+  /payments:
+    post:
+      operationId: initiatePayment
+      tags: [payments]
+      summary: Initiate a payment for an order
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PaymentInput"
+      responses:
+        "201":
+          description: Payment initiated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Payment"
+        "400":
+          description: Validation error
+
+  /payments/{id}:
+    get:
+      operationId: getPayment
+      tags: [payments]
+      summary: Get payment status
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Payment found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Payment"
+        "404":
+          description: Not found
+
+  /payments/{id}/simulate:
+    patch:
+      operationId: simulatePayment
+      tags: [payments]
+      summary: Simulate payment outcome (success/failure)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PaymentSimulate"
+      responses:
+        "200":
+          description: Payment updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Payment"
+        "404":
+          description: Not found
+
+  /reviews:
+    get:
+      operationId: listReviews
+      tags: [reviews]
+      summary: List approved reviews
+      responses:
+        "200":
+          description: List of reviews
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Review"
+    post:
+      operationId: createReview
+      tags: [reviews]
+      summary: Submit a review
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ReviewInput"
+      responses:
+        "201":
+          description: Review submitted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Review"
+        "400":
+          description: Validation error
+
+  /visitors/track:
+    post:
+      operationId: trackVisitor
+      tags: [visitors]
+      summary: Track a page visit
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/VisitorTrack"
+      responses:
+        "201":
+          description: Visit tracked
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VisitorTrackResult"
+
+  /contact:
+    post:
+      operationId: submitContact
+      tags: [contact]
+      summary: Submit a contact message
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ContactInput"
+      responses:
+        "201":
+          description: Message received
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ContactResult"
+        "400":
+          description: Validation error
+
+  /admin/login:
+    post:
+      operationId: adminLogin
+      tags: [admin]
+      summary: Admin login
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AdminCredentials"
+      responses:
+        "200":
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdminLoginResult"
+        "401":
+          description: Invalid credentials
+
+  /admin/stats:
+    get:
+      operationId: getAdminStats
+      tags: [admin]
+      summary: Get dashboard statistics
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Dashboard stats
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdminStats"
+        "401":
+          description: Unauthorized
+
+  /admin/orders:
+    get:
+      operationId: listAdminOrders
+      tags: [admin]
+      summary: List all orders
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: status
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: page
+          in: query
+          required: false
+          schema:
+            type: integer
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Orders list
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdminOrdersResult"
+        "401":
+          description: Unauthorized
+
+  /admin/buyers:
+    get:
+      operationId: listAdminBuyers
+      tags: [admin]
+      summary: List all buyers
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: page
+          in: query
+          required: false
+          schema:
+            type: integer
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Buyers list
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdminBuyersResult"
+        "401":
+          description: Unauthorized
+
+  /admin/payments:
+    get:
+      operationId: listAdminPayments
+      tags: [admin]
+      summary: List all payments
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: status
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: method
+          in: query
+          required: false
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Payments list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Payment"
+        "401":
+          description: Unauthorized
+
+  /admin/analytics:
+    get:
+      operationId: getAdminAnalytics
+      tags: [admin]
+      summary: Get sales and visitor analytics
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: period
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: [daily, weekly, monthly]
+      responses:
+        "200":
+          description: Analytics data
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AnalyticsResult"
+        "401":
+          description: Unauthorized
+
+  /admin/export/orders:
+    get:
+      operationId: exportOrders
+      tags: [admin]
+      summary: Export orders as CSV data
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Orders CSV data
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ExportResult"
+        "401":
+          description: Unauthorized
+
+  /admin/export/buyers:
+    get:
+      operationId: exportBuyers
+      tags: [admin]
+      summary: Export buyers as CSV data
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Buyers CSV data
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ExportResult"
+        "401":
+          description: Unauthorized
+
+  /admin/reviews:
+    get:
+      operationId: listAdminReviews
+      tags: [admin]
+      summary: List all reviews including pending
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Reviews list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Review"
+        "401":
+          description: Unauthorized
+
+  /admin/reviews/{id}/approve:
+    patch:
+      operationId: approveReview
+      tags: [admin]
+      summary: Approve a review
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Review approved
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Review"
+        "404":
+          description: Not found
+
+  /admin/reviews/{id}:
+    delete:
+      operationId: deleteReview
+      tags: [admin]
+      summary: Delete a review
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Review deleted
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+        "404":
+          description: Not found
+
+  /admin/orders/{id}/status:
+    patch:
+      operationId: updateOrderStatus
+      tags: [admin]
+      summary: Update order status
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [status]
+              properties:
+                status:
+                  type: string
+                  enum: [pending, confirmed, shipped, delivered, cancelled]
+      responses:
+        "200":
+          description: Order updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Order"
+        "404":
+          description: Not found
+
+  /admin/contacts:
+    get:
+      operationId: listAdminContacts
+      tags: [admin]
+      summary: List all contact messages
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Contact messages
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ContactMessage"
+        "401":
+          description: Unauthorized
+
 components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
   schemas:
     HealthStatus:
       type: object
+      required: [status]
       properties:
         status:
           type: string
-      required:
-        - status
 
+    Product:
+      type: object
+      required: [id, name, type, priceKwacha, description]
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        type:
+          type: string
+          enum: [paperback, hardcover]
+        priceKwacha:
+          type: number
+        description:
+          type: string
+        features:
+          type: array
+          items:
+            type: string
+        createdAt:
+          type: string
+
+    OrderInput:
+      type: object
+      required: [fullName, phone, email, deliveryAddress, city, productType, quantity]
+      properties:
+        fullName:
+          type: string
+          minLength: 2
+        phone:
+          type: string
+          minLength: 8
+        email:
+          type: string
+          format: email
+        deliveryAddress:
+          type: string
+          minLength: 5
+        city:
+          type: string
+          minLength: 2
+        productType:
+          type: string
+          enum: [paperback, hardcover]
+        quantity:
+          type: integer
+          minimum: 1
+        notes:
+          type: ["string", "null"]
+
+    Order:
+      type: object
+      required: [id, fullName, phone, email, deliveryAddress, city, productType, quantity, totalAmount, status, createdAt]
+      properties:
+        id:
+          type: integer
+        fullName:
+          type: string
+        phone:
+          type: string
+        email:
+          type: string
+        deliveryAddress:
+          type: string
+        city:
+          type: string
+        productType:
+          type: string
+        quantity:
+          type: integer
+        totalAmount:
+          type: number
+        status:
+          type: string
+          enum: [pending, confirmed, shipped, delivered, cancelled]
+        notes:
+          type: ["string", "null"]
+        createdAt:
+          type: string
+        payment:
+          $ref: "#/components/schemas/Payment"
+
+    PaymentInput:
+      type: object
+      required: [orderId, method]
+      properties:
+        orderId:
+          type: integer
+        method:
+          type: string
+          enum: [airtel_money, mtn_money, zamtel_money, visa_mastercard, bank_transfer]
+        phoneNumber:
+          type: ["string", "null"]
+        accountName:
+          type: ["string", "null"]
+
+    Payment:
+      type: object
+      required: [id, orderId, method, amount, status, reference, createdAt]
+      properties:
+        id:
+          type: integer
+        orderId:
+          type: integer
+        method:
+          type: string
+        amount:
+          type: number
+        status:
+          type: string
+          enum: [pending, successful, failed]
+        reference:
+          type: string
+        phoneNumber:
+          type: ["string", "null"]
+        accountName:
+          type: ["string", "null"]
+        createdAt:
+          type: string
+        updatedAt:
+          type: string
+
+    PaymentSimulate:
+      type: object
+      required: [outcome]
+      properties:
+        outcome:
+          type: string
+          enum: [successful, failed]
+
+    ReviewInput:
+      type: object
+      required: [reviewerName, rating, comment]
+      properties:
+        reviewerName:
+          type: string
+          minLength: 2
+        reviewerTitle:
+          type: ["string", "null"]
+        rating:
+          type: integer
+          minimum: 1
+          maximum: 5
+        comment:
+          type: string
+          minLength: 10
+        productType:
+          type: ["string", "null"]
+
+    Review:
+      type: object
+      required: [id, reviewerName, rating, comment, approved, createdAt]
+      properties:
+        id:
+          type: integer
+        reviewerName:
+          type: string
+        reviewerTitle:
+          type: ["string", "null"]
+        rating:
+          type: integer
+        comment:
+          type: string
+        productType:
+          type: ["string", "null"]
+        approved:
+          type: boolean
+        createdAt:
+          type: string
+
+    VisitorTrack:
+      type: object
+      required: [page]
+      properties:
+        page:
+          type: string
+        referrer:
+          type: ["string", "null"]
+        userAgent:
+          type: ["string", "null"]
+
+    VisitorTrackResult:
+      type: object
+      required: [tracked]
+      properties:
+        tracked:
+          type: boolean
+
+    ContactInput:
+      type: object
+      required: [name, email, message]
+      properties:
+        name:
+          type: string
+          minLength: 2
+        email:
+          type: string
+          format: email
+        phone:
+          type: ["string", "null"]
+        message:
+          type: string
+          minLength: 10
+
+    ContactResult:
+      type: object
+      required: [success, message]
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+
+    AdminCredentials:
+      type: object
+      required: [username, password]
+      properties:
+        username:
+          type: string
+        password:
+          type: string
+
+    AdminLoginResult:
+      type: object
+      required: [token, username]
+      properties:
+        token:
+          type: string
+        username:
+          type: string
+
+    AdminStats:
+      type: object
+      required: [totalVisitors, totalBuyers, totalOrders, totalRevenue, paperbackSales, hardcoverSales, pendingPayments, successfulPayments, failedPayments]
+      properties:
+        totalVisitors:
+          type: integer
+        totalBuyers:
+          type: integer
+        totalOrders:
+          type: integer
+        totalRevenue:
+          type: number
+        paperbackSales:
+          type: integer
+        hardcoverSales:
+          type: integer
+        pendingPayments:
+          type: integer
+        successfulPayments:
+          type: integer
+        failedPayments:
+          type: integer
+        paymentMethodBreakdown:
+          type: array
+          items:
+            $ref: "#/components/schemas/PaymentMethodStat"
+
+    PaymentMethodStat:
+      type: object
+      required: [method, count, total]
+      properties:
+        method:
+          type: string
+        count:
+          type: integer
+        total:
+          type: number
+
+    AdminOrdersResult:
+      type: object
+      required: [orders, total, page, limit]
+      properties:
+        orders:
+          type: array
+          items:
+            $ref: "#/components/schemas/Order"
+        total:
+          type: integer
+        page:
+          type: integer
+        limit:
+          type: integer
+
+    AdminBuyersResult:
+      type: object
+      required: [buyers, total, page, limit]
+      properties:
+        buyers:
+          type: array
+          items:
+            $ref: "#/components/schemas/Buyer"
+        total:
+          type: integer
+        page:
+          type: integer
+        limit:
+          type: integer
+
+    Buyer:
+      type: object
+      required: [id, fullName, phone, email, city, totalOrders, totalSpent, createdAt]
+      properties:
+        id:
+          type: integer
+        fullName:
+          type: string
+        phone:
+          type: string
+        email:
+          type: string
+        city:
+          type: string
+        totalOrders:
+          type: integer
+        totalSpent:
+          type: number
+        createdAt:
+          type: string
+
+    AnalyticsResult:
+      type: object
+      required: [period, salesData, visitorData]
+      properties:
+        period:
+          type: string
+        salesData:
+          type: array
+          items:
+            $ref: "#/components/schemas/SalesDataPoint"
+        visitorData:
+          type: array
+          items:
+            $ref: "#/components/schemas/VisitorDataPoint"
+
+    SalesDataPoint:
+      type: object
+      required: [date, orders, revenue]
+      properties:
+        date:
+          type: string
+        orders:
+          type: integer
+        revenue:
+          type: number
+
+    VisitorDataPoint:
+      type: object
+      required: [date, visitors, pageViews]
+      properties:
+        date:
+          type: string
+        visitors:
+          type: integer
+        pageViews:
+          type: integer
+
+    ExportResult:
+      type: object
+      required: [csv, filename]
+      properties:
+        csv:
+          type: string
+        filename:
+          type: string
+
+    ContactMessage:
+      type: object
+      required: [id, name, email, message, createdAt]
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        email:
+          type: string
+        phone:
+          type: string
+          nullable: true
+        message:
+          type: string
+        createdAt:
+          type: string
