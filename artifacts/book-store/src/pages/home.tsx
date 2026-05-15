@@ -1,5 +1,6 @@
 import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
+import bookPhoto from "@assets/WhatsApp_Image_2026-05-15_at_07.11.01_1778845938245.jpeg";
 import { useListProducts, useListReviews } from "@workspace/api-client-react";
 import { useCartStore } from "@/lib/store";
 import { Star, ShieldCheck, Truck, BookOpen, Award, ChevronDown } from "lucide-react";
@@ -658,25 +659,29 @@ export default function Home() {
             </motion.div>
           </Reveal>
 
-          {/* reason cards */}
-          <Reveal className="grid grid-cols-2 gap-4">
-            {reasons.map((r, i) => (
+          {/* Book photo */}
+          <Reveal>
+            <motion.div variants={fadeUp} className="relative">
+              {/* Soft shadow halo */}
+              <div className="absolute -inset-6 rounded-3xl pointer-events-none"
+                style={{ background: "radial-gradient(ellipse, hsl(42,78%,46%,0.08) 0%, transparent 70%)", filter: "blur(18px)" }} />
               <motion.div
-                key={i}
-                variants={fadeUp}
-                whileHover={{ y: -4, boxShadow: "0 12px 32px rgba(0,0,0,0.08)" }}
-                transition={{ type: "spring", stiffness: 260 }}
-                className="rounded-2xl border border-border p-6 bg-card group cursor-default"
+                whileHover={{ scale: 1.015, y: -4 }}
+                transition={{ type: "spring", stiffness: 200, damping: 22 }}
+                className="relative rounded-2xl overflow-hidden shadow-2xl"
+                style={{ boxShadow: "0 32px 80px rgba(0,0,0,0.18), 0 8px 24px rgba(0,0,0,0.12)" }}
               >
-                <div className="w-6 h-[2px] bg-primary mb-5 group-hover:w-12 transition-all duration-400 ease-out rounded-full" />
-                <h3 className="font-display text-[0.72rem] font-bold tracking-widest uppercase text-foreground mb-2.5">
-                  {r.title}
-                </h3>
-                <p className="font-sans text-[0.8rem] text-muted-foreground leading-relaxed">
-                  {r.desc}
-                </p>
+                <img
+                  src={bookPhoto}
+                  alt="The Luminous Path — physical book"
+                  className="w-full h-auto block"
+                  style={{ display: "block" }}
+                />
+                {/* Subtle gold bottom fade */}
+                <div className="absolute bottom-0 inset-x-0 h-24 pointer-events-none"
+                  style={{ background: "linear-gradient(to top, hsl(42,78%,46%,0.08), transparent)" }} />
               </motion.div>
-            ))}
+            </motion.div>
           </Reveal>
         </div>
       </section>
