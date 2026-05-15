@@ -9,4 +9,7 @@
 export type ListAdminPaymentsParams = {
 status?: string;
 method?: string;
+page?: number;
+limit?: number;
+search?: string;
 };

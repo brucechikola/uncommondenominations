@@ -6,6 +6,7 @@ import {
   useListAdminOrders,
   useListAdminReviews,
   useListAdminContacts,
+  useListAdminPayments,
   useApproveReview,
   useDeleteReview,
   useUpdateOrderStatus,
@@ -14,14 +15,17 @@ import {
   getListAdminReviewsQueryKey,
   getListAdminOrdersQueryKey,
   getListAdminContactsQueryKey,
+  getListAdminPaymentsQueryKey,
   getGetAdminPaymentSettingsQueryKey,
   type Review,
   type Order,
   type ContactMessage,
   type PaymentSetting,
+  type AdminPayment,
+  type ListAdminReviewsApproved,
 } from "@workspace/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import * as XLSX from "xlsx";
 import {
@@ -29,6 +33,7 @@ import {
   Check, Trash2, X, Phone, Mail,
   BookOpen, MessageSquare, FileSpreadsheet, FileText,
   ChevronRight, Settings, ToggleLeft, ToggleRight,
+  Search, CreditCard, ChevronLeft, Filter,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -47,15 +52,104 @@ const D = {
 };
 
 const STATUS_COLORS: Record<string, string> = {
-  pending:   "bg-yellow-400/15 text-yellow-300 border border-yellow-400/30",
-  confirmed: "bg-blue-400/15 text-blue-300 border border-blue-400/30",
-  shipped:   "bg-indigo-400/15 text-indigo-300 border border-indigo-400/30",
-  delivered: "bg-emerald-400/15 text-emerald-300 border border-emerald-400/30",
-  cancelled: "bg-red-400/15 text-red-300 border border-red-400/30",
+  pending:    "bg-yellow-400/15 text-yellow-300 border border-yellow-400/30",
+  confirmed:  "bg-blue-400/15 text-blue-300 border border-blue-400/30",
+  shipped:    "bg-indigo-400/15 text-indigo-300 border border-indigo-400/30",
+  delivered:  "bg-emerald-400/15 text-emerald-300 border border-emerald-400/30",
+  cancelled:  "bg-red-400/15 text-red-300 border border-red-400/30",
+  successful: "bg-emerald-400/15 text-emerald-300 border border-emerald-400/30",
+  failed:     "bg-red-400/15 text-red-300 border border-red-400/30",
+};
+
+const PAYMENT_METHOD_META: Record<string, { label: string; color: string; abbr: string }> = {
+  airtel_money:    { label: "Airtel Money",    color: "#ef4444", abbr: "A"    },
+  mtn_money:       { label: "MTN MoMo",        color: "#eab308", abbr: "MTN"  },
+  zamtel_money:    { label: "Zamtel Kwacha",   color: "#22c55e", abbr: "ZM"   },
+  visa_mastercard: { label: "Visa/Mastercard", color: "#3b82f6", abbr: "CARD" },
+  bank_transfer:   { label: "Bank Transfer",  color: "#6366f1", abbr: "BNK"  },
 };
 
 const ORDER_STATUSES = ["pending", "confirmed", "shipped", "delivered", "cancelled"] as const;
-type Tab = "overview" | "orders" | "reviews" | "contacts" | "settings";
+type Tab = "overview" | "orders" | "reviews" | "contacts" | "payments" | "settings";
+const PAGE_SIZE = 15;
+
+/* ─── Search bar ─────────────────────────────────────────────── */
+function SearchBar({
+  value, onChange, placeholder,
+}: { value: string; onChange: (v: string) => void; placeholder?: string }) {
+  const ref = useRef<HTMLInputElement>(null);
+  return (
+    <div className={cn("relative flex items-center rounded-lg border overflow-hidden", D.border, "bg-[#131e2e]")}>
+      <Search className={cn("absolute left-3 h-4 w-4 pointer-events-none", D.muted)} />
+      <input
+        ref={ref}
+        type="text"
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        placeholder={placeholder ?? "Search…"}
+        className={cn("w-full pl-9 pr-9 py-2 text-sm bg-transparent outline-none", D.text, "placeholder:text-slate-500")}
+      />
+      {value && (
+        <button onClick={() => { onChange(""); ref.current?.focus(); }}
+          className={cn("absolute right-2 p-1 rounded transition-colors hover:bg-white/10", D.muted)}>
+          <X className="h-3.5 w-3.5" />
+        </button>
+      )}
+    </div>
+  );
+}
+
+/* ─── Pagination ──────────────────────────────────────────────── */
+function Pagination({
+  page, total, limit, onChange,
+}: { page: number; total: number; limit: number; onChange: (p: number) => void }) {
+  const totalPages = Math.max(1, Math.ceil(total / limit));
+  const from = total === 0 ? 0 : (page - 1) * limit + 1;
+  const to = Math.min(page * limit, total);
+
+  if (totalPages <= 1 && total <= limit) return null;
+
+  return (
+    <div className={cn("flex items-center justify-between px-4 py-3 border-t", D.border)}>
+      <span className={cn("text-xs", D.muted)}>
+        {total === 0 ? "0 results" : `${from}–${to} of ${total}`}
+      </span>
+      <div className="flex items-center gap-1">
+        <button
+          onClick={() => onChange(page - 1)}
+          disabled={page <= 1}
+          className={cn("p-1.5 rounded-lg transition-colors",
+            page <= 1 ? "text-slate-700 cursor-not-allowed" : cn(D.muted, "hover:bg-white/5 hover:text-slate-200"))}>
+          <ChevronLeft className="h-4 w-4" />
+        </button>
+        {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+          let p = i + 1;
+          if (totalPages > 5) {
+            if (page <= 3) p = i + 1;
+            else if (page >= totalPages - 2) p = totalPages - 4 + i;
+            else p = page - 2 + i;
+          }
+          return (
+            <button key={p} onClick={() => onChange(p)}
+              className={cn("min-w-[32px] h-8 px-2 rounded-lg text-xs font-medium transition-colors",
+                p === page
+                  ? "bg-[#8d6b3d] text-white"
+                  : cn(D.muted, "hover:bg-white/5 hover:text-slate-200"))}>
+              {p}
+            </button>
+          );
+        })}
+        <button
+          onClick={() => onChange(page + 1)}
+          disabled={page >= totalPages}
+          className={cn("p-1.5 rounded-lg transition-colors",
+            page >= totalPages ? "text-slate-700 cursor-not-allowed" : cn(D.muted, "hover:bg-white/5 hover:text-slate-200"))}>
+          <ChevronRight className="h-4 w-4" />
+        </button>
+      </div>
+    </div>
+  );
+}
 
 /* ─── Slide-over panel ──────────────────────────────────────── */
 function SlidePanel({
@@ -124,7 +218,6 @@ function OrderPanel({
 
   return (
     <SlidePanel open title={`Order #${order.id}`} subtitle={new Date(order.createdAt).toLocaleString()} onClose={onClose}>
-      {/* Actions */}
       <div className="flex gap-2 flex-wrap">
         <a href={`tel:${order.phone}`}
           className={cn("flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors", D.accentBg, "text-white hover:opacity-90")}>
@@ -136,7 +229,6 @@ function OrderPanel({
         </a>
       </div>
 
-      {/* Customer info */}
       <div className={cn("rounded-xl p-4", D.card, "border", D.border)}>
         <p className={cn("text-xs font-semibold uppercase mb-3", D.muted)}>Customer</p>
         <Field label="Full Name" value={order.fullName} />
@@ -146,7 +238,6 @@ function OrderPanel({
         {(order as Order & { address?: string }).address && <Field label="Address" value={(order as Order & { address?: string }).address} />}
       </div>
 
-      {/* Order info */}
       <div className={cn("rounded-xl p-4", D.card, "border", D.border)}>
         <p className={cn("text-xs font-semibold uppercase mb-3", D.muted)}>Order Details</p>
         <Field label="Edition" value={<span className="capitalize">{order.productType}</span>} />
@@ -155,7 +246,6 @@ function OrderPanel({
         <Field label="Date" value={new Date(order.createdAt).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" })} />
       </div>
 
-      {/* Status update */}
       <div className={cn("rounded-xl p-4", D.card, "border", D.border)}>
         <p className={cn("text-xs font-semibold uppercase mb-3", D.muted)}>Update Status</p>
         <div className="flex gap-2 flex-wrap mb-3">
@@ -193,7 +283,6 @@ function ReviewPanel({
 
   return (
     <SlidePanel open title={`Review by ${review.reviewerName}`} subtitle={new Date(review.createdAt).toLocaleDateString()} onClose={onClose}>
-      {/* Status badge */}
       <div className="flex items-center gap-3">
         <span className={cn("px-3 py-1 rounded-full text-xs font-medium",
           review.approved ? "bg-emerald-400/15 text-emerald-300 border border-emerald-400/30"
@@ -207,7 +296,6 @@ function ReviewPanel({
         </div>
       </div>
 
-      {/* Reviewer info */}
       <div className={cn("rounded-xl p-4", D.card, "border", D.border)}>
         <Field label="Reviewer Name" value={review.reviewerName} />
         {review.reviewerTitle && <Field label="Title / Occupation" value={review.reviewerTitle} />}
@@ -216,13 +304,11 @@ function ReviewPanel({
         <Field label="Submitted" value={new Date(review.createdAt).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" })} />
       </div>
 
-      {/* Review text */}
       <div className={cn("rounded-xl p-4", D.card, "border", D.border)}>
         <p className={cn("text-xs font-semibold uppercase mb-3", D.muted)}>Review</p>
         <p className={cn("text-sm leading-relaxed italic", D.sub)}>"{review.comment}"</p>
       </div>
 
-      {/* Actions */}
       <div className="space-y-2">
         {!review.approved && (
           <button onClick={async () => { setApproving(true); await onApprove(review.id); onClose(); }}
@@ -289,6 +375,52 @@ function ContactPanel({ contact, onClose }: { contact: ContactMessage; onClose: 
   );
 }
 
+/* ─── Payment detail panel ──────────────────────────────────── */
+function PaymentPanel({ payment, onClose }: { payment: AdminPayment; onClose: () => void }) {
+  const meta = PAYMENT_METHOD_META[payment.method];
+  return (
+    <SlidePanel open title={`Transaction #${payment.id}`} subtitle={new Date(payment.createdAt).toLocaleString()} onClose={onClose}>
+      <div className="flex items-center gap-3">
+        <span className={cn("px-3 py-1 rounded-full text-xs font-medium capitalize border", STATUS_COLORS[payment.status] ?? "bg-white/10 text-slate-400")}>
+          {payment.status}
+        </span>
+        {meta && (
+          <div className="flex items-center gap-2 ml-auto">
+            <div className="w-7 h-7 rounded-lg flex items-center justify-center"
+              style={{ background: `${meta.color}18`, border: `1px solid ${meta.color}30` }}>
+              <span className="font-bold text-[0.45rem]" style={{ color: meta.color }}>{meta.abbr}</span>
+            </div>
+            <span className={cn("text-sm", D.sub)}>{meta.label}</span>
+          </div>
+        )}
+      </div>
+
+      <div className={cn("rounded-xl p-4", D.card, "border", D.border)}>
+        <p className={cn("text-xs font-semibold uppercase mb-3", D.muted)}>Transaction</p>
+        <Field label="Amount" value={<span className={cn("font-bold", D.accent)}>K{payment.amount}</span>} accent />
+        <Field label="Reference" value={<span className="font-mono text-xs">{payment.reference}</span>} />
+        <Field label="Method" value={meta?.label ?? payment.method} />
+        <Field label="Status" value={<span className="capitalize">{payment.status}</span>} />
+        {payment.phoneNumber && <Field label="Phone Number" value={payment.phoneNumber} />}
+        {payment.accountName && <Field label="Account Name" value={payment.accountName} />}
+        <Field label="Date" value={new Date(payment.createdAt).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric", hour: "2-digit", minute: "2-digit" } as Intl.DateTimeFormatOptions)} />
+      </div>
+
+      {(payment.orderName || payment.orderPhone) && (
+        <div className={cn("rounded-xl p-4", D.card, "border", D.border)}>
+          <p className={cn("text-xs font-semibold uppercase mb-3", D.muted)}>Customer</p>
+          {payment.orderName && <Field label="Name" value={payment.orderName} />}
+          {payment.orderPhone && <Field label="Phone" value={<a href={`tel:${payment.orderPhone}`} className={cn(D.accent, "hover:underline")}>{payment.orderPhone}</a>} />}
+          {payment.orderCity && <Field label="City" value={payment.orderCity} />}
+          <Field label="Order" value={
+            <span className={cn("font-mono text-xs", D.muted)}>Order #{payment.orderId}</span>
+          } />
+        </div>
+      )}
+    </SlidePanel>
+  );
+}
+
 /* ─── Main dashboard ────────────────────────────────────────── */
 export default function AdminDashboard() {
   const [, navigate] = useLocation();
@@ -299,18 +431,52 @@ export default function AdminDashboard() {
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [selectedReview, setSelectedReview] = useState<Review | null>(null);
   const [selectedContact, setSelectedContact] = useState<ContactMessage | null>(null);
+  const [selectedPayment, setSelectedPayment] = useState<AdminPayment | null>(null);
+
+  /* ── Per-tab pagination & search ── */
+  const [ordersPage, setOrdersPage] = useState(1);
+  const [ordersSearch, setOrdersSearch] = useState("");
+  const [ordersStatus, setOrdersStatus] = useState("");
+
+  const [reviewsPage, setReviewsPage] = useState(1);
+  const [reviewsSearch, setReviewsSearch] = useState("");
+  const [reviewsFilter, setReviewsFilter] = useState<"all" | "true" | "false">("all");
+
+  const [contactsPage, setContactsPage] = useState(1);
+  const [contactsSearch, setContactsSearch] = useState("");
+
+  const [paymentsPage, setPaymentsPage] = useState(1);
+  const [paymentsSearch, setPaymentsSearch] = useState("");
+  const [paymentsStatus, setPaymentsStatus] = useState("");
+
+  /* Reset page when search/filter changes */
+  useEffect(() => { setOrdersPage(1); }, [ordersSearch, ordersStatus]);
+  useEffect(() => { setReviewsPage(1); }, [reviewsSearch, reviewsFilter]);
+  useEffect(() => { setContactsPage(1); }, [contactsSearch]);
+  useEffect(() => { setPaymentsPage(1); }, [paymentsSearch, paymentsStatus]);
 
   if (!isAuthenticated) { navigate("/admin/login"); return null; }
 
   const { data: stats } = useGetAdminStats();
-  const { data: ordersResult } = useListAdminOrders(undefined, {
-    query: { enabled: tab === "orders" || tab === "overview", queryKey: getListAdminOrdersQueryKey() },
+
+  const ordersParams = { page: ordersPage, limit: PAGE_SIZE, ...(ordersSearch ? { search: ordersSearch } : {}), ...(ordersStatus ? { status: ordersStatus } : {}) };
+  const { data: ordersResult } = useListAdminOrders(ordersParams, {
+    query: { enabled: tab === "orders" || tab === "overview", queryKey: getListAdminOrdersQueryKey(ordersParams) },
   });
-  const { data: reviews } = useListAdminReviews({
-    query: { enabled: tab === "reviews", queryKey: getListAdminReviewsQueryKey() },
+
+  const reviewsParams = { page: reviewsPage, limit: PAGE_SIZE, ...(reviewsSearch ? { search: reviewsSearch } : {}), ...(reviewsFilter !== "all" ? { approved: reviewsFilter as ListAdminReviewsApproved } : {}) };
+  const { data: reviewsResult } = useListAdminReviews(reviewsParams, {
+    query: { enabled: tab === "reviews", queryKey: getListAdminReviewsQueryKey(reviewsParams) },
   });
-  const { data: contacts } = useListAdminContacts({
-    query: { enabled: tab === "contacts", queryKey: getListAdminContactsQueryKey() },
+
+  const contactsParams = { page: contactsPage, limit: PAGE_SIZE, ...(contactsSearch ? { search: contactsSearch } : {}) };
+  const { data: contactsResult } = useListAdminContacts(contactsParams, {
+    query: { enabled: tab === "contacts", queryKey: getListAdminContactsQueryKey(contactsParams) },
+  });
+
+  const paymentsParams = { page: paymentsPage, limit: PAGE_SIZE, ...(paymentsSearch ? { search: paymentsSearch } : {}), ...(paymentsStatus ? { status: paymentsStatus } : {}) };
+  const { data: paymentsResult } = useListAdminPayments(paymentsParams, {
+    query: { enabled: tab === "payments", queryKey: getListAdminPaymentsQueryKey(paymentsParams) },
   });
 
   const approveReview = useApproveReview();
@@ -320,11 +486,16 @@ export default function AdminDashboard() {
   const { data: paymentSettings } = useGetAdminPaymentSettings({
     query: { enabled: tab === "settings", queryKey: getGetAdminPaymentSettingsQueryKey() },
   });
-  const paymentSettingsList: PaymentSetting[] = Array.isArray(paymentSettings) ? (paymentSettings as PaymentSetting[]) : [];
 
+  const paymentSettingsList: PaymentSetting[] = Array.isArray(paymentSettings) ? (paymentSettings as PaymentSetting[]) : [];
   const orders: Order[] = ordersResult?.orders ?? [];
-  const reviewList: Review[] = Array.isArray(reviews) ? (reviews as Review[]) : [];
-  const contactList: ContactMessage[] = Array.isArray(contacts) ? (contacts as ContactMessage[]) : [];
+  const ordersTotal: number = ordersResult?.total ?? 0;
+  const reviewList: Review[] = reviewsResult?.reviews ?? [];
+  const reviewsTotal: number = reviewsResult?.total ?? 0;
+  const contactList: ContactMessage[] = contactsResult?.contacts ?? [];
+  const contactsTotal: number = contactsResult?.total ?? 0;
+  const paymentList: AdminPayment[] = paymentsResult?.payments ?? [];
+  const paymentsTotal: number = paymentsResult?.total ?? 0;
 
   const handleApproveReview = async (id: number) => {
     await approveReview.mutateAsync({ id });
@@ -347,8 +518,6 @@ export default function AdminDashboard() {
   const handleLogout = () => { logout(); navigate("/"); };
 
   /* ── Export helpers ── */
-  const exportCSV = (url: string) => { window.location.href = url; };
-
   const exportExcel = (data: Record<string, unknown>[], filename: string) => {
     const ws = XLSX.utils.json_to_sheet(data);
     const wb = XLSX.utils.book_new();
@@ -358,40 +527,11 @@ export default function AdminDashboard() {
 
   const exportOrdersExcel = () => {
     exportExcel(orders.map((o) => ({
-      ID: o.id,
-      "Full Name": o.fullName,
-      Phone: o.phone,
-      Edition: o.productType,
-      Quantity: o.quantity,
-      "Total (K)": o.totalAmount,
-      City: o.city,
-      Status: o.status,
+      ID: o.id, "Full Name": o.fullName, Phone: o.phone,
+      Edition: o.productType, Quantity: o.quantity,
+      "Total (K)": o.totalAmount, City: o.city, Status: o.status,
       Date: new Date(o.createdAt).toLocaleDateString(),
     })), "orders.xlsx");
-  };
-
-  const exportReviewsExcel = () => {
-    exportExcel(reviewList.map((r) => ({
-      ID: r.id,
-      Name: r.reviewerName,
-      Title: r.reviewerTitle ?? "",
-      Rating: r.rating,
-      Comment: r.comment,
-      Edition: r.productType ?? "",
-      Approved: r.approved ? "Yes" : "No",
-      Date: new Date(r.createdAt).toLocaleDateString(),
-    })), "reviews.xlsx");
-  };
-
-  const exportContactsExcel = () => {
-    exportExcel(contactList.map((c) => ({
-      ID: c.id,
-      Name: c.name,
-      Email: c.email,
-      Phone: c.phone ?? "",
-      Message: c.message,
-      Date: new Date(c.createdAt).toLocaleDateString(),
-    })), "contacts.xlsx");
   };
 
   const statCards = [
@@ -402,11 +542,12 @@ export default function AdminDashboard() {
   ];
 
   const tabs: { id: Tab; label: string; icon: React.ElementType; count?: number }[] = [
-    { id: "overview", label: "Overview", icon: TrendingUp },
-    { id: "orders", label: "Orders", icon: ShoppingBag, count: orders.length },
-    { id: "reviews", label: "Reviews", icon: Star, count: reviewList.length },
-    { id: "contacts", label: "Messages", icon: MessageSquare, count: contactList.length },
-    { id: "settings", label: "Settings", icon: Settings },
+    { id: "overview",  label: "Overview",     icon: TrendingUp  },
+    { id: "orders",    label: "Orders",        icon: ShoppingBag, count: ordersTotal  },
+    { id: "reviews",   label: "Reviews",       icon: Star,        count: reviewsTotal },
+    { id: "contacts",  label: "Messages",      icon: MessageSquare, count: contactsTotal },
+    { id: "payments",  label: "Transactions",  icon: CreditCard,  count: paymentsTotal },
+    { id: "settings",  label: "Settings",      icon: Settings    },
   ];
 
   return (
@@ -444,8 +585,8 @@ export default function AdminDashboard() {
           <div className="grid md:grid-cols-3 gap-4 mb-8">
             {[
               { label: "Pending Payments", value: stats.pendingPayments, color: "text-yellow-300" },
-              { label: "Paperback Sales", value: stats.paperbackSales, color: D.text },
-              { label: "Hardcover Sales", value: stats.hardcoverSales, color: D.text },
+              { label: "Paperback Sales",  value: stats.paperbackSales,  color: D.text },
+              { label: "Hardcover Sales",  value: stats.hardcoverSales,  color: D.text },
             ].map((item) => (
               <div key={item.label} className={cn("rounded-xl p-5 border", D.card, D.border)}>
                 <p className={cn("text-xs mb-1", D.muted)}>{item.label}</p>
@@ -456,16 +597,16 @@ export default function AdminDashboard() {
         )}
 
         {/* Tabs */}
-        <div className={cn("flex gap-1 mb-6 rounded-xl p-1 w-fit border", D.card, D.border)}>
+        <div className={cn("flex gap-1 mb-6 rounded-xl p-1 w-fit border overflow-x-auto", D.card, D.border)}>
           {tabs.map((t) => (
             <button key={t.id} onClick={() => setTab(t.id)}
-              className={cn("flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all",
+              className={cn("flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all whitespace-nowrap",
                 tab === t.id
                   ? "bg-[#8d6b3d] text-white shadow"
                   : cn(D.muted, "hover:text-slate-200 hover:bg-white/5"))}>
               <t.icon className="h-3.5 w-3.5" />
               {t.label}
-              {t.count !== undefined && tab !== t.id && (
+              {t.count !== undefined && t.count > 0 && tab !== t.id && (
                 <span className="text-xs bg-white/10 px-1.5 py-0.5 rounded-full">{t.count}</span>
               )}
             </button>
@@ -513,9 +654,12 @@ export default function AdminDashboard() {
         {tab === "orders" && (
           <div className="space-y-4">
             <div className="flex items-center justify-between flex-wrap gap-3">
-              <h2 className={cn("font-serif text-xl font-bold", D.text)}>All Orders</h2>
+              <h2 className={cn("font-serif text-xl font-bold", D.text)}>
+                Orders
+                {ordersTotal > 0 && <span className={cn("ml-2 text-sm font-normal", D.muted)}>{ordersTotal} total</span>}
+              </h2>
               <div className="flex gap-2">
-                <button onClick={() => exportCSV("/api/admin/export/orders")}
+                <button onClick={() => window.location.assign("/api/admin/export/orders")}
                   className={cn("flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium border transition-colors", D.muted, D.border, "hover:bg-white/5")}>
                   <FileText className="h-4 w-4" />CSV
                 </button>
@@ -525,6 +669,21 @@ export default function AdminDashboard() {
                 </button>
               </div>
             </div>
+
+            {/* Search + filter bar */}
+            <div className="flex gap-2 flex-wrap">
+              <div className="flex-1 min-w-[200px]">
+                <SearchBar value={ordersSearch} onChange={setOrdersSearch} placeholder="Search by name, phone, city…" />
+              </div>
+              <select
+                value={ordersStatus}
+                onChange={(e) => setOrdersStatus(e.target.value)}
+                className={cn("px-3 py-2 text-sm rounded-lg border bg-[#131e2e] outline-none", D.border, D.sub)}>
+                <option value="">All statuses</option>
+                {ORDER_STATUSES.map((s) => <option key={s} value={s} className="capitalize">{s.charAt(0).toUpperCase() + s.slice(1)}</option>)}
+              </select>
+            </div>
+
             <div className={cn("rounded-xl border overflow-x-auto", D.card, D.border)}>
               <table className="w-full text-sm">
                 <thead>
@@ -554,7 +713,8 @@ export default function AdminDashboard() {
                   ))}
                 </tbody>
               </table>
-              {orders.length === 0 && <div className={cn("py-12 text-center text-sm", D.muted)}>No orders yet.</div>}
+              {orders.length === 0 && <div className={cn("py-12 text-center text-sm", D.muted)}>No orders found.</div>}
+              <Pagination page={ordersPage} total={ordersTotal} limit={PAGE_SIZE} onChange={setOrdersPage} />
             </div>
           </div>
         )}
@@ -563,41 +723,58 @@ export default function AdminDashboard() {
         {tab === "reviews" && (
           <div className="space-y-4">
             <div className="flex items-center justify-between flex-wrap gap-3">
-              <h2 className={cn("font-serif text-xl font-bold", D.text)}>Reviews
-                <span className={cn("ml-2 text-sm font-normal", D.muted)}>
-                  {reviewList.filter((r) => !r.approved).length} pending
-                </span>
+              <h2 className={cn("font-serif text-xl font-bold", D.text)}>
+                Reviews
+                {reviewsTotal > 0 && <span className={cn("ml-2 text-sm font-normal", D.muted)}>{reviewsTotal} total</span>}
               </h2>
-              <button onClick={exportReviewsExcel}
-                className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium bg-emerald-800/60 text-emerald-300 border border-emerald-700/40 hover:bg-emerald-800/80 transition-colors">
-                <FileSpreadsheet className="h-4 w-4" />Export Excel
-              </button>
             </div>
-            <div className="space-y-2">
-              {reviewList.map((review) => (
-                <div key={review.id} onClick={() => setSelectedReview(review)}
-                  className={cn("rounded-xl p-4 border cursor-pointer transition-colors flex items-center gap-4", D.card, D.border, D.cardHov)}>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-3 mb-1 flex-wrap">
-                      <span className={cn("font-medium text-sm", D.text)}>{review.reviewerName}</span>
-                      {review.reviewerTitle && <span className={cn("text-xs", D.muted)}>{review.reviewerTitle}</span>}
-                      <div className="flex gap-0.5 ml-auto">
-                        {Array.from({ length: review.rating }).map((_, i) => (
-                          <Star key={i} className="h-3 w-3 fill-[#b08a58] text-[#b08a58]" />
-                        ))}
+
+            {/* Search + filter */}
+            <div className="flex gap-2 flex-wrap">
+              <div className="flex-1 min-w-[200px]">
+                <SearchBar value={reviewsSearch} onChange={setReviewsSearch} placeholder="Search by name or review text…" />
+              </div>
+              <div className={cn("flex rounded-lg border overflow-hidden", D.border)}>
+                {(["all", "false", "true"] as const).map((f) => (
+                  <button key={f} onClick={() => setReviewsFilter(f)}
+                    className={cn("px-4 py-2 text-xs font-medium transition-colors",
+                      reviewsFilter === f
+                        ? "bg-[#8d6b3d] text-white"
+                        : cn("bg-[#131e2e]", D.muted, "hover:bg-white/5"))}>
+                    {f === "all" ? "All" : f === "false" ? "Pending" : "Approved"}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className={cn("rounded-xl border overflow-hidden", D.card, D.border)}>
+              <div className="divide-y divide-[#1e3050]">
+                {reviewList.map((review) => (
+                  <div key={review.id} onClick={() => setSelectedReview(review)}
+                    className={cn("p-4 cursor-pointer transition-colors flex items-center gap-4", D.cardHov)}>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-3 mb-1 flex-wrap">
+                        <span className={cn("font-medium text-sm", D.text)}>{review.reviewerName}</span>
+                        {review.reviewerTitle && <span className={cn("text-xs", D.muted)}>{review.reviewerTitle}</span>}
+                        <div className="flex gap-0.5 ml-auto">
+                          {Array.from({ length: review.rating }).map((_, i) => (
+                            <Star key={i} className="h-3 w-3 fill-[#b08a58] text-[#b08a58]" />
+                          ))}
+                        </div>
+                        <span className={cn("px-2 py-0.5 rounded-full text-xs font-medium",
+                          review.approved ? "bg-emerald-400/15 text-emerald-300 border border-emerald-400/20"
+                            : "bg-yellow-400/15 text-yellow-300 border border-yellow-400/20")}>
+                          {review.approved ? "Approved" : "Pending"}
+                        </span>
                       </div>
-                      <span className={cn("px-2 py-0.5 rounded-full text-xs font-medium",
-                        review.approved ? "bg-emerald-400/15 text-emerald-300 border border-emerald-400/20"
-                          : "bg-yellow-400/15 text-yellow-300 border border-yellow-400/20")}>
-                        {review.approved ? "Approved" : "Pending"}
-                      </span>
+                      <p className={cn("text-xs truncate italic", D.muted)}>"{review.comment}"</p>
                     </div>
-                    <p className={cn("text-xs truncate italic", D.muted)}>"{review.comment}"</p>
+                    <ChevronRight className={cn("h-4 w-4 flex-shrink-0", D.muted)} />
                   </div>
-                  <ChevronRight className={cn("h-4 w-4 flex-shrink-0", D.muted)} />
-                </div>
-              ))}
-              {reviewList.length === 0 && <div className={cn("py-12 text-center text-sm", D.muted)}>No reviews yet.</div>}
+                ))}
+                {reviewList.length === 0 && <div className={cn("py-12 text-center text-sm", D.muted)}>No reviews found.</div>}
+              </div>
+              <Pagination page={reviewsPage} total={reviewsTotal} limit={PAGE_SIZE} onChange={setReviewsPage} />
             </div>
           </div>
         )}
@@ -606,33 +783,117 @@ export default function AdminDashboard() {
         {tab === "contacts" && (
           <div className="space-y-4">
             <div className="flex items-center justify-between flex-wrap gap-3">
-              <h2 className={cn("font-serif text-xl font-bold", D.text)}>Contact Messages</h2>
-              <button onClick={exportContactsExcel}
-                className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium bg-emerald-800/60 text-emerald-300 border border-emerald-700/40 hover:bg-emerald-800/80 transition-colors">
-                <FileSpreadsheet className="h-4 w-4" />Export Excel
-              </button>
+              <h2 className={cn("font-serif text-xl font-bold", D.text)}>
+                Contact Messages
+                {contactsTotal > 0 && <span className={cn("ml-2 text-sm font-normal", D.muted)}>{contactsTotal} total</span>}
+              </h2>
             </div>
-            <div className="space-y-2">
-              {contactList.map((contact) => (
-                <div key={contact.id} onClick={() => setSelectedContact(contact)}
-                  className={cn("rounded-xl p-4 border cursor-pointer transition-colors", D.card, D.border, D.cardHov)}>
-                  <div className="flex items-start justify-between gap-4 mb-2">
-                    <div className="min-w-0">
-                      <p className={cn("font-medium text-sm", D.text)}>{contact.name}</p>
-                      <div className="flex items-center gap-3 mt-0.5 flex-wrap">
-                        <span className={cn("text-xs", D.accent)}>{contact.email}</span>
-                        {contact.phone && <span className={cn("text-xs", D.muted)}>{contact.phone}</span>}
+
+            <SearchBar value={contactsSearch} onChange={setContactsSearch} placeholder="Search by name, email, or message…" />
+
+            <div className={cn("rounded-xl border overflow-hidden", D.card, D.border)}>
+              <div className="divide-y divide-[#1e3050]">
+                {contactList.map((contact) => (
+                  <div key={contact.id} onClick={() => setSelectedContact(contact)}
+                    className={cn("p-4 cursor-pointer transition-colors", D.cardHov)}>
+                    <div className="flex items-start justify-between gap-4 mb-2">
+                      <div className="min-w-0">
+                        <p className={cn("font-medium text-sm", D.text)}>{contact.name}</p>
+                        <div className="flex items-center gap-3 mt-0.5 flex-wrap">
+                          <span className={cn("text-xs", D.accent)}>{contact.email}</span>
+                          {contact.phone && <span className={cn("text-xs", D.muted)}>{contact.phone}</span>}
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2 flex-shrink-0">
+                        <span className={cn("text-xs whitespace-nowrap", D.muted)}>{new Date(contact.createdAt).toLocaleDateString()}</span>
+                        <ChevronRight className={cn("h-4 w-4", D.muted)} />
                       </div>
                     </div>
-                    <div className="flex items-center gap-2 flex-shrink-0">
-                      <span className={cn("text-xs whitespace-nowrap", D.muted)}>{new Date(contact.createdAt).toLocaleDateString()}</span>
-                      <ChevronRight className={cn("h-4 w-4", D.muted)} />
-                    </div>
+                    <p className={cn("text-xs line-clamp-2 leading-relaxed", D.muted)}>{contact.message}</p>
                   </div>
-                  <p className={cn("text-xs line-clamp-2 leading-relaxed", D.muted)}>{contact.message}</p>
-                </div>
-              ))}
-              {contactList.length === 0 && <div className={cn("py-12 text-center text-sm", D.muted)}>No messages yet.</div>}
+                ))}
+                {contactList.length === 0 && <div className={cn("py-12 text-center text-sm", D.muted)}>No messages found.</div>}
+              </div>
+              <Pagination page={contactsPage} total={contactsTotal} limit={PAGE_SIZE} onChange={setContactsPage} />
+            </div>
+          </div>
+        )}
+
+        {/* ── PAYMENTS ── */}
+        {tab === "payments" && (
+          <div className="space-y-4">
+            <div className="flex items-center justify-between flex-wrap gap-3">
+              <h2 className={cn("font-serif text-xl font-bold", D.text)}>
+                Transactions
+                {paymentsTotal > 0 && <span className={cn("ml-2 text-sm font-normal", D.muted)}>{paymentsTotal} total</span>}
+              </h2>
+            </div>
+
+            {/* Search + filter */}
+            <div className="flex gap-2 flex-wrap">
+              <div className="flex-1 min-w-[200px]">
+                <SearchBar value={paymentsSearch} onChange={setPaymentsSearch} placeholder="Search by reference, name, or method…" />
+              </div>
+              <select
+                value={paymentsStatus}
+                onChange={(e) => setPaymentsStatus(e.target.value)}
+                className={cn("px-3 py-2 text-sm rounded-lg border bg-[#131e2e] outline-none", D.border, D.sub)}>
+                <option value="">All statuses</option>
+                <option value="pending">Pending</option>
+                <option value="successful">Successful</option>
+                <option value="failed">Failed</option>
+              </select>
+            </div>
+
+            <div className={cn("rounded-xl border overflow-x-auto", D.card, D.border)}>
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className={cn("border-b", D.border)}>
+                    {["#", "Customer", "Method", "Amount", "Reference", "Status", "Date", ""].map((h) => (
+                      <th key={h} className={cn("text-left px-4 py-3 text-xs font-medium whitespace-nowrap", D.muted)}>{h}</th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {paymentList.map((p) => {
+                    const meta = PAYMENT_METHOD_META[p.method];
+                    return (
+                      <tr key={p.id} onClick={() => setSelectedPayment(p)}
+                        className={cn("border-b last:border-0 cursor-pointer transition-colors", D.border, D.cardHov)}>
+                        <td className={cn("px-4 py-3 font-mono text-xs", D.muted)}>#{p.id}</td>
+                        <td className={cn("px-4 py-3 whitespace-nowrap", D.text)}>
+                          {p.orderName ?? <span className={D.muted}>—</span>}
+                          {p.orderCity && <span className={cn("text-xs ml-2", D.muted)}>{p.orderCity}</span>}
+                        </td>
+                        <td className="px-4 py-3">
+                          {meta ? (
+                            <div className="flex items-center gap-2">
+                              <div className="w-6 h-6 rounded flex items-center justify-center flex-shrink-0"
+                                style={{ background: `${meta.color}18`, border: `1px solid ${meta.color}30` }}>
+                                <span className="font-bold leading-none" style={{ color: meta.color, fontSize: "0.42rem" }}>{meta.abbr}</span>
+                              </div>
+                              <span className={cn("text-xs whitespace-nowrap", D.sub)}>{meta.label}</span>
+                            </div>
+                          ) : (
+                            <span className={cn("text-xs", D.muted)}>{p.method}</span>
+                          )}
+                        </td>
+                        <td className={cn("px-4 py-3 font-semibold", D.accent)}>K{p.amount}</td>
+                        <td className={cn("px-4 py-3 font-mono text-xs", D.muted)}>{p.reference}</td>
+                        <td className="px-4 py-3">
+                          <span className={cn("px-2 py-0.5 rounded-full text-xs font-medium capitalize", STATUS_COLORS[p.status] ?? "bg-white/10 text-slate-400")}>
+                            {p.status}
+                          </span>
+                        </td>
+                        <td className={cn("px-4 py-3 text-xs whitespace-nowrap", D.muted)}>{new Date(p.createdAt).toLocaleDateString()}</td>
+                        <td className="px-4 py-3"><ChevronRight className={cn("h-4 w-4", D.muted)} /></td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+              {paymentList.length === 0 && <div className={cn("py-12 text-center text-sm", D.muted)}>No transactions found.</div>}
+              <Pagination page={paymentsPage} total={paymentsTotal} limit={PAGE_SIZE} onChange={setPaymentsPage} />
             </div>
           </div>
         )}
@@ -660,24 +921,20 @@ export default function AdminDashboard() {
                 const meta = META[ch.channelId] ?? { color: "#b08a58", abbr: "?", desc: "" };
                 return (
                   <div key={ch.channelId} className="flex items-center gap-4 px-5 py-4">
-                    {/* Icon */}
                     <div className="flex-shrink-0 w-10 h-10 rounded-xl flex items-center justify-center"
                       style={{ background: `${meta.color}18`, border: `1px solid ${meta.color}30` }}>
                       <span className="font-bold text-[0.48rem]" style={{ color: meta.color }}>{meta.abbr}</span>
                     </div>
-                    {/* Label */}
                     <div className="flex-1 min-w-0">
                       <p className={cn("text-sm font-medium", D.text)}>{ch.label}</p>
                       <p className={cn("text-xs", D.muted)}>{meta.desc}</p>
                     </div>
-                    {/* Status badge */}
                     <span className={cn("text-xs px-2.5 py-1 rounded-full font-medium border",
                       ch.enabled
                         ? "bg-emerald-400/10 text-emerald-400 border-emerald-400/20"
                         : "bg-white/5 text-slate-500 border-white/10")}>
                       {ch.enabled ? "Active" : "Disabled"}
                     </span>
-                    {/* Toggle */}
                     <button
                       onClick={() => handleTogglePaymentChannel(ch.channelId, !ch.enabled)}
                       className="flex-shrink-0 transition-opacity hover:opacity-80"
@@ -716,6 +973,9 @@ export default function AdminDashboard() {
       )}
       {selectedContact && (
         <ContactPanel contact={selectedContact} onClose={() => setSelectedContact(null)} />
+      )}
+      {selectedPayment && (
+        <PaymentPanel payment={selectedPayment} onClose={() => setSelectedPayment(null)} />
       )}
     </div>
   );

@@ -6,8 +6,7 @@
  * OpenAPI spec version: 0.1.0
  */
 
-export type ListAdminOrdersParams = {
-status?: string;
+export type ListAdminContactsParams = {
 page?: number;
 limit?: number;
 search?: string;

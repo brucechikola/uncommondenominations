@@ -321,6 +321,11 @@ paths:
           required: false
           schema:
             type: integer
+        - name: search
+          in: query
+          required: false
+          schema:
+            type: string
       responses:
         "200":
           description: Orders list
@@ -377,15 +382,28 @@ paths:
           required: false
           schema:
             type: string
+        - name: page
+          in: query
+          required: false
+          schema:
+            type: integer
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+        - name: search
+          in: query
+          required: false
+          schema:
+            type: string
       responses:
         "200":
           description: Payments list
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/Payment"
+                $ref: "#/components/schemas/AdminPaymentsResult"
         "401":
           description: Unauthorized
 
@@ -454,15 +472,35 @@ paths:
       summary: List all reviews including pending
       security:
         - bearerAuth: []
+      parameters:
+        - name: page
+          in: query
+          required: false
+          schema:
+            type: integer
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+        - name: search
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: approved
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: ["true", "false", "all"]
       responses:
         "200":
           description: Reviews list
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/Review"
+                $ref: "#/components/schemas/AdminReviewsResult"
         "401":
           description: Unauthorized
 
@@ -556,15 +594,29 @@ paths:
       summary: List all contact messages
       security:
         - bearerAuth: []
+      parameters:
+        - name: page
+          in: query
+          required: false
+          schema:
+            type: integer
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+        - name: search
+          in: query
+          required: false
+          schema:
+            type: string
       responses:
         "200":
           description: Contact messages
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/ContactMessage"
+                $ref: "#/components/schemas/AdminContactsResult"
         "401":
           description: Unauthorized
 
@@ -1011,6 +1063,86 @@ components:
           type: string
         filename:
           type: string
+
+    AdminReviewsResult:
+      type: object
+      required: [reviews, total, page, limit]
+      properties:
+        reviews:
+          type: array
+          items:
+            $ref: "#/components/schemas/Review"
+        total:
+          type: integer
+        page:
+          type: integer
+        limit:
+          type: integer
+
+    AdminContactsResult:
+      type: object
+      required: [contacts, total, page, limit]
+      properties:
+        contacts:
+          type: array
+          items:
+            $ref: "#/components/schemas/ContactMessage"
+        total:
+          type: integer
+        page:
+          type: integer
+        limit:
+          type: integer
+
+    AdminPayment:
+      type: object
+      required: [id, orderId, method, amount, status, reference, createdAt]
+      properties:
+        id:
+          type: integer
+        orderId:
+          type: integer
+        method:
+          type: string
+        amount:
+          type: number
+        status:
+          type: string
+          enum: [pending, successful, failed]
+        reference:
+          type: string
+        phoneNumber:
+          type: string
+          nullable: true
+        accountName:
+          type: string
+          nullable: true
+        createdAt:
+          type: string
+        orderName:
+          type: string
+          nullable: true
+        orderPhone:
+          type: string
+          nullable: true
+        orderCity:
+          type: string
+          nullable: true
+
+    AdminPaymentsResult:
+      type: object
+      required: [payments, total, page, limit]
+      properties:
+        payments:
+          type: array
+          items:
+            $ref: "#/components/schemas/AdminPayment"
+        total:
+          type: integer
+        page:
+          type: integer
+        limit:
+          type: integer
 
     ContactMessage:
       type: object

@@ -5,10 +5,11 @@
  * Book sales platform API
  * OpenAPI spec version: 0.1.0
  */
+import type { ListAdminReviewsApproved } from './listAdminReviewsApproved';
 
-export type ListAdminOrdersParams = {
-status?: string;
+export type ListAdminReviewsParams = {
 page?: number;
 limit?: number;
 search?: string;
+approved?: ListAdminReviewsApproved;
 };

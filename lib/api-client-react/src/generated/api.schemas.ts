@@ -269,6 +269,13 @@ export interface ExportResult {
   filename: string;
 }
 
+export interface AdminReviewsResult {
+  reviews: Review[];
+  total: number;
+  page: number;
+  limit: number;
+}
+
 export interface ContactMessage {
   id: number;
   name: string;
@@ -276,6 +283,44 @@ export interface ContactMessage {
   phone?: string | null;
   message: string;
   createdAt: string;
+}
+
+export interface AdminContactsResult {
+  contacts: ContactMessage[];
+  total: number;
+  page: number;
+  limit: number;
+}
+
+export type AdminPaymentStatus = typeof AdminPaymentStatus[keyof typeof AdminPaymentStatus];
+
+
+export const AdminPaymentStatus = {
+  pending: 'pending',
+  successful: 'successful',
+  failed: 'failed',
+} as const;
+
+export interface AdminPayment {
+  id: number;
+  orderId: number;
+  method: string;
+  amount: number;
+  status: AdminPaymentStatus;
+  reference: string;
+  phoneNumber?: string | null;
+  accountName?: string | null;
+  createdAt: string;
+  orderName?: string | null;
+  orderPhone?: string | null;
+  orderCity?: string | null;
+}
+
+export interface AdminPaymentsResult {
+  payments: AdminPayment[];
+  total: number;
+  page: number;
+  limit: number;
 }
 
 export interface PaymentSetting {
@@ -294,6 +339,7 @@ export type ListAdminOrdersParams = {
 status?: string;
 page?: number;
 limit?: number;
+search?: string;
 };
 
 export type ListAdminBuyersParams = {
@@ -304,6 +350,9 @@ limit?: number;
 export type ListAdminPaymentsParams = {
 status?: string;
 method?: string;
+page?: number;
+limit?: number;
+search?: string;
 };
 
 export type GetAdminAnalyticsParams = {
@@ -317,6 +366,22 @@ export const GetAdminAnalyticsPeriod = {
   daily: 'daily',
   weekly: 'weekly',
   monthly: 'monthly',
+} as const;
+
+export type ListAdminReviewsParams = {
+page?: number;
+limit?: number;
+search?: string;
+approved?: ListAdminReviewsApproved;
+};
+
+export type ListAdminReviewsApproved = typeof ListAdminReviewsApproved[keyof typeof ListAdminReviewsApproved];
+
+
+export const ListAdminReviewsApproved = {
+  true: 'true',
+  false: 'false',
+  all: 'all',
 } as const;
 
 export type DeleteReview200 = {
@@ -336,5 +401,11 @@ export const UpdateOrderStatusBodyStatus = {
 
 export type UpdateOrderStatusBody = {
   status: UpdateOrderStatusBodyStatus;
+};
+
+export type ListAdminContactsParams = {
+page?: number;
+limit?: number;
+search?: string;
 };
 

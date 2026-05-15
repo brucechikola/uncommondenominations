@@ -9,7 +9,7 @@ import {
   reviewsTable,
   paymentSettingsTable,
 } from "@workspace/db";
-import { eq, sql, desc, count, sum, and } from "drizzle-orm";
+import { eq, sql, desc, count, sum, and, or, ilike } from "drizzle-orm";
 import bcrypt from "bcryptjs";
 import { signToken, requireAdmin } from "../lib/auth";
 import { AdminLoginBody, ListAdminOrdersQueryParams, ListAdminBuyersQueryParams, ListAdminPaymentsQueryParams, GetAdminAnalyticsQueryParams, ApproveReviewParams } from "@workspace/api-zod";
@@ -106,13 +106,21 @@ router.get("/admin/stats", requireAdmin, async (_req, res): Promise<void> => {
 });
 
 router.get("/admin/orders", requireAdmin, async (req, res): Promise<void> => {
-  const queryParams = ListAdminOrdersQueryParams.safeParse(req.query);
-  const page = queryParams.success ? (queryParams.data.page ?? 1) : 1;
-  const limit = queryParams.success ? (queryParams.data.limit ?? 20) : 20;
-  const status = queryParams.success ? queryParams.data.status : undefined;
+  const page = Math.max(1, parseInt(String(req.query.page ?? "1")) || 1);
+  const limit = Math.min(50, Math.max(1, parseInt(String(req.query.limit ?? "15")) || 15));
+  const status = req.query.status ? String(req.query.status) : undefined;
+  const search = String(req.query.search ?? "").trim();
   const offset = (page - 1) * limit;
 
-  const whereClause = status ? eq(ordersTable.status, status) : undefined;
+  const conditions = [];
+  if (status) conditions.push(eq(ordersTable.status, status as "pending" | "confirmed" | "shipped" | "delivered" | "cancelled"));
+  if (search) conditions.push(or(
+    ilike(ordersTable.fullName, `%${search}%`),
+    ilike(ordersTable.phone, `%${search}%`),
+    ilike(ordersTable.city, `%${search}%`),
+    ilike(ordersTable.email, `%${search}%`),
+  ));
+  const whereClause = conditions.length ? and(...conditions) : undefined;
 
   const orders = await db.select().from(ordersTable)
     .where(whereClause)
@@ -192,26 +200,62 @@ router.get("/admin/buyers", requireAdmin, async (req, res): Promise<void> => {
 });
 
 router.get("/admin/payments", requireAdmin, async (req, res): Promise<void> => {
-  const queryParams = ListAdminPaymentsQueryParams.safeParse(req.query);
-  const status = queryParams.success ? queryParams.data.status : undefined;
-  const method = queryParams.success ? queryParams.data.method : undefined;
-
-  let query = db.select().from(paymentsTable);
+  const page = Math.max(1, parseInt(String(req.query.page ?? "1")) || 1);
+  const limit = Math.min(50, Math.max(1, parseInt(String(req.query.limit ?? "15")) || 15));
+  const status = req.query.status ? String(req.query.status) : undefined;
+  const method = req.query.method ? String(req.query.method) : undefined;
+  const search = String(req.query.search ?? "").trim();
+  const offset = (page - 1) * limit;
 
   const conditions = [];
-  if (status) conditions.push(eq(paymentsTable.status, status));
+  if (status) conditions.push(eq(paymentsTable.status, status as "pending" | "successful" | "failed"));
   if (method) conditions.push(eq(paymentsTable.method, method));
+  if (search) conditions.push(or(
+    ilike(paymentsTable.reference, `%${search}%`),
+    ilike(paymentsTable.method, `%${search}%`),
+    ilike(ordersTable.fullName, `%${search}%`),
+    ilike(ordersTable.phone, `%${search}%`),
+  ));
+  const whereClause = conditions.length ? and(...conditions) : undefined;
 
-  const payments = await db.select().from(paymentsTable)
-    .where(conditions.length ? and(...conditions) : undefined)
-    .orderBy(desc(paymentsTable.createdAt));
+  const rows = await db
+    .select({
+      id: paymentsTable.id,
+      orderId: paymentsTable.orderId,
+      method: paymentsTable.method,
+      amount: paymentsTable.amount,
+      status: paymentsTable.status,
+      reference: paymentsTable.reference,
+      phoneNumber: paymentsTable.phoneNumber,
+      accountName: paymentsTable.accountName,
+      createdAt: paymentsTable.createdAt,
+      orderName: ordersTable.fullName,
+      orderPhone: ordersTable.phone,
+      orderCity: ordersTable.city,
+    })
+    .from(paymentsTable)
+    .leftJoin(ordersTable, eq(paymentsTable.orderId, ordersTable.id))
+    .where(whereClause)
+    .orderBy(desc(paymentsTable.createdAt))
+    .limit(limit)
+    .offset(offset);
 
-  res.json(payments.map(p => ({
-    ...p,
-    amount: Number(p.amount),
-    createdAt: p.createdAt.toISOString(),
-    updatedAt: p.updatedAt.toISOString(),
-  })));
+  const [totalRow] = await db
+    .select({ count: count() })
+    .from(paymentsTable)
+    .leftJoin(ordersTable, eq(paymentsTable.orderId, ordersTable.id))
+    .where(whereClause);
+
+  res.json({
+    payments: rows.map(p => ({
+      ...p,
+      amount: Number(p.amount),
+      createdAt: p.createdAt.toISOString(),
+    })),
+    total: totalRow?.count ?? 0,
+    page,
+    limit,
+  });
 });
 
 router.get("/admin/analytics", requireAdmin, async (req, res): Promise<void> => {
@@ -337,9 +381,37 @@ router.get("/admin/export/buyers", requireAdmin, async (_req, res): Promise<void
   res.json({ csv, filename: `buyers-${new Date().toISOString().split("T")[0]}.csv` });
 });
 
-router.get("/admin/reviews", requireAdmin, async (_req, res): Promise<void> => {
-  const reviews = await db.select().from(reviewsTable).orderBy(desc(reviewsTable.createdAt));
-  res.json(reviews.map(r => ({ ...r, createdAt: r.createdAt.toISOString() })));
+router.get("/admin/reviews", requireAdmin, async (req, res): Promise<void> => {
+  const page = Math.max(1, parseInt(String(req.query.page ?? "1")) || 1);
+  const limit = Math.min(50, Math.max(1, parseInt(String(req.query.limit ?? "15")) || 15));
+  const search = String(req.query.search ?? "").trim();
+  const approvedFilter = req.query.approved ? String(req.query.approved) : "all";
+  const offset = (page - 1) * limit;
+
+  const conditions = [];
+  if (approvedFilter === "true") conditions.push(eq(reviewsTable.approved, true));
+  if (approvedFilter === "false") conditions.push(eq(reviewsTable.approved, false));
+  if (search) conditions.push(or(
+    ilike(reviewsTable.reviewerName, `%${search}%`),
+    ilike(reviewsTable.comment, `%${search}%`),
+    ilike(reviewsTable.reviewerTitle, `%${search}%`),
+  ));
+  const whereClause = conditions.length ? and(...conditions) : undefined;
+
+  const reviews = await db.select().from(reviewsTable)
+    .where(whereClause)
+    .orderBy(desc(reviewsTable.createdAt))
+    .limit(limit)
+    .offset(offset);
+
+  const [totalRow] = await db.select({ count: count() }).from(reviewsTable).where(whereClause);
+
+  res.json({
+    reviews: reviews.map(r => ({ ...r, createdAt: r.createdAt.toISOString() })),
+    total: totalRow?.count ?? 0,
+    page,
+    limit,
+  });
 });
 
 router.patch("/admin/reviews/:id/approve", requireAdmin, async (req, res): Promise<void> => {
@@ -396,9 +468,35 @@ router.patch("/admin/orders/:id/status", requireAdmin, async (req, res): Promise
   res.json({ ...order, createdAt: order.createdAt.toISOString() });
 });
 
-router.get("/admin/contacts", requireAdmin, async (_req, res): Promise<void> => {
-  const contacts = await db.select().from(contactsTable).orderBy(desc(contactsTable.createdAt));
-  res.json(contacts.map(c => ({ ...c, createdAt: c.createdAt.toISOString() })));
+router.get("/admin/contacts", requireAdmin, async (req, res): Promise<void> => {
+  const page = Math.max(1, parseInt(String(req.query.page ?? "1")) || 1);
+  const limit = Math.min(50, Math.max(1, parseInt(String(req.query.limit ?? "15")) || 15));
+  const search = String(req.query.search ?? "").trim();
+  const offset = (page - 1) * limit;
+
+  const conditions = [];
+  if (search) conditions.push(or(
+    ilike(contactsTable.name, `%${search}%`),
+    ilike(contactsTable.email, `%${search}%`),
+    ilike(contactsTable.message, `%${search}%`),
+    ilike(contactsTable.phone, `%${search}%`),
+  ));
+  const whereClause = conditions.length ? and(...conditions) : undefined;
+
+  const contacts = await db.select().from(contactsTable)
+    .where(whereClause)
+    .orderBy(desc(contactsTable.createdAt))
+    .limit(limit)
+    .offset(offset);
+
+  const [totalRow] = await db.select({ count: count() }).from(contactsTable).where(whereClause);
+
+  res.json({
+    contacts: contacts.map(c => ({ ...c, createdAt: c.createdAt.toISOString() })),
+    total: totalRow?.count ?? 0,
+    page,
+    limit,
+  });
 });
 
 router.get("/admin/payment-settings", requireAdmin, async (_req, res): Promise<void> => {

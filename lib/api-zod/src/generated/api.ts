@@ -271,7 +271,8 @@ export const GetAdminStatsResponse = zod.object({
 export const ListAdminOrdersQueryParams = zod.object({
   "status": zod.coerce.string().optional(),
   "page": zod.coerce.number().optional(),
-  "limit": zod.coerce.number().optional()
+  "limit": zod.coerce.number().optional(),
+  "search": zod.coerce.string().optional()
 })
 
 export const ListAdminOrdersResponse = zod.object({
@@ -337,10 +338,14 @@ export const ListAdminBuyersResponse = zod.object({
  */
 export const ListAdminPaymentsQueryParams = zod.object({
   "status": zod.coerce.string().optional(),
-  "method": zod.coerce.string().optional()
+  "method": zod.coerce.string().optional(),
+  "page": zod.coerce.number().optional(),
+  "limit": zod.coerce.number().optional(),
+  "search": zod.coerce.string().optional()
 })
 
-export const ListAdminPaymentsResponseItem = zod.object({
+export const ListAdminPaymentsResponse = zod.object({
+  "payments": zod.array(zod.object({
   "id": zod.number(),
   "orderId": zod.number(),
   "method": zod.string(),
@@ -350,9 +355,14 @@ export const ListAdminPaymentsResponseItem = zod.object({
   "phoneNumber": zod.string().nullish(),
   "accountName": zod.string().nullish(),
   "createdAt": zod.string(),
-  "updatedAt": zod.string().optional()
+  "orderName": zod.string().nullish(),
+  "orderPhone": zod.string().nullish(),
+  "orderCity": zod.string().nullish()
+})),
+  "total": zod.number(),
+  "page": zod.number(),
+  "limit": zod.number()
 })
-export const ListAdminPaymentsResponse = zod.array(ListAdminPaymentsResponseItem)
 
 
 /**
@@ -398,7 +408,15 @@ export const ExportBuyersResponse = zod.object({
 /**
  * @summary List all reviews including pending
  */
-export const ListAdminReviewsResponseItem = zod.object({
+export const ListAdminReviewsQueryParams = zod.object({
+  "page": zod.coerce.number().optional(),
+  "limit": zod.coerce.number().optional(),
+  "search": zod.coerce.string().optional(),
+  "approved": zod.enum(['true', 'false', 'all']).optional()
+})
+
+export const ListAdminReviewsResponse = zod.object({
+  "reviews": zod.array(zod.object({
   "id": zod.number(),
   "reviewerName": zod.string(),
   "reviewerTitle": zod.string().nullish(),
@@ -407,8 +425,11 @@ export const ListAdminReviewsResponseItem = zod.object({
   "productType": zod.string().nullish(),
   "approved": zod.boolean(),
   "createdAt": zod.string()
+})),
+  "total": zod.number(),
+  "page": zod.number(),
+  "limit": zod.number()
 })
-export const ListAdminReviewsResponse = zod.array(ListAdminReviewsResponseItem)
 
 
 /**
@@ -484,15 +505,25 @@ export const UpdateOrderStatusResponse = zod.object({
 /**
  * @summary List all contact messages
  */
-export const ListAdminContactsResponseItem = zod.object({
+export const ListAdminContactsQueryParams = zod.object({
+  "page": zod.coerce.number().optional(),
+  "limit": zod.coerce.number().optional(),
+  "search": zod.coerce.string().optional()
+})
+
+export const ListAdminContactsResponse = zod.object({
+  "contacts": zod.array(zod.object({
   "id": zod.number(),
   "name": zod.string(),
   "email": zod.string(),
   "phone": zod.string().nullish(),
   "message": zod.string(),
   "createdAt": zod.string()
+})),
+  "total": zod.number(),
+  "page": zod.number(),
+  "limit": zod.number()
 })
-export const ListAdminContactsResponse = zod.array(ListAdminContactsResponseItem)
 
 
 /**

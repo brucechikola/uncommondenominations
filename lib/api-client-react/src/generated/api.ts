@@ -21,21 +21,25 @@ import type {
 
 import type {
   AdminBuyersResult,
+  AdminContactsResult,
   AdminCredentials,
   AdminLoginResult,
   AdminOrdersResult,
+  AdminPaymentsResult,
+  AdminReviewsResult,
   AdminStats,
   AnalyticsResult,
   ContactInput,
-  ContactMessage,
   ContactResult,
   DeleteReview200,
   ExportResult,
   GetAdminAnalyticsParams,
   HealthStatus,
   ListAdminBuyersParams,
+  ListAdminContactsParams,
   ListAdminOrdersParams,
   ListAdminPaymentsParams,
+  ListAdminReviewsParams,
   Order,
   OrderInput,
   Payment,
@@ -1286,9 +1290,9 @@ export const getListAdminPaymentsUrl = (params?: ListAdminPaymentsParams,) => {
 /**
  * @summary List all payments
  */
-export const listAdminPayments = async (params?: ListAdminPaymentsParams, options?: RequestInit): Promise<Payment[]> => {
+export const listAdminPayments = async (params?: ListAdminPaymentsParams, options?: RequestInit): Promise<AdminPaymentsResult> => {
 
-  return customFetch<Payment[]>(getListAdminPaymentsUrl(params),
+  return customFetch<AdminPaymentsResult>(getListAdminPaymentsUrl(params),
   {
     ...options,
     method: 'GET'
@@ -1590,20 +1594,27 @@ export function useExportBuyers<TData = Awaited<ReturnType<typeof exportBuyers>>
 
 
 
-export const getListAdminReviewsUrl = () => {
+export const getListAdminReviewsUrl = (params?: ListAdminReviewsParams,) => {
+  const normalizedParams = new URLSearchParams();
 
+  Object.entries(params || {}).forEach(([key, value]) => {
 
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : value.toString())
+    }
+  });
 
+  const stringifiedParams = normalizedParams.toString();
 
-  return `/api/admin/reviews`
+  return stringifiedParams.length > 0 ? `/api/admin/reviews?${stringifiedParams}` : `/api/admin/reviews`
 }
 
 /**
  * @summary List all reviews including pending
  */
-export const listAdminReviews = async ( options?: RequestInit): Promise<Review[]> => {
+export const listAdminReviews = async (params?: ListAdminReviewsParams, options?: RequestInit): Promise<AdminReviewsResult> => {
 
-  return customFetch<Review[]>(getListAdminReviewsUrl(),
+  return customFetch<AdminReviewsResult>(getListAdminReviewsUrl(params),
   {
     ...options,
     method: 'GET'
@@ -1616,23 +1627,23 @@ export const listAdminReviews = async ( options?: RequestInit): Promise<Review[]
 
 
 
-export const getListAdminReviewsQueryKey = () => {
+export const getListAdminReviewsQueryKey = (params?: ListAdminReviewsParams,) => {
     return [
-    `/api/admin/reviews`
+    `/api/admin/reviews`, ...(params ? [params] : [])
     ] as const;
     }
 
 
-export const getListAdminReviewsQueryOptions = <TData = Awaited<ReturnType<typeof listAdminReviews>>, TError = ErrorType<void>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listAdminReviews>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+export const getListAdminReviewsQueryOptions = <TData = Awaited<ReturnType<typeof listAdminReviews>>, TError = ErrorType<void>>(params?: ListAdminReviewsParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listAdminReviews>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
 ) => {
 
 const {query: queryOptions, request: requestOptions} = options ?? {};
 
-  const queryKey =  queryOptions?.queryKey ?? getListAdminReviewsQueryKey();
+  const queryKey =  queryOptions?.queryKey ?? getListAdminReviewsQueryKey(params);
 
 
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof listAdminReviews>>> = ({ signal }) => listAdminReviews({ signal, ...requestOptions });
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof listAdminReviews>>> = ({ signal }) => listAdminReviews(params, { signal, ...requestOptions });
 
 
 
@@ -1650,11 +1661,11 @@ export type ListAdminReviewsQueryError = ErrorType<void>
  */
 
 export function useListAdminReviews<TData = Awaited<ReturnType<typeof listAdminReviews>>, TError = ErrorType<void>>(
-  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listAdminReviews>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+ params?: ListAdminReviewsParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listAdminReviews>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
 
  ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
 
-  const queryOptions = getListAdminReviewsQueryOptions(options)
+  const queryOptions = getListAdminReviewsQueryOptions(params,options)
 
   const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
 
@@ -1879,20 +1890,27 @@ export const useUpdateOrderStatus = <TError = ErrorType<void>,
       return useMutation(getUpdateOrderStatusMutationOptions(options));
     }
 
-export const getListAdminContactsUrl = () => {
+export const getListAdminContactsUrl = (params?: ListAdminContactsParams,) => {
+  const normalizedParams = new URLSearchParams();
 
+  Object.entries(params || {}).forEach(([key, value]) => {
 
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : value.toString())
+    }
+  });
 
+  const stringifiedParams = normalizedParams.toString();
 
-  return `/api/admin/contacts`
+  return stringifiedParams.length > 0 ? `/api/admin/contacts?${stringifiedParams}` : `/api/admin/contacts`
 }
 
 /**
  * @summary List all contact messages
  */
-export const listAdminContacts = async ( options?: RequestInit): Promise<ContactMessage[]> => {
+export const listAdminContacts = async (params?: ListAdminContactsParams, options?: RequestInit): Promise<AdminContactsResult> => {
 
-  return customFetch<ContactMessage[]>(getListAdminContactsUrl(),
+  return customFetch<AdminContactsResult>(getListAdminContactsUrl(params),
   {
     ...options,
     method: 'GET'
@@ -1905,23 +1923,23 @@ export const listAdminContacts = async ( options?: RequestInit): Promise<Contact
 
 
 
-export const getListAdminContactsQueryKey = () => {
+export const getListAdminContactsQueryKey = (params?: ListAdminContactsParams,) => {
     return [
-    `/api/admin/contacts`
+    `/api/admin/contacts`, ...(params ? [params] : [])
     ] as const;
     }
 
 
-export const getListAdminContactsQueryOptions = <TData = Awaited<ReturnType<typeof listAdminContacts>>, TError = ErrorType<void>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listAdminContacts>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+export const getListAdminContactsQueryOptions = <TData = Awaited<ReturnType<typeof listAdminContacts>>, TError = ErrorType<void>>(params?: ListAdminContactsParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listAdminContacts>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
 ) => {
 
 const {query: queryOptions, request: requestOptions} = options ?? {};
 
-  const queryKey =  queryOptions?.queryKey ?? getListAdminContactsQueryKey();
+  const queryKey =  queryOptions?.queryKey ?? getListAdminContactsQueryKey(params);
 
 
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof listAdminContacts>>> = ({ signal }) => listAdminContacts({ signal, ...requestOptions });
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof listAdminContacts>>> = ({ signal }) => listAdminContacts(params, { signal, ...requestOptions });
 
 
 
@@ -1939,11 +1957,11 @@ export type ListAdminContactsQueryError = ErrorType<void>
  */
 
 export function useListAdminContacts<TData = Awaited<ReturnType<typeof listAdminContacts>>, TError = ErrorType<void>>(
-  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listAdminContacts>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+ params?: ListAdminContactsParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listAdminContacts>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
 
  ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
 
-  const queryOptions = getListAdminContactsQueryOptions(options)
+  const queryOptions = getListAdminContactsQueryOptions(params,options)
 
   const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
 
