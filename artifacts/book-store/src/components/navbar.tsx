@@ -36,7 +36,7 @@ export function Navbar() {
         initial={{ y: -20, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-        className="sticky top-0 z-50 w-full transition-all duration-300"
+        className="fixed top-0 left-0 right-0 z-50 w-full transition-all duration-300"
         style={{
           background: scrolled
             ? "hsl(222,58%,6%,0.88)"
