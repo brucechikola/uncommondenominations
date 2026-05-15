@@ -446,8 +446,8 @@ export default function Home() {
                   <Button size="lg" onClick={() => setProductType("paperback")}
                     className="font-sans tracking-[0.13em] uppercase border-0 w-full sm:w-auto"
                     style={{ fontSize: "0.69rem", height: "3rem", padding: "0 2.2rem",
-                      background: "hsl(42,78%,46%)", color: "#fff", fontWeight: 700,
-                      boxShadow: "0 4px 28px hsl(42,78%,46%,0.32), inset 0 1px 0 hsl(44,90%,68%,0.28)" }}>
+                      background: "#8d6b3d", color: "#fff", fontWeight: 700,
+                      boxShadow: "0 4px 28px rgba(141,107,61,0.32), inset 0 1px 0 rgba(176,138,88,0.28)" }}>
                     Buy Paperback — K400
                   </Button>
                 </motion.div>
@@ -845,7 +845,7 @@ export default function Home() {
                       style={{
                         fontSize:   "0.7rem",
                         height:     "3rem",
-                        background: "hsl(42,78%,46%)",
+                        background: "#8d6b3d",
                         color:      "#fff",
                         fontWeight: 700,
                       }}
@@ -937,7 +937,7 @@ export default function Home() {
                       style={{
                         fontSize:   "0.7rem",
                         height:     "3rem",
-                        background: "hsl(42,78%,46%)",
+                        background: "#8d6b3d",
                         color:      "#fff",
                         fontWeight: 700,
                       }}

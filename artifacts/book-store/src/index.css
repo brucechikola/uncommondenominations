@@ -40,7 +40,7 @@
   --foreground: 220 52% 10%;
   --border: 40 14% 88%;
   --input: 40 14% 88%;
-  --ring: 42 78% 46%;
+  --ring: 33 39% 40%;
 
   --card: 40 22% 99%;
   --card-foreground: 220 52% 10%;
@@ -49,8 +49,8 @@
   --popover-foreground: 220 52% 10%;
 
   /* Gold */
-  --primary: 42 78% 46%;
-  --primary-foreground: 220 52% 8%;
+  --primary: 33 39% 40%;
+  --primary-foreground: 0 0% 100%;
 
   /* Deep navy */
   --secondary: 220 52% 14%;
@@ -59,8 +59,8 @@
   --muted: 40 18% 92%;
   --muted-foreground: 220 22% 44%;
 
-  --accent: 42 78% 46%;
-  --accent-foreground: 220 52% 8%;
+  --accent: 33 39% 40%;
+  --accent-foreground: 0 0% 100%;
 
   --destructive: 0 66% 52%;
   --destructive-foreground: 0 0% 100%;
@@ -80,9 +80,9 @@
   --dark-text:  hsl(40, 22%, 88%);
 
   /* Gold tints */
-  --gold:       hsl(42, 78%, 48%);
-  --gold-light: hsl(44, 85%, 64%);
-  --gold-dim:   hsl(42, 60%, 38%);
+  --gold:       #8d6b3d;
+  --gold-light: #b08a58;
+  --gold-dim:   #6b5030;
 }
 
 @layer base {
@@ -108,11 +108,11 @@
 .gold-shimmer {
   background: linear-gradient(
     110deg,
-    hsl(42,78%,34%) 0%,
-    hsl(43,82%,50%) 28%,
-    hsl(46,92%,70%) 50%,
-    hsl(43,82%,50%) 72%,
-    hsl(42,78%,34%) 100%
+    #6b5030 0%,
+    #8d6b3d 28%,
+    #b08a58 50%,
+    #8d6b3d 72%,
+    #6b5030 100%
   );
   background-size: 220% auto;
   -webkit-background-clip: text;
@@ -131,11 +131,11 @@
 /* ── Decorative lines ──────────────────────────────────────────── */
 .gold-line {
   height: 1px;
-  background: linear-gradient(90deg, transparent, hsl(42,78%,48%), transparent);
+  background: linear-gradient(90deg, transparent, #8d6b3d, transparent);
 }
 .gold-line-left {
   height: 1.5px;
-  background: linear-gradient(90deg, hsl(42,78%,48%), hsl(42,78%,48%,0));
+  background: linear-gradient(90deg, #8d6b3d, rgba(141,107,61,0));
 }
 
 /* ── Section transitions ───────────────────────────────────────── */
