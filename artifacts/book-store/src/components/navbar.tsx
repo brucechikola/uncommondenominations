@@ -38,12 +38,14 @@ export function Navbar() {
         transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
         className="sticky top-0 z-50 w-full transition-all duration-300"
         style={{
-          background: onHero
-            ? "transparent"
-            : "hsl(40,25%,98%)",
-          borderBottom: onHero ? "1px solid hsl(220,38%,22%)" : "1px solid hsl(40,15%,88%)",
-          boxShadow: scrolled ? "0 1px 24px rgba(0,0,0,0.07)" : "none",
-          backdropFilter: onHero ? "none" : "blur(12px)",
+          background: scrolled
+            ? "hsl(222,58%,6%,0.88)"
+            : "transparent",
+          borderBottom: scrolled
+            ? "1px solid hsl(220,38%,18%,0.6)"
+            : "1px solid transparent",
+          boxShadow: scrolled ? "0 4px 32px rgba(0,0,0,0.4)" : "none",
+          backdropFilter: scrolled ? "blur(18px) saturate(1.4)" : "none",
         }}
       >
         <div className="container mx-auto flex h-15 items-center justify-between px-6 h-14">
@@ -53,7 +55,7 @@ export function Navbar() {
               style={{ background: "hsl(42,80%,48%,0.12)", border: "1px solid hsl(42,80%,48%,0.35)" }}>
               <span className="font-display text-xs font-bold text-primary">U</span>
             </div>
-            <span className={`font-display text-xs font-bold tracking-[0.14em] uppercase transition-colors ${onHero ? "text-white/80" : "text-foreground"} group-hover:text-primary`}>
+            <span className="font-display text-xs font-bold tracking-[0.14em] uppercase transition-colors text-white/80 group-hover:text-primary">
               Uncommon Denominators
             </span>
           </Link>
@@ -63,11 +65,7 @@ export function Navbar() {
             {NAV_LINKS.map(({ href, label }) => (
               <Link key={href} href={href}
                 className={`font-sans text-[0.7rem] font-medium tracking-[0.1em] uppercase transition-colors ${
-                  isCurrent(href)
-                    ? "text-primary"
-                    : onHero
-                    ? "text-white/70 hover:text-white"
-                    : "text-muted-foreground hover:text-foreground"
+                  isCurrent(href) ? "text-primary" : "text-white/70 hover:text-white"
                 }`}>
                 {label}
               </Link>
@@ -86,7 +84,7 @@ export function Navbar() {
               </Button>
             </Link>
             <button onClick={() => setMobileOpen(!mobileOpen)}
-              className={`md:hidden p-2 transition-colors ${onHero ? "text-white/60 hover:text-white" : "text-muted-foreground hover:text-foreground"}`}>
+              className="md:hidden p-2 transition-colors text-white/60 hover:text-white">
               {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
             </button>
           </div>
