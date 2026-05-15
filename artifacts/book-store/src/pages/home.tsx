@@ -508,7 +508,7 @@ export default function Home() {
               }} />
             </div>
 
-            {/* 3D book — mouse spring parallax */}
+            {/* Real book photo — mouse spring parallax */}
             <motion.div
               initial={{ opacity: 0, y: 44, scale: 0.9 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
@@ -517,7 +517,17 @@ export default function Home() {
               style={{ perspective: "1200px" }}
             >
               <motion.div style={{ rotateY: springRotY, rotateX: springRotX, transformStyle: "preserve-3d" }}>
-                <BookCover bookWidth="clamp(215px,20vw,268px)" />
+                <img
+                  src={bookPhoto}
+                  alt="The Luminous Path — physical book"
+                  style={{
+                    width: "clamp(215px,20vw,268px)",
+                    height: "auto",
+                    display: "block",
+                    borderRadius: "12px",
+                    boxShadow: "0 40px 80px rgba(0,0,0,0.55), 0 12px 28px rgba(0,0,0,0.3)",
+                  }}
+                />
               </motion.div>
             </motion.div>
 
