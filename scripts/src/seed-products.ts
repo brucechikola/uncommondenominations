@@ -1,7 +1,7 @@
-import { db, productsTable } from "@workspace/db";
+import { db, productsTable, type InsertProduct } from "@workspace/db";
 import { eq } from "drizzle-orm";
 
-const products = [
+const products: InsertProduct[] = [
   {
     type: "paperback",
     name: "Uncommon Denominators Paperback",
@@ -28,7 +28,7 @@ const products = [
       "Ideal for gifting or long-term shelf display",
     ],
   },
-] as const;
+];
 
 for (const product of products) {
   const [existing] = await db
