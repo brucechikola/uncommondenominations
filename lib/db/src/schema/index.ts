@@ -6,4 +6,7 @@ export * from "./reviews";
 export * from "./visitors";
 export * from "./contacts";
 export * from "./admins";
+export * from "./agents";
+export * from "./couriers";
 export * from "./payment-settings";
+export * from "./payment-gateway-settings";

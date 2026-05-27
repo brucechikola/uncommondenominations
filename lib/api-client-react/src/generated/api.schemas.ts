@@ -59,8 +59,10 @@ export const OrderStatus = {
   pending: 'pending',
   confirmed: 'confirmed',
   awaiting_delivery: 'awaiting_delivery',
-  shipped: 'shipped',
+  picked_up: 'picked_up',
+  in_transit: 'in_transit',
   delivered: 'delivered',
+  failed_delivery: 'failed_delivery',
   cancelled: 'cancelled',
 } as const;
 
@@ -73,6 +75,11 @@ export const PaymentStatus = {
   failed: 'failed',
 } as const;
 
+/**
+ * @nullable
+ */
+export type PaymentGatewayLastPayload = { [key: string]: unknown } | null;
+
 export interface Payment {
   id: number;
   orderId: number;
@@ -84,6 +91,26 @@ export interface Payment {
   phoneNumber?: string | null;
   /** @nullable */
   accountName?: string | null;
+  /** @nullable */
+  gatewayTransactionId?: string | null;
+  /** @nullable */
+  gatewayStatus?: string | null;
+  /** @nullable */
+  gatewayCheckoutUrl?: string | null;
+  /** @nullable */
+  gatewayProviderReference?: string | null;
+  /** @nullable */
+  gatewayIdempotencyKey?: string | null;
+  /** @nullable */
+  gatewayLastPayload?: PaymentGatewayLastPayload;
+  /** @nullable */
+  lastCheckedAt?: string | null;
+  /** @nullable */
+  completedAt?: string | null;
+  /** @nullable */
+  expiresAt?: string | null;
+  /** @nullable */
+  failureReason?: string | null;
   createdAt: string;
   updatedAt?: string;
 }
@@ -100,6 +127,12 @@ export interface Order {
   totalAmount: number;
   status: OrderStatus;
   /** @nullable */
+  courierId?: number | null;
+  /** @nullable */
+  trackingNotes?: string | null;
+  /** @nullable */
+  deliveryPaymentMethod?: string | null;
+  /** @nullable */
   notes?: string | null;
   createdAt: string;
   payment?: Payment;
@@ -114,7 +147,7 @@ export const PaymentInputMethod = {
   zamtel_money: 'zamtel_money',
   visa_mastercard: 'visa_mastercard',
   bank_transfer: 'bank_transfer',
-  cash_on_delivery: 'cash_on_delivery',
+  mobile_money_on_delivery: 'mobile_money_on_delivery',
 } as const;
 
 export interface PaymentInput {
@@ -337,6 +370,252 @@ export interface UpdatePaymentSetting {
   enabled: boolean;
 }
 
+export interface AgentProfile {
+  id: number;
+  name: string;
+  phone: string;
+  email: string;
+  active: boolean;
+  totalOrders?: number;
+  createdAt: string;
+}
+
+export interface CreateAgentInput {
+  /** @minLength 2 */
+  name: string;
+  /** @minLength 8 */
+  phone: string;
+  email: string;
+  /** @minLength 6 */
+  password: string;
+}
+
+export interface UpdateAgentInput {
+  name?: string;
+  phone?: string;
+  email?: string;
+  active?: boolean;
+}
+
+export interface AgentCredentials {
+  email: string;
+  password: string;
+}
+
+export interface AgentLoginResult {
+  token: string;
+  agent: AgentProfile;
+}
+
+export type AgentOrderInputProductType = typeof AgentOrderInputProductType[keyof typeof AgentOrderInputProductType];
+
+
+export const AgentOrderInputProductType = {
+  paperback: 'paperback',
+  hardcover: 'hardcover',
+} as const;
+
+export type AgentOrderInputOverrideTier = typeof AgentOrderInputOverrideTier[keyof typeof AgentOrderInputOverrideTier];
+
+
+export const AgentOrderInputOverrideTier = {
+  standard: 'standard',
+  bulk: 'bulk',
+  institutional: 'institutional',
+} as const;
+
+export interface AgentOrderInput {
+  /** @minLength 2 */
+  fullName: string;
+  /** @minLength 8 */
+  phone: string;
+  email: string;
+  /** @minLength 5 */
+  deliveryAddress: string;
+  /** @minLength 2 */
+  city: string;
+  productType: AgentOrderInputProductType;
+  /** @minimum 1 */
+  quantity: number;
+  /** @nullable */
+  notes?: string | null;
+  overrideTier?: AgentOrderInputOverrideTier;
+}
+
+export interface AgentOrderResult {
+  id: number;
+  fullName: string;
+  phone: string;
+  email: string;
+  deliveryAddress: string;
+  city: string;
+  productType: string;
+  quantity: number;
+  totalAmount: number;
+  status: string;
+  pricingTier: string;
+  paymentLink: string;
+  /** @nullable */
+  notes?: string | null;
+  createdAt: string;
+}
+
+export interface AgentOrdersResult {
+  orders: AgentOrderResult[];
+  total: number;
+  page: number;
+  limit: number;
+}
+
+export interface AgentStats {
+  totalOrders: number;
+  totalRevenue: number;
+  pendingPayments: number;
+  confirmedOrders: number;
+}
+
+export type ProductWithStockType = typeof ProductWithStockType[keyof typeof ProductWithStockType];
+
+
+export const ProductWithStockType = {
+  paperback: 'paperback',
+  hardcover: 'hardcover',
+} as const;
+
+export interface ProductWithStock {
+  id: number;
+  name: string;
+  type: ProductWithStockType;
+  priceKwacha: number;
+  stockQuantity: number;
+  description: string;
+  features?: string[];
+  createdAt: string;
+}
+
+export interface CourierProfile {
+  id: number;
+  name: string;
+  phone: string;
+  /** @nullable */
+  email?: string | null;
+  /** @nullable */
+  vehicleInfo?: string | null;
+  active: boolean;
+  createdAt: string;
+}
+
+export interface CourierCredentials {
+  phone: string;
+  password: string;
+}
+
+export interface CourierLoginResult {
+  token: string;
+  courier: CourierProfile;
+}
+
+export interface CreateCourierInput {
+  /** @minLength 2 */
+  name: string;
+  /** @minLength 8 */
+  phone: string;
+  /** @nullable */
+  email?: string | null;
+  /** @nullable */
+  vehicleInfo?: string | null;
+  /** @minLength 6 */
+  password: string;
+}
+
+export type AssignCourierInputDeliveryPaymentMethod = typeof AssignCourierInputDeliveryPaymentMethod[keyof typeof AssignCourierInputDeliveryPaymentMethod];
+
+
+export const AssignCourierInputDeliveryPaymentMethod = {
+  mobile_money_on_delivery: 'mobile_money_on_delivery',
+  bank_transfer: 'bank_transfer',
+} as const;
+
+export interface AssignCourierInput {
+  courierId: number;
+  deliveryPaymentMethod?: AssignCourierInputDeliveryPaymentMethod;
+}
+
+export interface AdminOrderDetail {
+  id: number;
+  fullName: string;
+  phone: string;
+  email: string;
+  deliveryAddress: string;
+  city: string;
+  productType: string;
+  quantity: number;
+  totalAmount: number;
+  status: string;
+  /** @nullable */
+  notes?: string | null;
+  /** @nullable */
+  agentId?: number | null;
+  /** @nullable */
+  pricingTier?: string | null;
+  /** @nullable */
+  courierId?: number | null;
+  /** @nullable */
+  trackingNotes?: string | null;
+  /** @nullable */
+  deliveryPaymentMethod?: string | null;
+  payment?: Payment;
+  courier?: CourierProfile;
+  createdAt: string;
+}
+
+export interface CourierOrderResult {
+  id: number;
+  fullName: string;
+  phone: string;
+  deliveryAddress: string;
+  city: string;
+  productType: string;
+  quantity: number;
+  totalAmount: number;
+  status: string;
+  /** @nullable */
+  trackingNotes?: string | null;
+  /** @nullable */
+  deliveryPaymentMethod?: string | null;
+  /** @nullable */
+  notes?: string | null;
+  createdAt: string;
+}
+
+export interface CourierOrdersResult {
+  orders: CourierOrderResult[];
+  total: number;
+}
+
+export type CourierStatusUpdateStatus = typeof CourierStatusUpdateStatus[keyof typeof CourierStatusUpdateStatus];
+
+
+export const CourierStatusUpdateStatus = {
+  picked_up: 'picked_up',
+  in_transit: 'in_transit',
+  delivered: 'delivered',
+  failed_delivery: 'failed_delivery',
+} as const;
+
+export interface CourierStatusUpdate {
+  status: CourierStatusUpdateStatus;
+  /** @nullable */
+  trackingNotes?: string | null;
+}
+
+export interface CourierStats {
+  assignedOrders: number;
+  deliveredOrders: number;
+  inTransitOrders: number;
+  failedOrders: number;
+}
+
 export type ListAdminOrdersParams = {
 status?: string;
 page?: number;
@@ -397,8 +676,10 @@ export const UpdateOrderStatusBodyStatus = {
   pending: 'pending',
   confirmed: 'confirmed',
   awaiting_delivery: 'awaiting_delivery',
-  shipped: 'shipped',
+  picked_up: 'picked_up',
+  in_transit: 'in_transit',
   delivered: 'delivered',
+  failed_delivery: 'failed_delivery',
   cancelled: 'cancelled',
 } as const;
 
@@ -410,5 +691,32 @@ export type ListAdminContactsParams = {
 page?: number;
 limit?: number;
 search?: string;
+};
+
+export type ResetAgentPasswordBody = {
+  /** @minLength 6 */
+  password: string;
+};
+
+export type ResetAgentPassword200 = {
+  success?: boolean;
+};
+
+export type UpdateStockBody = {
+  /** @minimum 0 */
+  stockQuantity: number;
+};
+
+export type ListAgentOrdersParams = {
+page?: number;
+limit?: number;
+};
+
+export type UpdateCourierBody = {
+  active: boolean;
+};
+
+export type ListCourierOrdersParams = {
+status?: string;
 };
 

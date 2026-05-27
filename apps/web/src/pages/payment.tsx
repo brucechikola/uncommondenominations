@@ -2,26 +2,30 @@ import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useCartStore } from "@/lib/store";
-import { useInitiatePayment, useSimulatePayment, useGetOrder, useGetPaymentSettings } from "@workspace/api-client-react";
+import { useGetOrder, useGetPaymentSettings, useInitiatePayment, useRefreshPayment } from "@workspace/api-client-react";
 import { getGetOrderQueryKey, getGetPaymentSettingsQueryKey } from "@workspace/api-client-react";
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Loader2, Smartphone, CreditCard, Landmark, Check, X, PackageCheck } from "lucide-react";
 import { StepIndicator, MiniBook,
   PAGE_BG, CARD_BG, CARD_BORDER, GOLD, TEXT_PRIMARY, TEXT_MUTED, TEXT_DIM, fmtMoney } from "@/components/purchase-ui";
+import { detectMobileNetwork, extractZambianSubscriberDigits, MOBILE_NETWORK_META, toNormalizedZambianPhone, type MobileNetworkMethod } from "@/lib/mobile-money";
 
 const ALL_METHODS = [
-  { id: "airtel_money",      label: "Airtel Money",      accent: "hsl(0,82%,52%)",    bg: "hsl(0,70%,10%)",    abbr: "A",   network: "Airtel",  tab: "mobile" },
-  { id: "mtn_money",         label: "MTN Mobile Money",  accent: "hsl(48,100%,48%)",  bg: "hsl(48,80%,9%)",    abbr: "MTN", network: "MTN",     tab: "mobile" },
-  { id: "zamtel_money",      label: "Zamtel Money",       accent: "hsl(152,62%,44%)",  bg: "hsl(152,50%,8%)",   abbr: "ZM",  network: "Zamtel",  tab: "mobile" },
+  { id: "airtel_money",      ...MOBILE_NETWORK_META.airtel_money, tab: "mobile" },
+  { id: "mtn_money",         ...MOBILE_NETWORK_META.mtn_money, tab: "mobile" },
+  { id: "zamtel_money",      ...MOBILE_NETWORK_META.zamtel_money, tab: "mobile" },
   { id: "visa_mastercard",   label: "Visa / Mastercard",  accent: "hsl(215,80%,56%)",  bg: "",                  abbr: "CARD",network: "",        tab: "card"   },
   { id: "bank_transfer",     label: "Bank Transfer",      accent: "hsl(220,38%,55%)",  bg: "",                  abbr: "BNK", network: "",        tab: "bank"   },
-  { id: "cash_on_delivery",  label: "Cash on Delivery",   accent: "hsl(42,78%,46%)",   bg: "",                  abbr: "COD", network: "",        tab: "cod"    },
+  { id: "mobile_money_on_delivery",  label: "Mobile Money on Delivery",   accent: "hsl(42,78%,46%)",   bg: "",                  abbr: "MOD", network: "",        tab: "cod"    },
 ] as const;
 
 type Method = (typeof ALL_METHODS)[number]["id"];
 type Tab = "cod" | "mobile" | "card" | "bank";
 
+type MobileMethod = MobileNetworkMethod;
+const MOBILE_POLL_TIMEOUT_MS = 3 * 60 * 1000;
+const MOBILE_POLL_INTERVALS_MS = [5000, 7000, 10000] as const;
 const TABS: { id: Tab; label: string; icon: React.ElementType; subtext: string }[] = [
   { id: "cod",    label: "Pay on Delivery",  icon: PackageCheck, subtext: "Pay when it arrives" },
   { id: "mobile", label: "Mobile Money",     icon: Smartphone,   subtext: "Airtel · MTN · Zamtel" },
@@ -30,8 +34,8 @@ const TABS: { id: Tab; label: string; icon: React.ElementType; subtext: string }
 ];
 
 const inputStyle: React.CSSProperties = {
-  background: "hsl(222,54%,8%)",
-  borderColor: "hsl(220,38%,17%)",
+  background: "hsl(40,28%,99%)",
+  borderColor: CARD_BORDER,
   color: TEXT_PRIMARY,
   height: "3rem",
   borderRadius: "12px",
@@ -42,7 +46,7 @@ const inputStyle: React.CSSProperties = {
 function FieldLabel({ children }: { children: React.ReactNode }) {
   return (
     <label className="block font-sans text-[0.67rem] tracking-[0.14em] uppercase font-medium mb-2"
-      style={{ color: "hsl(40,18%,48%)" }}>
+      style={{ color: TEXT_DIM }}>
       {children}
     </label>
   );
@@ -60,17 +64,34 @@ function NetworkBadge({ abbr, accent, size = 42 }: { abbr: string; accent: strin
   );
 }
 
+function NetworkLogo({ method, size = 40 }: { method: MobileMethod; size?: number }) {
+  const meta = ALL_METHODS.find((item) => item.id === method);
+  return (
+    <div
+      className="overflow-hidden rounded-xl flex items-center justify-center flex-shrink-0 bg-white"
+      style={{
+        width: size,
+        height: size,
+        border: `1px solid ${meta?.accent ?? CARD_BORDER}`,
+        boxShadow: `0 0 0 3px ${meta?.accent ?? "#000"}12`,
+      }}
+    >
+      <img
+        src={MOBILE_NETWORK_META[method].logo}
+        alt={ALL_METHODS.find((item) => item.id === method)?.label ?? method}
+        className="w-full h-full object-cover"
+      />
+    </div>
+  );
+}
+
 export default function Payment() {
   const [, navigate] = useLocation();
   const { currentOrderId, setCurrentPaymentId } = useCartStore();
-  const [activeTab, setActiveTab] = useState<Tab>("cod");
-  const [selectedMethod, setSelectedMethod] = useState<Method | null>(null);
+  const [activeTab, setActiveTab] = useState<Tab>("mobile");
   const [phone, setPhone] = useState("");
-  const [accountName, setAccountName] = useState("");
-  const [cardNumber, setCardNumber] = useState("");
-  const [expiry, setExpiry] = useState("");
-  const [cvc, setCvc] = useState("");
   const [stage, setStage] = useState<"select" | "processing" | "success" | "order_confirmed" | "failed">("select");
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const { data: order } = useGetOrder(currentOrderId!, {
     query: { enabled: !!currentOrderId, queryKey: getGetOrderQueryKey(currentOrderId!) },
@@ -92,35 +113,61 @@ export default function Payment() {
   const visibleTabs = TABS.filter((t) => enabledTabs.has(t.id));
 
   const initiatePayment = useInitiatePayment();
-  const simulatePayment = useSimulatePayment();
+  const refreshPayment = useRefreshPayment();
 
   const isMobile = activeTab === "mobile";
-  const selectedMobileMethod = selectedMethod
-    ? METHODS.find((m) => m.id === selectedMethod && m.tab === "mobile") ?? null
+  const subscriberDigits = isMobile ? extractZambianSubscriberDigits(phone) : "";
+  const normalizedMobileNumber = subscriberDigits.length > 0 ? toNormalizedZambianPhone(subscriberDigits) : "";
+  const detectedMobileNetwork = isMobile ? detectMobileNetwork(subscriberDigits) : null;
+  const detectedMobileMethod = detectedMobileNetwork
+    ? METHODS.find((m) => m.id === detectedMobileNetwork && m.tab === "mobile") ?? null
     : null;
+  const detectedAccent = detectedMobileMethod?.accent ?? GOLD;
+  const detectedSoftBg = detectedMobileMethod ? `${detectedMobileMethod.accent}12` : "hsl(40,18%,96%)";
+  const detectedSoftBorder = detectedMobileMethod ? `${detectedMobileMethod.accent}40` : CARD_BORDER;
+  const detectedFieldBg = detectedMobileMethod ? `${detectedMobileMethod.accent}0D` : "hsl(40,28%,99%)";
+  const detectedFieldBorder = detectedMobileMethod ? detectedMobileMethod.accent : CARD_BORDER;
 
   function handleTabChange(tab: Tab) {
     setActiveTab(tab);
-    setSelectedMethod(null);
     setPhone("");
+    setErrorMessage(null);
   }
 
   function effectiveMethod(): Method | null {
     if (activeTab === "card")  return "visa_mastercard";
     if (activeTab === "bank")  return "bank_transfer";
-    if (activeTab === "cod")   return "cash_on_delivery";
-    return selectedMethod;
+    if (activeTab === "cod")   return "mobile_money_on_delivery";
+    return detectedMobileNetwork;
   }
 
   function canPay(): boolean {
     if (stage !== "select") return false;
-    if (activeTab === "mobile") return !!selectedMethod && phone.trim().length >= 8;
+    if (activeTab === "mobile") return !!detectedMobileNetwork && normalizedMobileNumber.length === 12;
     return true;
+  }
+
+  async function pollPaymentStatus(paymentId: number) {
+    const startedAt = Date.now();
+    let attempt = 0;
+
+    while (Date.now() - startedAt < MOBILE_POLL_TIMEOUT_MS) {
+      const delay = MOBILE_POLL_INTERVALS_MS[Math.min(attempt, MOBILE_POLL_INTERVALS_MS.length - 1)];
+      await new Promise((resolve) => setTimeout(resolve, delay));
+      const refreshed = await refreshPayment.mutateAsync({ id: paymentId });
+      if (refreshed.status === "successful" || refreshed.status === "failed") {
+        return refreshed;
+      }
+      attempt += 1;
+    }
+
+    return refreshPayment.mutateAsync({ id: paymentId });
   }
 
   const handlePay = async () => {
     const method = effectiveMethod();
     if (!method || !currentOrderId) return;
+    setErrorMessage(null);
     setStage("processing");
 
     try {
@@ -128,8 +175,8 @@ export default function Payment() {
         data: {
           orderId: currentOrderId,
           method,
-          phoneNumber: activeTab === "mobile" ? phone : null,
-          accountName: accountName || null,
+          phoneNumber: activeTab === "mobile" ? normalizedMobileNumber : null,
+          accountName: null,
         },
       });
       setCurrentPaymentId(payment.id);
@@ -142,23 +189,53 @@ export default function Payment() {
         return;
       }
 
-      // Online payment — simulate success
-      await new Promise((r) => setTimeout(r, 2500));
-      const result = await simulatePayment.mutateAsync({ id: payment.id, data: { outcome: "successful" } });
-      if (result.status === "successful") {
-        setStage("success");
-        setTimeout(() => navigate("/confirmation"), 1800);
-      } else {
+      if (activeTab === "mobile") {
+        const result = await pollPaymentStatus(payment.id);
+        if (result.status === "successful") {
+          setStage("success");
+          setTimeout(() => navigate("/confirmation"), 1800);
+          return;
+        }
+
+        if (result.status === "pending") {
+          navigate("/confirmation");
+          return;
+        }
+
+        setErrorMessage(result.failureReason || "The payment was not completed.");
         setStage("failed");
+        return;
       }
-    } catch {
+
+      if (payment.gatewayCheckoutUrl) {
+        window.location.assign(payment.gatewayCheckoutUrl);
+        return;
+      }
+
+      setErrorMessage("The payment session could not be created.");
+      setStage("failed");
+    } catch (error) {
+      let message = "Something went wrong while starting the payment.";
+      if (error && typeof error === "object" && "data" in error) {
+        const data = (error as { data?: unknown }).data;
+        if (data && typeof data === "object" && "error" in data && typeof data.error === "string") {
+          message = data.error;
+        } else if ("message" in (error as Record<string, unknown>) && typeof (error as Record<string, unknown>).message === "string") {
+          message = (error as Record<string, string>).message;
+        }
+      } else if (error instanceof Error) {
+        message = error.message;
+      }
+      setErrorMessage(message);
       setStage("failed");
     }
   };
 
   const payBtnLabel = (() => {
     if (activeTab === "cod")  return `Confirm Order — ${fmtMoney(order?.totalAmount ?? 0)}`;
-    if (activeTab === "bank") return `Confirm Order — ${fmtMoney(order?.totalAmount ?? 0)}`;
+    if (activeTab === "mobile") return `Send Prompt — ${fmtMoney(order?.totalAmount ?? 0)}`;
+    if (activeTab === "card") return `Continue to Secure Checkout — ${fmtMoney(order?.totalAmount ?? 0)}`;
+    if (activeTab === "bank") return `Continue to Secure Checkout — ${fmtMoney(order?.totalAmount ?? 0)}`;
     return `Pay ${fmtMoney(order?.totalAmount ?? 0)}`;
   })();
 
@@ -168,7 +245,7 @@ export default function Payment() {
 
       <div className="absolute inset-x-0 top-0 h-[420px] overflow-hidden pointer-events-none" style={{ zIndex: 0 }}>
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[900px] h-[420px]"
-          style={{ background: "radial-gradient(ellipse, hsl(222,65%,13%,0.7) 0%, transparent 65%)" }} />
+          style={{ background: "radial-gradient(ellipse, hsl(42,70%,80%,0.3) 0%, transparent 65%)" }} />
       </div>
 
       <div className="relative z-10 container mx-auto px-6 pt-14 max-w-5xl">
@@ -199,7 +276,7 @@ export default function Payment() {
 
                   {/* ── TAB BAR — 2×2 grid ── */}
                   <div className="grid grid-cols-2 gap-2 mb-6 p-1 rounded-2xl"
-                    style={{ background: "hsl(222,52%,7%)", border: `1px solid ${CARD_BORDER}` }}>
+                    style={{ background: "hsl(40,18%,94%)", border: `1px solid ${CARD_BORDER}` }}>
                     {visibleTabs.map((tab) => {
                       const active = activeTab === tab.id;
                       const Icon = tab.icon;
@@ -214,8 +291,8 @@ export default function Payment() {
                           )}
                           <div className="relative z-10 flex-shrink-0 w-8 h-8 rounded-lg flex items-center justify-center"
                             style={{
-                              background: active ? "hsl(42,78%,46%,0.12)" : "hsl(220,38%,10%)",
-                              border: `1px solid ${active ? "hsl(42,78%,46%,0.28)" : "hsl(220,28%,14%)"}`,
+                              background: active ? "hsl(42,78%,46%,0.12)" : "hsl(40,14%,90%)",
+                              border: `1px solid ${active ? "hsl(42,78%,46%,0.28)" : CARD_BORDER}`,
                               transition: "all 0.2s",
                             }}>
                             <Icon size={15}
@@ -228,7 +305,7 @@ export default function Payment() {
                               {tab.label}
                             </p>
                             <p className="font-sans text-[0.58rem] leading-tight mt-0.5"
-                              style={{ color: active ? TEXT_DIM : "hsl(220,18%,24%)", transition: "color 0.2s" }}>
+                              style={{ color: TEXT_DIM, transition: "color 0.2s" }}>
                               {tab.subtext}
                             </p>
                           </div>
@@ -251,7 +328,7 @@ export default function Payment() {
 
                           {/* Header */}
                           <div className="flex items-center gap-3.5 px-5 py-4"
-                            style={{ background: "hsl(42,60%,7%)", borderBottom: `1px solid hsl(42,78%,26%,0.35)` }}>
+                            style={{ background: "hsl(42,78%,97%)", borderBottom: `1px solid hsl(42,78%,46%,0.2)` }}>
                             <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
                               style={{ background: "hsl(42,78%,46%,0.12)", border: "1px solid hsl(42,78%,46%,0.28)" }}>
                               <PackageCheck size={18} style={{ color: GOLD }} />
@@ -294,7 +371,7 @@ export default function Payment() {
                           {/* Contact note */}
                           <div className="px-5 pb-5">
                             <div className="rounded-xl p-3.5 flex items-center gap-3"
-                              style={{ background: "hsl(222,52%,7%)", border: `1px solid ${CARD_BORDER}` }}>
+                              style={{ background: "hsl(40,18%,96%)", border: `1px solid ${CARD_BORDER}` }}>
                               <span className="text-sm flex-shrink-0">📞</span>
                               <p className="font-sans text-[0.68rem]" style={{ color: TEXT_DIM }}>
                                 Questions? Call or WhatsApp{" "}
@@ -306,7 +383,7 @@ export default function Payment() {
 
                         {/* COD disclaimer */}
                         <div className="rounded-xl px-4 py-3 mb-6 flex items-start gap-2.5"
-                          style={{ background: "hsl(42,60%,7%)", border: "1px solid hsl(42,78%,26%,0.3)" }}>
+                          style={{ background: "hsl(42,78%,97%)", border: "1px solid hsl(42,78%,46%,0.2)" }}>
                           <span className="text-sm flex-shrink-0 mt-0.5">⚠️</span>
                           <p className="font-sans text-[0.68rem] leading-relaxed" style={{ color: TEXT_DIM }}>
                             Your receipt will show <span className="font-semibold" style={{ color: TEXT_MUTED }}>Unpaid</span> until
@@ -322,57 +399,74 @@ export default function Payment() {
                         initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }}
                         exit={{ opacity: 0, x: 10 }} transition={{ duration: 0.18 }}>
 
-                        <div className="rounded-2xl overflow-hidden mb-6"
-                          style={{ background: CARD_BG, border: `1px solid ${CARD_BORDER}` }}>
-                          {METHODS.filter((m) => m.tab === "mobile").map((m, idx, arr) => {
-                            const sel = selectedMethod === m.id;
-                            return (
-                              <button key={m.id} type="button"
-                                onClick={() => setSelectedMethod(m.id)}
-                                className="w-full flex items-center gap-4 px-5 py-4 text-left transition-all"
-                                style={{
-                                  background: sel ? m.bg : "transparent",
-                                  borderBottom: idx < arr.length - 1 ? `1px solid ${CARD_BORDER}` : "none",
-                                }}>
-                                <NetworkBadge abbr={m.abbr} accent={m.accent} />
-                                <div className="flex-1 min-w-0">
-                                  <p className="font-sans text-[0.82rem] font-semibold" style={{ color: TEXT_PRIMARY }}>{m.label}</p>
-                                  <p className="font-sans text-[0.68rem] mt-0.5" style={{ color: TEXT_DIM }}>{m.network} mobile wallet</p>
-                                </div>
-                                <div className="flex-shrink-0 w-5 h-5 rounded-full flex items-center justify-center"
-                                  style={{ background: sel ? m.accent : "transparent", border: `2px solid ${sel ? m.accent : "hsl(220,28%,20%)"}`, transition: "all 0.18s" }}>
-                                  {sel && <Check size={11} style={{ color: "white" }} strokeWidth={3} />}
-                                </div>
-                              </button>
-                            );
-                          })}
-                        </div>
+                        <div className="rounded-2xl p-5 mb-6" style={{ background: CARD_BG, border: `1px solid ${CARD_BORDER}` }}>
+                          <div className="flex items-center gap-3 mb-4">
+                            <div className="w-10 h-10 rounded-xl flex items-center justify-center"
+                              style={{ background: "hsl(42,78%,46%,0.12)", border: "1px solid hsl(42,78%,46%,0.28)" }}>
+                              <Smartphone size={18} style={{ color: GOLD }} />
+                            </div>
+                            <div>
+                              <p className="font-sans text-[0.82rem] font-semibold" style={{ color: TEXT_PRIMARY }}>Mobile Money</p>
+                              <p className="font-sans text-[0.68rem]" style={{ color: TEXT_DIM }}>
+                                Enter the customer&apos;s number and we&apos;ll detect the correct network automatically.
+                              </p>
+                            </div>
+                          </div>
 
-                        <AnimatePresence>
-                          {selectedMethod && selectedMobileMethod && (
-                            <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }}
-                              exit={{ opacity: 0, y: -8 }} transition={{ duration: 0.2 }} className="mb-6">
-                              <div className="rounded-2xl p-5" style={{ background: CARD_BG, border: `1px solid ${CARD_BORDER}` }}>
-                                <div className="flex items-center gap-3 mb-4">
-                                  <NetworkBadge abbr={selectedMobileMethod.abbr} accent={selectedMobileMethod.accent} size={36} />
-                                  <div>
-                                    <p className="font-sans text-[0.75rem] font-semibold" style={{ color: TEXT_PRIMARY }}>{selectedMobileMethod.label}</p>
-                                    <p className="font-sans text-[0.65rem]" style={{ color: TEXT_DIM }}>Enter the number linked to your wallet</p>
-                                  </div>
+                          <FieldLabel>Mobile Money Number *</FieldLabel>
+                          <div
+                            className="flex items-center rounded-xl border px-3"
+                            style={{
+                              background: detectedFieldBg,
+                              borderColor: detectedFieldBorder,
+                              height: "3rem",
+                              borderWidth: detectedMobileMethod ? "1.5px" : "1px",
+                              boxShadow: detectedMobileMethod ? `0 0 0 3px ${detectedMobileMethod.accent}18` : "none",
+                            }}
+                          >
+                            <span className="font-sans text-[0.8rem] font-semibold mr-2" style={{ color: detectedMobileMethod ? detectedAccent : TEXT_PRIMARY }}>
+                              +260
+                            </span>
+                            <input
+                              value={subscriberDigits}
+                              onChange={(e) => setPhone(e.target.value)}
+                              placeholder="977 123 456"
+                              autoFocus
+                              inputMode="numeric"
+                              className="w-full bg-transparent outline-none text-sm placeholder:text-[hsl(220,22%,72%)]"
+                              style={{ color: detectedMobileMethod ? detectedAccent : TEXT_PRIMARY, fontFamily: "var(--app-font-sans)" }}
+                            />
+                          </div>
+
+                          <div className="mt-3 rounded-xl p-3.5"
+                            style={{ background: detectedSoftBg, border: `1px solid ${detectedSoftBorder}` }}>
+                            {detectedMobileMethod ? (
+                              <div className="flex items-center gap-3">
+                                <NetworkLogo method={detectedMobileMethod.id as MobileMethod} size={38} />
+                                <div>
+                                  <p className="font-sans text-[0.72rem] font-semibold" style={{ color: detectedAccent }}>
+                                    Detected: {detectedMobileMethod.label}
+                                  </p>
+                                  <p className="font-sans text-[0.64rem]" style={{ color: TEXT_DIM }}>
+                                    Normalized number: {normalizedMobileNumber}. A payment prompt will be sent to this wallet.
+                                  </p>
                                 </div>
-                                <FieldLabel>Mobile Money Number *</FieldLabel>
-                                <Input value={phone} onChange={(e) => setPhone(e.target.value)}
-                                  placeholder="e.g. 0977 123 456" autoFocus
-                                  style={inputStyle}
-                                  className="placeholder:text-[hsl(220,18%,28%)] focus-visible:ring-1 focus-visible:ring-[hsl(42,78%,46%,0.3)] focus-visible:ring-offset-0" />
-                                <p className="mt-2.5 font-sans text-[0.65rem] flex items-center gap-1.5" style={{ color: TEXT_DIM }}>
-                                  <Smartphone size={11} />
-                                  A payment prompt will be sent to this number.
+                              </div>
+                            ) : (
+                              <div>
+                                <p className="font-sans text-[0.7rem] font-semibold" style={{ color: TEXT_PRIMARY }}>
+                                  Supported prefixes
+                                </p>
+                                <p className="font-sans text-[0.64rem] mt-1" style={{ color: TEXT_DIM }}>
+                                  Airtel: 097 / 077 · MTN: 096 / 076 · Zamtel: 095 / 075
+                                </p>
+                                <p className="font-sans text-[0.64rem] mt-1" style={{ color: TEXT_DIM }}>
+                                  We normalize every number to `260XXXXXXXXX` and require exactly 12 digits in total.
                                 </p>
                               </div>
-                            </motion.div>
-                          )}
-                        </AnimatePresence>
+                            )}
+                          </div>
+                        </div>
                       </motion.div>
                     )}
 
@@ -383,15 +477,15 @@ export default function Payment() {
                         exit={{ opacity: 0, x: 10 }} transition={{ duration: 0.18 }}>
                         <div className="rounded-2xl overflow-hidden mb-6" style={{ background: CARD_BG, border: `1px solid ${CARD_BORDER}` }}>
                           <div className="relative px-6 pt-6 pb-5 overflow-hidden"
-                            style={{ background: "linear-gradient(135deg, hsl(215,60%,12%) 0%, hsl(222,58%,8%) 100%)", borderBottom: `1px solid ${CARD_BORDER}` }}>
+                            style={{ background: "linear-gradient(135deg, hsl(215,60%,96%) 0%, hsl(215,40%,92%) 100%)", borderBottom: `1px solid ${CARD_BORDER}` }}>
                             <div className="absolute top-0 right-0 w-40 h-40 rounded-full pointer-events-none"
-                              style={{ background: "radial-gradient(circle, hsl(215,80%,56%,0.08) 0%, transparent 70%)", transform: "translate(30%, -30%)" }} />
+                              style={{ background: "radial-gradient(circle, hsl(215,80%,56%,0.1) 0%, transparent 70%)", transform: "translate(30%, -30%)" }} />
                             <div className="flex items-start justify-between">
                               <div>
-                                <p className="font-sans text-[0.6rem] tracking-[0.24em] uppercase font-bold mb-3" style={{ color: "hsl(215,60%,60%)" }}>Debit / Credit Card</p>
+                                <p className="font-sans text-[0.6rem] tracking-[0.24em] uppercase font-bold mb-3" style={{ color: "hsl(215,60%,40%)" }}>Debit / Credit Card</p>
                                 <div className="flex items-center gap-2 mb-4">
-                                  <div className="px-2.5 py-1 rounded-md" style={{ background: "hsl(215,80%,56%,0.15)", border: "1px solid hsl(215,80%,56%,0.3)" }}>
-                                    <span className="font-sans font-black text-[0.72rem] italic" style={{ color: "hsl(215,80%,66%)" }}>VISA</span>
+                                  <div className="px-2.5 py-1 rounded-md" style={{ background: "hsl(215,80%,56%,0.12)", border: "1px solid hsl(215,80%,56%,0.25)" }}>
+                                    <span className="font-sans font-black text-[0.72rem] italic" style={{ color: "hsl(215,80%,46%)" }}>VISA</span>
                                   </div>
                                   <div className="flex">
                                     <div className="w-6 h-6 rounded-full" style={{ background: "hsl(0,82%,52%,0.85)", marginRight: "-8px" }} />
@@ -399,37 +493,37 @@ export default function Payment() {
                                   </div>
                                 </div>
                               </div>
-                              <CreditCard size={28} style={{ color: "hsl(215,60%,45%)", marginTop: 2 }} />
+                              <CreditCard size={28} style={{ color: "hsl(215,60%,50%)", marginTop: 2 }} />
                             </div>
-                            <p className="font-mono text-[0.78rem]" style={{ color: "hsl(220,20%,38%)", letterSpacing: "0.16em" }}>•••• •••• •••• ••••</p>
+                            <p className="font-mono text-[0.78rem]" style={{ color: "hsl(220,22%,52%)", letterSpacing: "0.16em" }}>CARD CHECKOUT</p>
                           </div>
                           <div className="p-5 space-y-4">
-                            <div>
-                              <FieldLabel>Cardholder Name</FieldLabel>
-                              <Input value={accountName} onChange={(e) => setAccountName(e.target.value)} placeholder="Name on card" style={inputStyle}
-                                className="placeholder:text-[hsl(220,18%,28%)] focus-visible:ring-1 focus-visible:ring-[hsl(42,78%,46%,0.3)] focus-visible:ring-offset-0" />
+                            <div className="rounded-xl p-4"
+                              style={{ background: "linear-gradient(135deg, hsl(215,80%,56%,0.08) 0%, hsl(215,60%,97%) 100%)", border: `1px solid ${CARD_BORDER}` }}>
+                              <p className="font-sans text-[0.76rem] font-semibold mb-2" style={{ color: TEXT_PRIMARY }}>
+                                Pay with card
+                              </p>
+                              <p className="font-sans text-[0.68rem] leading-relaxed" style={{ color: TEXT_DIM }}>
+                                When you continue, you&apos;ll be taken to the card payment page to finish the payment. Card details are entered there, not on this page.
+                              </p>
                             </div>
-                            <div>
-                              <FieldLabel>Card Number <span style={{ color: TEXT_DIM }}>(demo)</span></FieldLabel>
-                              <Input value={cardNumber} onChange={(e) => setCardNumber(e.target.value)} placeholder="4242 4242 4242 4242" style={inputStyle}
-                                className="placeholder:text-[hsl(220,18%,28%)] focus-visible:ring-1 focus-visible:ring-[hsl(42,78%,46%,0.3)] focus-visible:ring-offset-0" />
+                            <div className="grid grid-cols-3 gap-3">
+                              {[
+                                { title: "Step 1", desc: "Open the payment page" },
+                                { title: "Step 2", desc: "Enter card details" },
+                                { title: "Step 3", desc: "Return after payment" },
+                              ].map((step) => (
+                                <div key={step.title} className="rounded-xl p-3"
+                                  style={{ background: "hsl(40,18%,96%)", border: `1px solid ${CARD_BORDER}` }}>
+                                  <p className="font-sans text-[0.58rem] font-bold tracking-[0.16em] uppercase mb-2" style={{ color: GOLD }}>
+                                    {step.title}
+                                  </p>
+                                  <p className="font-sans text-[0.64rem] leading-relaxed" style={{ color: TEXT_DIM }}>
+                                    {step.desc}
+                                  </p>
+                                </div>
+                              ))}
                             </div>
-                            <div className="grid grid-cols-2 gap-4">
-                              <div>
-                                <FieldLabel>Expiry</FieldLabel>
-                                <Input value={expiry} onChange={(e) => setExpiry(e.target.value)} placeholder="MM / YY" style={inputStyle}
-                                  className="placeholder:text-[hsl(220,18%,28%)] focus-visible:ring-1 focus-visible:ring-[hsl(42,78%,46%,0.3)] focus-visible:ring-offset-0" />
-                              </div>
-                              <div>
-                                <FieldLabel>CVC</FieldLabel>
-                                <Input value={cvc} onChange={(e) => setCvc(e.target.value)} placeholder="•••" style={inputStyle}
-                                  className="placeholder:text-[hsl(220,18%,28%)] focus-visible:ring-1 focus-visible:ring-[hsl(42,78%,46%,0.3)] focus-visible:ring-offset-0" />
-                              </div>
-                            </div>
-                            <p className="font-sans text-[0.65rem] flex items-center gap-1.5" style={{ color: TEXT_DIM }}>
-                              <span className="inline-block w-3 h-3 rounded-full flex-shrink-0" style={{ background: "hsl(152,62%,44%,0.3)", border: "1px solid hsl(152,62%,44%,0.5)" }} />
-                              Simulated payment — no real card data is collected or processed.
-                            </p>
                           </div>
                         </div>
                       </motion.div>
@@ -441,21 +535,21 @@ export default function Payment() {
                         initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }}
                         exit={{ opacity: 0, x: 10 }} transition={{ duration: 0.18 }}>
                         <div className="rounded-2xl overflow-hidden mb-6" style={{ background: CARD_BG, border: `1px solid ${CARD_BORDER}` }}>
-                          <div className="flex items-center gap-3.5 px-5 py-4" style={{ background: "hsl(222,52%,7%)", borderBottom: `1px solid ${CARD_BORDER}` }}>
-                            <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: "hsl(220,38%,55%,0.12)", border: "1px solid hsl(220,38%,55%,0.25)" }}>
-                              <Landmark size={18} style={{ color: "hsl(220,60%,66%)" }} />
+                            <div className="flex items-center gap-3.5 px-5 py-4" style={{ background: "hsl(215,60%,97%)", borderBottom: `1px solid ${CARD_BORDER}` }}>
+                            <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: "hsl(215,80%,56%,0.1)", border: "1px solid hsl(215,80%,56%,0.2)" }}>
+                              <Landmark size={18} style={{ color: "hsl(215,60%,46%)" }} />
                             </div>
                             <div>
-                              <p className="font-sans text-[0.8rem] font-semibold" style={{ color: TEXT_PRIMARY }}>Direct Bank Transfer</p>
-                              <p className="font-sans text-[0.68rem]" style={{ color: TEXT_DIM }}>Transfer to our account and send proof of payment</p>
+                              <p className="font-sans text-[0.8rem] font-semibold" style={{ color: TEXT_PRIMARY }}>Bank and other payment options</p>
+                              <p className="font-sans text-[0.68rem]" style={{ color: TEXT_DIM }}>Continue to the payment page to choose an available option.</p>
                             </div>
                           </div>
                           <div className="p-5 space-y-0">
                             {[
-                              { label: "Bank",      value: "First National Bank Zambia", highlight: false },
-                              { label: "Account",   value: "1234567890",                 highlight: true  },
-                              { label: "Name",      value: "Lumina Publications Ltd",     highlight: false },
+                              { label: "Payment", value: "Checkout page", highlight: false },
+                              { label: "Flow", value: "Choose an available payment option and complete the payment there", highlight: false },
                               { label: "Reference", value: `Order #${currentOrderId ?? "—"}`, highlight: true },
+                              { label: "Currency", value: "ZMW", highlight: true },
                             ].map(({ label, value, highlight }, i, arr) => (
                               <div key={label} className="flex justify-between items-center py-3.5"
                                 style={{ borderBottom: i < arr.length - 1 ? `1px solid ${CARD_BORDER}` : "none" }}>
@@ -465,14 +559,14 @@ export default function Payment() {
                             ))}
                           </div>
                           <div className="px-5 pb-5">
-                            <div className="rounded-xl p-4 flex items-center gap-3" style={{ background: "hsl(142,60%,6%)", border: "1px solid hsl(142,60%,18%)" }}>
-                              <div className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0" style={{ background: "hsl(142,60%,10%)", border: "1px solid hsl(142,60%,22%)" }}>
-                                <span className="text-sm">📲</span>
+                            <div className="rounded-xl p-4 flex items-center gap-3" style={{ background: "hsl(215,60%,97%)", border: `1px solid ${CARD_BORDER}` }}>
+                              <div className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0" style={{ background: "hsl(215,80%,56%,0.1)", border: "1px solid hsl(215,80%,56%,0.2)" }}>
+                                <span className="text-sm">🏦</span>
                               </div>
                               <div>
-                                <p className="font-sans text-[0.72rem] font-semibold" style={{ color: TEXT_PRIMARY }}>Send proof of payment</p>
+                                <p className="font-sans text-[0.72rem] font-semibold" style={{ color: TEXT_PRIMARY }}>Continue to payment</p>
                                 <p className="font-sans text-[0.66rem]" style={{ color: TEXT_DIM }}>
-                                  WhatsApp receipt to <span className="font-bold" style={{ color: GOLD }}>0979 697 853</span>
+                                  We&apos;ll open the payment page so you can choose an available option and complete the order there.
                                 </p>
                               </div>
                             </div>
@@ -483,14 +577,12 @@ export default function Payment() {
                   </AnimatePresence>
 
                   {/* Manual payment notice */}
-                  <div className="flex gap-3 rounded-xl p-4 mb-6"
-                    style={{ background: "hsl(42,60%,7%)", border: "1px solid hsl(42,78%,26%,0.3)" }}>
-                    <span className="text-base flex-shrink-0 mt-0.5">📞</span>
-                    <p className="font-sans text-[0.7rem]" style={{ color: TEXT_DIM }}>
-                      Prefer to arrange payment directly?{" "}
-                      <span className="font-semibold" style={{ color: GOLD }}>Call 0979 697 853</span>
-                    </p>
-                  </div>
+                  {errorMessage && (
+                    <div className="rounded-xl px-4 py-3 mb-4"
+                      style={{ background: "hsl(0,55%,96%)", border: "1px solid hsl(0,60%,84%)", color: "hsl(0,52%,38%)" }}>
+                      <p className="font-sans text-[0.7rem] leading-relaxed">{errorMessage}</p>
+                    </div>
+                  )}
 
                   <div className="h-px mb-6" style={{ background: CARD_BORDER }} />
 
@@ -500,7 +592,7 @@ export default function Payment() {
                       disabled={!canPay()}
                       style={{
                         height: "3rem",
-                        background: canPay() ? GOLD : "hsl(220,38%,12%)",
+                        background: canPay() ? GOLD : "hsl(40,14%,88%)",
                         color: canPay() ? "#fff" : TEXT_DIM,
                         fontWeight: canPay() ? 700 : undefined,
                         boxShadow: canPay() ? "0 4px 24px rgba(141,107,61,0.28)" : "none",
@@ -527,12 +619,14 @@ export default function Payment() {
                       style={{ background: "hsl(42,78%,46%,0.15)" }} />
                   </div>
                   <h2 className="font-display text-2xl font-bold mb-3" style={{ color: TEXT_PRIMARY }}>
-                    {activeTab === "cod" ? "Confirming your order…" : "Processing Payment"}
+                    {activeTab === "cod" ? "Confirming your order…" : activeTab === "mobile" ? "Processing Payment" : "Opening payment page…"}
                   </h2>
                   <p className="font-serif text-sm" style={{ color: TEXT_MUTED }}>
                     {activeTab === "cod"
                       ? "Setting up your cash on delivery order…"
-                      : "Please wait while we confirm your transaction…"}
+                      : activeTab === "mobile"
+                        ? "Please wait while we confirm your transaction. This can take up to 3 minutes."
+                        : "Opening the payment page…"}
                   </p>
                   {activeTab === "mobile" && (
                     <p className="font-sans text-[0.72rem] mt-3" style={{ color: TEXT_DIM }}>
@@ -551,7 +645,7 @@ export default function Payment() {
                     transition={{ type: "spring", stiffness: 260, damping: 18 }}>
                     <div className="w-16 h-16 rounded-full flex items-center justify-center"
                       style={{ background: GOLD, boxShadow: "0 0 40px hsl(42,78%,46%,0.4)" }}>
-                      <PackageCheck size={28} strokeWidth={2.5} style={{ color: "hsl(222,58%,8%)" }} />
+                      <PackageCheck size={28} strokeWidth={2.5} style={{ color: "#fff" }} />
                     </div>
                   </motion.div>
                   <h2 className="font-display text-2xl font-bold mb-3" style={{ color: TEXT_PRIMARY }}>Order Confirmed!</h2>
@@ -570,7 +664,7 @@ export default function Payment() {
                     transition={{ type: "spring", stiffness: 260, damping: 18 }}>
                     <div className="w-16 h-16 rounded-full flex items-center justify-center"
                       style={{ background: GOLD, boxShadow: "0 0 40px hsl(42,78%,46%,0.4)" }}>
-                      <Check size={28} strokeWidth={3} style={{ color: "hsl(222,58%,8%)" }} />
+                      <Check size={28} strokeWidth={3} style={{ color: "#fff" }} />
                     </div>
                   </motion.div>
                   <h2 className="font-display text-2xl font-bold mb-3" style={{ color: TEXT_PRIMARY }}>Payment Successful!</h2>
@@ -588,8 +682,18 @@ export default function Payment() {
                   </div>
                   <h2 className="font-display text-2xl font-bold mb-3" style={{ color: TEXT_PRIMARY }}>Payment Failed</h2>
                   <p className="font-serif text-sm mb-8" style={{ color: TEXT_MUTED }}>
-                    Something went wrong. Please try again or call{" "}
-                    <span style={{ color: GOLD }}>0979 697 853</span>.
+                    {errorMessage || "Something went wrong. Please try again or call "}
+                    {!errorMessage && (
+                      <>
+                        <span style={{ color: GOLD }}>0979 697 853</span>.
+                      </>
+                    )}
+                    {errorMessage && " "}
+                    {errorMessage && (
+                      <>
+                        Call <span style={{ color: GOLD }}>0979 697 853</span> if the issue persists.
+                      </>
+                    )}
                   </p>
                   <Button onClick={() => setStage("select")} className="font-sans uppercase"
                     style={{ background: GOLD, color: "#fff", fontWeight: 700, boxShadow: "0 4px 20px rgba(141,107,61,0.25)" }}>
@@ -606,7 +710,7 @@ export default function Payment() {
             className="lg:sticky lg:top-24 self-start hidden lg:block">
             <div className="rounded-2xl overflow-hidden" style={{ background: CARD_BG, border: `1px solid ${CARD_BORDER}` }}>
               <div className="flex items-center justify-center py-8"
-                style={{ background: "hsl(222,58%,6%)", borderBottom: `1px solid ${CARD_BORDER}` }}>
+                style={{ background: "hsl(40,22%,94%)", borderBottom: `1px solid ${CARD_BORDER}` }}>
                 <div style={{ position: "relative" }}>
                   <div style={{ position: "absolute", inset: "-20px", background: "radial-gradient(ellipse, hsl(42,78%,46%,0.08) 0%, transparent 70%)", filter: "blur(8px)" }} />
                   <MiniBook size={100} />

@@ -24,6 +24,10 @@ tags:
     description: Contact form
   - name: admin
     description: Admin operations
+  - name: agent
+    description: Agent portal operations
+  - name: courier
+    description: Courier portal operations
 
 paths:
   /healthz:
@@ -152,6 +156,27 @@ paths:
       responses:
         "200":
           description: Payment found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Payment"
+        "404":
+          description: Not found
+
+  /payments/{id}/refresh:
+    post:
+      operationId: refreshPayment
+      tags: [payments]
+      summary: Refresh payment status from the gateway
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Payment refreshed
           content:
             application/json:
               schema:
@@ -576,7 +601,7 @@ paths:
               properties:
                 status:
                   type: string
-                  enum: [pending, confirmed, awaiting_delivery, shipped, delivered, cancelled]
+                  enum: [pending, confirmed, awaiting_delivery, picked_up, in_transit, delivered, failed_delivery, cancelled]
       responses:
         "200":
           description: Order updated
@@ -668,6 +693,295 @@ paths:
         "404":
           description: Not found
 
+  /admin/agents:
+    get:
+      operationId: listAdminAgents
+      tags: [admin]
+      summary: List all agents
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Agents list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/AgentProfile"
+        "401":
+          description: Unauthorized
+    post:
+      operationId: createAgent
+      tags: [admin]
+      summary: Create a new agent account
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateAgentInput"
+      responses:
+        "201":
+          description: Agent created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AgentProfile"
+        "400":
+          description: Validation error
+        "409":
+          description: Agent with that email or phone already exists
+
+  /admin/agents/{id}:
+    patch:
+      operationId: updateAgent
+      tags: [admin]
+      summary: Update agent details or active status
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateAgentInput"
+      responses:
+        "200":
+          description: Agent updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AgentProfile"
+        "404":
+          description: Not found
+
+  /admin/agents/{id}/reset-password:
+    patch:
+      operationId: resetAgentPassword
+      tags: [admin]
+      summary: Reset an agent password
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [password]
+              properties:
+                password:
+                  type: string
+                  minLength: 6
+      responses:
+        "200":
+          description: Password reset
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+        "404":
+          description: Not found
+
+  /admin/stock:
+    get:
+      operationId: getAdminStock
+      tags: [admin]
+      summary: Get stock levels for all products
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Stock list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ProductWithStock"
+        "401":
+          description: Unauthorized
+
+  /admin/stock/{type}:
+    patch:
+      operationId: updateStock
+      tags: [admin]
+      summary: Update stock quantity for a product type
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: type
+          in: path
+          required: true
+          schema:
+            type: string
+            enum: [paperback, hardcover]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [stockQuantity]
+              properties:
+                stockQuantity:
+                  type: integer
+                  minimum: 0
+      responses:
+        "200":
+          description: Stock updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProductWithStock"
+        "404":
+          description: Not found
+
+  /agent/login:
+    post:
+      operationId: agentLogin
+      tags: [agent]
+      summary: Agent login
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AgentCredentials"
+      responses:
+        "200":
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AgentLoginResult"
+        "401":
+          description: Invalid credentials
+
+  /agent/me:
+    get:
+      operationId: getAgentMe
+      tags: [agent]
+      summary: Get current agent profile
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Agent profile
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AgentProfile"
+        "401":
+          description: Unauthorized
+
+  /agent/orders:
+    get:
+      operationId: listAgentOrders
+      tags: [agent]
+      summary: List orders created by this agent
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: page
+          in: query
+          required: false
+          schema:
+            type: integer
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Agent orders
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AgentOrdersResult"
+        "401":
+          description: Unauthorized
+    post:
+      operationId: createAgentOrder
+      tags: [agent]
+      summary: Create an order on behalf of a customer
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AgentOrderInput"
+      responses:
+        "201":
+          description: Order created with payment link
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AgentOrderResult"
+        "400":
+          description: Validation error
+        "409":
+          description: Insufficient stock
+
+  /agent/stats:
+    get:
+      operationId: getAgentStats
+      tags: [agent]
+      summary: Get agent sales summary
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Agent stats
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AgentStats"
+        "401":
+          description: Unauthorized
+
+  /pay/{token}:
+    get:
+      operationId: getOrderByPaymentToken
+      tags: [payments]
+      summary: Get order details via payment link token (public)
+      parameters:
+        - name: token
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Order found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Order"
+        "404":
+          description: Payment link not found
+
   /payment-settings:
     get:
       operationId: getPaymentSettings
@@ -682,6 +996,263 @@ paths:
                 type: array
                 items:
                   $ref: "#/components/schemas/PaymentSetting"
+
+  /admin/couriers:
+    get:
+      operationId: listAdminCouriers
+      tags: [admin]
+      summary: List all couriers
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: List of couriers
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/CourierProfile"
+        "401":
+          description: Unauthorized
+    post:
+      operationId: createCourier
+      tags: [admin]
+      summary: Create a new courier account
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateCourierInput"
+      responses:
+        "201":
+          description: Courier created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CourierProfile"
+        "400":
+          description: Validation error
+
+  /admin/couriers/{id}:
+    patch:
+      operationId: updateCourier
+      tags: [admin]
+      summary: Update courier active status
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [active]
+              properties:
+                active:
+                  type: boolean
+      responses:
+        "200":
+          description: Courier updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CourierProfile"
+        "404":
+          description: Not found
+
+  /admin/orders/{id}:
+    get:
+      operationId: getAdminOrder
+      tags: [admin]
+      summary: Get a single order with full details
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Order detail
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdminOrderDetail"
+        "404":
+          description: Not found
+
+  /admin/orders/{id}/assign-courier:
+    post:
+      operationId: assignCourier
+      tags: [admin]
+      summary: Assign a courier to an order
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AssignCourierInput"
+      responses:
+        "200":
+          description: Courier assigned
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdminOrderDetail"
+        "404":
+          description: Not found
+
+  /admin/orders/{id}/unassign-courier:
+    post:
+      operationId: unassignCourier
+      tags: [admin]
+      summary: Unassign the courier from an order
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Courier unassigned
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdminOrderDetail"
+        "404":
+          description: Not found
+
+  /courier/login:
+    post:
+      operationId: courierLogin
+      tags: [courier]
+      summary: Courier login
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CourierCredentials"
+      responses:
+        "200":
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CourierLoginResult"
+        "401":
+          description: Invalid credentials
+
+  /courier/me:
+    get:
+      operationId: getCourierMe
+      tags: [courier]
+      summary: Get current courier profile
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Courier profile
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CourierProfile"
+        "401":
+          description: Unauthorized
+
+  /courier/orders:
+    get:
+      operationId: listCourierOrders
+      tags: [courier]
+      summary: List orders assigned to this courier
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: status
+          in: query
+          required: false
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Assigned orders
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CourierOrdersResult"
+        "401":
+          description: Unauthorized
+
+  /courier/orders/{id}/status:
+    patch:
+      operationId: updateCourierOrderStatus
+      tags: [courier]
+      summary: Update delivery status for an assigned order
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CourierStatusUpdate"
+      responses:
+        "200":
+          description: Status updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CourierOrderResult"
+        "403":
+          description: Order not assigned to this courier
+        "404":
+          description: Not found
+
+  /courier/stats:
+    get:
+      operationId: getCourierStats
+      tags: [courier]
+      summary: Get courier delivery stats
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Courier stats
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CourierStats"
+        "401":
+          description: Unauthorized
 
 components:
   securitySchemes:
@@ -772,7 +1343,13 @@ components:
           type: number
         status:
           type: string
-          enum: [pending, confirmed, awaiting_delivery, shipped, delivered, cancelled]
+          enum: [pending, confirmed, awaiting_delivery, picked_up, in_transit, delivered, failed_delivery, cancelled]
+        courierId:
+          type: ["integer", "null"]
+        trackingNotes:
+          type: ["string", "null"]
+        deliveryPaymentMethod:
+          type: ["string", "null"]
         notes:
           type: ["string", "null"]
         createdAt:
@@ -788,7 +1365,7 @@ components:
           type: integer
         method:
           type: string
-          enum: [airtel_money, mtn_money, zamtel_money, visa_mastercard, bank_transfer, cash_on_delivery]
+          enum: [airtel_money, mtn_money, zamtel_money, visa_mastercard, bank_transfer, mobile_money_on_delivery]
         phoneNumber:
           type: ["string", "null"]
         accountName:
@@ -814,6 +1391,27 @@ components:
         phoneNumber:
           type: ["string", "null"]
         accountName:
+          type: ["string", "null"]
+        gatewayTransactionId:
+          type: ["string", "null"]
+        gatewayStatus:
+          type: ["string", "null"]
+        gatewayCheckoutUrl:
+          type: ["string", "null"]
+        gatewayProviderReference:
+          type: ["string", "null"]
+        gatewayIdempotencyKey:
+          type: ["string", "null"]
+        gatewayLastPayload:
+          type: ["object", "null"]
+          additionalProperties: true
+        lastCheckedAt:
+          type: ["string", "null"]
+        completedAt:
+          type: ["string", "null"]
+        expiresAt:
+          type: ["string", "null"]
+        failureReason:
           type: ["string", "null"]
         createdAt:
           type: string
@@ -1183,3 +1781,359 @@ components:
       properties:
         enabled:
           type: boolean
+
+    AgentProfile:
+      type: object
+      required: [id, name, phone, email, active, createdAt]
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        phone:
+          type: string
+        email:
+          type: string
+        active:
+          type: boolean
+        totalOrders:
+          type: integer
+        createdAt:
+          type: string
+
+    CreateAgentInput:
+      type: object
+      required: [name, phone, email, password]
+      properties:
+        name:
+          type: string
+          minLength: 2
+        phone:
+          type: string
+          minLength: 8
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+          minLength: 6
+
+    UpdateAgentInput:
+      type: object
+      properties:
+        name:
+          type: string
+        phone:
+          type: string
+        email:
+          type: string
+        active:
+          type: boolean
+
+    AgentCredentials:
+      type: object
+      required: [email, password]
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+
+    AgentLoginResult:
+      type: object
+      required: [token, agent]
+      properties:
+        token:
+          type: string
+        agent:
+          $ref: "#/components/schemas/AgentProfile"
+
+    AgentOrderInput:
+      type: object
+      required: [fullName, phone, email, deliveryAddress, city, productType, quantity]
+      properties:
+        fullName:
+          type: string
+          minLength: 2
+        phone:
+          type: string
+          minLength: 8
+        email:
+          type: string
+          format: email
+        deliveryAddress:
+          type: string
+          minLength: 5
+        city:
+          type: string
+          minLength: 2
+        productType:
+          type: string
+          enum: [paperback, hardcover]
+        quantity:
+          type: integer
+          minimum: 1
+        notes:
+          type: ["string", "null"]
+        overrideTier:
+          type: string
+          enum: [standard, bulk, institutional]
+
+    AgentOrderResult:
+      type: object
+      required: [id, fullName, phone, email, deliveryAddress, city, productType, quantity, totalAmount, status, pricingTier, paymentLink, createdAt]
+      properties:
+        id:
+          type: integer
+        fullName:
+          type: string
+        phone:
+          type: string
+        email:
+          type: string
+        deliveryAddress:
+          type: string
+        city:
+          type: string
+        productType:
+          type: string
+        quantity:
+          type: integer
+        totalAmount:
+          type: number
+        status:
+          type: string
+        pricingTier:
+          type: string
+        paymentLink:
+          type: string
+        notes:
+          type: ["string", "null"]
+        createdAt:
+          type: string
+
+    AgentOrdersResult:
+      type: object
+      required: [orders, total, page, limit]
+      properties:
+        orders:
+          type: array
+          items:
+            $ref: "#/components/schemas/AgentOrderResult"
+        total:
+          type: integer
+        page:
+          type: integer
+        limit:
+          type: integer
+
+    AgentStats:
+      type: object
+      required: [totalOrders, totalRevenue, pendingPayments, confirmedOrders]
+      properties:
+        totalOrders:
+          type: integer
+        totalRevenue:
+          type: number
+        pendingPayments:
+          type: integer
+        confirmedOrders:
+          type: integer
+
+    ProductWithStock:
+      type: object
+      required: [id, name, type, priceKwacha, stockQuantity, description, createdAt]
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        type:
+          type: string
+          enum: [paperback, hardcover]
+        priceKwacha:
+          type: number
+        stockQuantity:
+          type: integer
+        description:
+          type: string
+        features:
+          type: array
+          items:
+            type: string
+        createdAt:
+          type: string
+
+    CourierProfile:
+      type: object
+      required: [id, name, phone, active, createdAt]
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        phone:
+          type: string
+        email:
+          type: ["string", "null"]
+        vehicleInfo:
+          type: ["string", "null"]
+        active:
+          type: boolean
+        createdAt:
+          type: string
+
+    CourierCredentials:
+      type: object
+      required: [phone, password]
+      properties:
+        phone:
+          type: string
+        password:
+          type: string
+
+    CourierLoginResult:
+      type: object
+      required: [token, courier]
+      properties:
+        token:
+          type: string
+        courier:
+          $ref: "#/components/schemas/CourierProfile"
+
+    CreateCourierInput:
+      type: object
+      required: [name, phone, password]
+      properties:
+        name:
+          type: string
+          minLength: 2
+        phone:
+          type: string
+          minLength: 8
+        email:
+          type: ["string", "null"]
+        vehicleInfo:
+          type: ["string", "null"]
+        password:
+          type: string
+          minLength: 6
+
+    AssignCourierInput:
+      type: object
+      required: [courierId]
+      properties:
+        courierId:
+          type: integer
+        deliveryPaymentMethod:
+          type: string
+          enum: [mobile_money_on_delivery, bank_transfer]
+
+    AdminOrderDetail:
+      type: object
+      required: [id, fullName, phone, email, deliveryAddress, city, productType, quantity, totalAmount, status, createdAt]
+      properties:
+        id:
+          type: integer
+        fullName:
+          type: string
+        phone:
+          type: string
+        email:
+          type: string
+        deliveryAddress:
+          type: string
+        city:
+          type: string
+        productType:
+          type: string
+        quantity:
+          type: integer
+        totalAmount:
+          type: number
+        status:
+          type: string
+        notes:
+          type: ["string", "null"]
+        agentId:
+          type: ["integer", "null"]
+        pricingTier:
+          type: ["string", "null"]
+        courierId:
+          type: ["integer", "null"]
+        trackingNotes:
+          type: ["string", "null"]
+        deliveryPaymentMethod:
+          type: ["string", "null"]
+        payment:
+          $ref: "#/components/schemas/Payment"
+        courier:
+          $ref: "#/components/schemas/CourierProfile"
+        createdAt:
+          type: string
+
+    CourierOrderResult:
+      type: object
+      required: [id, fullName, phone, deliveryAddress, city, productType, quantity, totalAmount, status, createdAt]
+      properties:
+        id:
+          type: integer
+        fullName:
+          type: string
+        phone:
+          type: string
+        deliveryAddress:
+          type: string
+        city:
+          type: string
+        productType:
+          type: string
+        quantity:
+          type: integer
+        totalAmount:
+          type: number
+        status:
+          type: string
+        trackingNotes:
+          type: ["string", "null"]
+        deliveryPaymentMethod:
+          type: ["string", "null"]
+        notes:
+          type: ["string", "null"]
+        createdAt:
+          type: string
+
+    CourierOrdersResult:
+      type: object
+      required: [orders, total]
+      properties:
+        orders:
+          type: array
+          items:
+            $ref: "#/components/schemas/CourierOrderResult"
+        total:
+          type: integer
+
+    CourierStatusUpdate:
+      type: object
+      required: [status]
+      properties:
+        status:
+          type: string
+          enum: [picked_up, in_transit, delivered, failed_delivery]
+        trackingNotes:
+          type: ["string", "null"]
+
+    CourierStats:
+      type: object
+      required: [assignedOrders, deliveredOrders, inTransitOrders, failedOrders]
+      properties:
+        assignedOrders:
+          type: integer
+        deliveredOrders:
+          type: integer
+        inTransitOrders:
+          type: integer
+        failedOrders:
+          type: integer

@@ -44,7 +44,7 @@ function ReviewModal({
       </div>
 
       {/* Details */}
-      <div className={cn("rounded-xl p-4 border", "bg-[#111f35]", D.border)}>
+      <div className={cn("rounded-xl p-4 border", "bg-slate-50", D.border)}>
         <Field label="Reviewer Name"      value={review.reviewerName} />
         {review.reviewerTitle && <Field label="Title / Occupation" value={review.reviewerTitle} />}
         <Field label="Edition"            value={<span className="capitalize">{review.productType ?? "—"}</span>} />
@@ -53,7 +53,7 @@ function ReviewModal({
       </div>
 
       {/* Review text */}
-      <div className={cn("rounded-xl p-4 border", "bg-[#111f35]", D.border)}>
+      <div className={cn("rounded-xl p-4 border", "bg-slate-50", D.border)}>
         <p className={cn("text-xs font-semibold uppercase tracking-wider mb-3", D.muted)}>Review</p>
         <p className={cn("text-sm leading-relaxed italic", D.sub)}>"{review.comment}"</p>
       </div>
@@ -77,7 +77,7 @@ function ReviewModal({
             <p className="text-sm text-red-300 mb-3">Are you sure? This cannot be undone.</p>
             <div className="flex gap-2">
               <button onClick={() => setConfirmDelete(false)}
-                className="flex-1 py-2 rounded-xl text-sm font-medium bg-white/5 text-slate-400 hover:bg-white/10 transition-colors">
+                className="flex-1 py-2 rounded-xl text-sm font-medium bg-slate-100 text-slate-400 hover:bg-slate-100 transition-colors">
                 Cancel
               </button>
               <button onClick={async () => { setDeleting(true); await onDelete(review.id); onClose(); }}
@@ -149,7 +149,7 @@ export default function AdminReviews() {
             {(["all", "false", "true"] as const).map((f) => (
               <button key={f} onClick={() => setFilter(f)}
                 className={cn("px-4 py-2 text-xs font-medium transition-colors",
-                  filter === f ? "bg-[#8d6b3d] text-white" : cn(D.card, D.muted, "hover:bg-white/5"))}>
+                  filter === f ? "bg-[#8d6b3d] text-white" : cn(D.card, D.muted, "hover:bg-slate-100"))}>
                 {f === "all" ? "All" : f === "false" ? "Pending" : "Approved"}
               </button>
             ))}

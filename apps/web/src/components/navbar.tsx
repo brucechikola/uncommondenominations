@@ -12,10 +12,9 @@ const NAV_LINKS = [
   { href: "/contact",      label: "Contact" },
 ];
 
-/* Blue used before scrolling — visible on all dark-background pages */
-const BLUE   = "hsl(215,80%,68%)";
-const WHITE  = "rgba(255,255,255,0.85)";
-const WHITE2 = "rgba(255,255,255,0.60)";
+/* Text colors for light navbar */
+const DARK  = "hsl(220,52%,14%)";
+const DARK2 = "hsl(220,22%,44%)";
 
 export function Navbar() {
   const [location]  = useLocation();
@@ -29,14 +28,11 @@ export function Navbar() {
 
   const isCurrent = (p: string) => location === p;
 
-  /* Only the home page hero gets a transparent navbar that transitions on scroll.
-     Every other page shows the glass backdrop immediately for consistent styling. */
   const isHome    = location === "/";
   const showGlass = scrolled || !isHome;
 
-  /* Text is soft blue before glass appears (home hero only); white once glass is active */
-  const linkColor = showGlass ? WHITE  : BLUE;
-  const muteColor = showGlass ? WHITE2 : BLUE;
+  const linkColor = DARK;
+  const muteColor = DARK2;
 
   return (
     <>
@@ -46,10 +42,10 @@ export function Navbar() {
         transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
         className="fixed top-0 left-0 right-0 z-50 w-full transition-all duration-300"
         style={{
-          background:     showGlass ? "hsl(222,58%,6%,0.88)"          : "transparent",
-          borderBottom:   showGlass ? "1px solid hsl(220,38%,18%,0.6)" : "1px solid transparent",
-          boxShadow:      showGlass ? "0 4px 32px rgba(0,0,0,0.4)"     : "none",
-          backdropFilter: showGlass ? "blur(18px) saturate(1.4)"       : "none",
+          background:     showGlass ? "hsl(38,30%,98%,0.94)"               : "transparent",
+          borderBottom:   showGlass ? "1px solid hsl(40,16%,90%)"          : "1px solid transparent",
+          boxShadow:      showGlass ? "0 2px 28px rgba(0,0,0,0.07)"        : "none",
+          backdropFilter: showGlass ? "blur(18px) saturate(1.5)"           : "none",
         }}
       >
         <div className="container mx-auto flex h-14 items-center justify-between px-6">
@@ -76,11 +72,11 @@ export function Navbar() {
             </svg>
             <div className="flex flex-col leading-tight">
               <span className="font-display text-[0.78rem] font-bold tracking-wide uppercase transition-colors group-hover:text-primary"
-                style={{ color: muteColor }}>
+                style={{ color: DARK }}>
                 Uncommon
               </span>
               <span className="font-display text-[0.78rem] font-bold tracking-wide uppercase transition-colors group-hover:text-primary"
-                style={{ color: muteColor, opacity: 0.75 }}>
+                style={{ color: DARK2 }}>
                 Denominators
               </span>
             </div>
@@ -90,7 +86,7 @@ export function Navbar() {
           <nav className="hidden md:flex items-center gap-6">
             {NAV_LINKS.map(({ href, label }) => (
               <Link key={href} href={href}
-                className="font-sans text-[0.85rem] font-medium uppercase transition-colors hover:text-white"
+                className="font-sans text-[0.85rem] font-medium uppercase transition-colors hover:text-[#8d6b3d]"
                 style={{ color: isCurrent(href) ? "#8d6b3d" : linkColor }}>
                 {label}
               </Link>
@@ -109,7 +105,7 @@ export function Navbar() {
               </Button>
             </Link>
             <button onClick={() => setMobileOpen(!mobileOpen)}
-              className="md:hidden p-2 transition-colors hover:text-white"
+              className="md:hidden p-2 transition-colors hover:text-[#8d6b3d]"
               style={{ color: muteColor }}>
               {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
             </button>

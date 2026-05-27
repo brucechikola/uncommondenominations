@@ -5,6 +5,7 @@
  * Book sales platform API
  * OpenAPI spec version: 0.1.0
  */
+import type { PaymentGatewayLastPayload } from './paymentGatewayLastPayload';
 import type { PaymentStatus } from './paymentStatus';
 
 export interface Payment {
@@ -18,6 +19,26 @@ export interface Payment {
   phoneNumber?: string | null;
   /** @nullable */
   accountName?: string | null;
+  /** @nullable */
+  gatewayTransactionId?: string | null;
+  /** @nullable */
+  gatewayStatus?: string | null;
+  /** @nullable */
+  gatewayCheckoutUrl?: string | null;
+  /** @nullable */
+  gatewayProviderReference?: string | null;
+  /** @nullable */
+  gatewayIdempotencyKey?: string | null;
+  /** @nullable */
+  gatewayLastPayload?: PaymentGatewayLastPayload;
+  /** @nullable */
+  lastCheckedAt?: string | null;
+  /** @nullable */
+  completedAt?: string | null;
+  /** @nullable */
+  expiresAt?: string | null;
+  /** @nullable */
+  failureReason?: string | null;
   createdAt: string;
   updatedAt?: string;
 }

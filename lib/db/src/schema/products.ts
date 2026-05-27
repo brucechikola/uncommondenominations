@@ -1,4 +1,4 @@
-import { pgTable, text, serial, timestamp, numeric, jsonb } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, timestamp, numeric, jsonb, integer } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod/v4";
 
@@ -9,6 +9,7 @@ export const productsTable = pgTable("products", {
   priceKwacha: numeric("price_kwacha", { precision: 10, scale: 2 }).notNull(),
   description: text("description").notNull(),
   features: jsonb("features").$type<string[]>().notNull().default([]),
+  stockQuantity: integer("stock_quantity").notNull().default(0),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });
 

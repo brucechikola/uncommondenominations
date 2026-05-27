@@ -13,7 +13,9 @@ export const OrderStatus = {
   pending: 'pending',
   confirmed: 'confirmed',
   awaiting_delivery: 'awaiting_delivery',
-  shipped: 'shipped',
+  picked_up: 'picked_up',
+  in_transit: 'in_transit',
   delivered: 'delivered',
+  failed_delivery: 'failed_delivery',
   cancelled: 'cancelled',
 } as const;

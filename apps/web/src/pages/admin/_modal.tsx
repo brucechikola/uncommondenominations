@@ -19,7 +19,7 @@ export function Modal({
         <>
           <motion.div
             initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-            className="fixed inset-0 z-40 bg-black/70 backdrop-blur-sm"
+            className="fixed inset-0 z-40 bg-black/30 backdrop-blur-sm"
             onClick={onClose}
           />
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4 pointer-events-none">
@@ -42,7 +42,7 @@ export function Modal({
                   {subtitle && <p className={cn("text-xs mt-1", D.muted)}>{subtitle}</p>}
                 </div>
                 <button onClick={onClose}
-                  className={cn("p-1.5 rounded-lg transition-colors hover:bg-white/8 flex-shrink-0 mt-0.5", D.muted)}>
+                  className={cn("p-1.5 rounded-lg transition-colors hover:bg-slate-100 flex-shrink-0 mt-0.5", D.muted)}>
                   <X className="h-4 w-4" />
                 </button>
               </div>

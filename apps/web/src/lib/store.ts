@@ -62,3 +62,60 @@ export const useAdminAuthStore = create<AdminAuthState>()(
     { name: 'admin-auth-storage' }
   )
 );
+
+interface AgentProfile {
+  id: number;
+  name: string;
+  phone: string;
+  email: string;
+}
+
+interface AgentAuthState {
+  token: string | null;
+  agent: AgentProfile | null;
+  isAuthenticated: boolean;
+  setAuth: (token: string, agent: AgentProfile) => void;
+  logout: () => void;
+}
+
+export const useAgentAuthStore = create<AgentAuthState>()(
+  persist(
+    (set) => ({
+      token: null,
+      agent: null,
+      isAuthenticated: false,
+      setAuth: (token, agent) => set({ token, agent, isAuthenticated: true }),
+      logout: () => set({ token: null, agent: null, isAuthenticated: false }),
+    }),
+    { name: 'agent-auth-storage' }
+  )
+);
+
+interface CourierProfile {
+  id: number;
+  name: string;
+  phone: string;
+  email?: string | null;
+  vehicleInfo?: string | null;
+}
+
+interface CourierAuthState {
+  token: string | null;
+  courier: CourierProfile | null;
+  isAuthenticated: boolean;
+  setAuth: (token: string, courier: CourierProfile) => void;
+  logout: () => void;
+}
+
+export const useCourierAuthStore = create<CourierAuthState>()(
+  persist(
+    (set) => ({
+      token: null,
+      courier: null,
+      isAuthenticated: false,
+      setAuth: (token, courier) => set({ token, courier, isAuthenticated: true }),
+      logout: () => set({ token: null, courier: null, isAuthenticated: false }),
+    }),
+    { name: 'courier-auth-storage' }
+  )
+);

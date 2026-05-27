@@ -25,7 +25,7 @@ export default function Shop() {
         <div style={{
           position: "absolute", top: 0, left: "50%", transform: "translateX(-50%)",
           width: "1000px", height: "480px",
-          background: "radial-gradient(ellipse, hsl(222,65%,14%,0.8) 0%, transparent 65%)",
+          background: "radial-gradient(ellipse, hsl(42,78%,60%,0.2) 0%, transparent 65%)",
         }} />
       </div>
 
@@ -74,7 +74,7 @@ export default function Shop() {
                       border: `1px solid ${selected ? GOLD : CARD_BORDER}`,
                       boxShadow: selected
                         ? `0 0 0 1px ${GOLD}, 0 8px 40px hsl(42,78%,46%,0.08)`
-                        : "0 4px 24px hsl(222,60%,3%,0.4)",
+                        : "0 4px 24px rgba(0,0,0,0.06)",
                     }}>
 
                     {/* Top accent bar */}
@@ -82,7 +82,7 @@ export default function Shop() {
                       height: 3,
                       background: selected
                         ? "linear-gradient(90deg, hsl(44,92%,70%), hsl(42,78%,46%))"
-                        : `hsl(220,38%,14%)`,
+                        : `hsl(40,14%,88%)`,
                       transition: "background 0.25s",
                     }} />
 
@@ -110,14 +110,14 @@ export default function Shop() {
                             <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }}
                               className="w-6 h-6 rounded-full flex items-center justify-center"
                               style={{ background: GOLD }}>
-                              <span className="text-[0.6rem] font-bold" style={{ color: "hsl(222,58%,8%)" }}>✓</span>
+                              <span className="text-[0.6rem] font-bold" style={{ color: "#fff" }}>✓</span>
                             </motion.div>
                           )}
                         </div>
                       </div>
 
                       {/* Divider */}
-                      <div className="mb-5 h-px" style={{ background: "hsl(220,38%,13%)" }} />
+                      <div className="mb-5 h-px" style={{ background: "hsl(40,14%,88%)" }} />
 
                       {/* Description */}
                       <p className="font-serif text-sm leading-relaxed mb-5" style={{ color: TEXT_MUTED }}>
@@ -166,7 +166,7 @@ export default function Shop() {
                   <div className="flex items-center gap-3">
                     <button onClick={() => setQuantity(Math.max(1, quantity - 1))}
                       className="w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm transition-colors"
-                      style={{ background: "hsl(220,38%,12%)", border: `1px solid ${CARD_BORDER}`, color: TEXT_MUTED }}>
+                      style={{ background: "hsl(40,14%,94%)", border: `1px solid ${CARD_BORDER}`, color: TEXT_MUTED }}>
                       −
                     </button>
                     <span className="font-display text-xl font-bold w-6 text-center" style={{ color: TEXT_PRIMARY }}>
@@ -174,7 +174,7 @@ export default function Shop() {
                     </span>
                     <button onClick={() => setQuantity(quantity + 1)}
                       className="w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm transition-colors"
-                      style={{ background: "hsl(220,38%,12%)", border: `1px solid ${CARD_BORDER}`, color: TEXT_MUTED }}>
+                      style={{ background: "hsl(40,14%,94%)", border: `1px solid ${CARD_BORDER}`, color: TEXT_MUTED }}>
                       +
                     </button>
                   </div>

@@ -2,7 +2,7 @@ import { db, paymentSettingsTable } from "@workspace/db";
 import { eq } from "drizzle-orm";
 
 const channels = [
-  { channelId: "cash_on_delivery", label: "Cash on Delivery", enabled: true, sortOrder: 1 },
+  { channelId: "mobile_money_on_delivery", label: "Mobile Money on Delivery", enabled: true, sortOrder: 1 },
   { channelId: "airtel_money", label: "Airtel Money", enabled: true, sortOrder: 2 },
   { channelId: "mtn_money", label: "MTN Mobile Money", enabled: true, sortOrder: 3 },
   { channelId: "zamtel_money", label: "Zamtel Money", enabled: true, sortOrder: 4 },

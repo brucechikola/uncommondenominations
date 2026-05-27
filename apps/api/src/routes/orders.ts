@@ -1,7 +1,7 @@
 import { Router, type IRouter } from "express";
 import { db } from "@workspace/db";
 import { ordersTable, paymentsTable } from "@workspace/db";
-import { eq } from "drizzle-orm";
+import { desc, eq } from "drizzle-orm";
 import { CreateOrderBody, GetOrderParams } from "@workspace/api-zod";
 
 const PRICES: Record<string, number> = {
@@ -57,7 +57,11 @@ router.get("/orders/:id", async (req, res): Promise<void> => {
     return;
   }
 
-  const [payment] = await db.select().from(paymentsTable).where(eq(paymentsTable.orderId, order.id));
+  const [payment] = await db.select()
+    .from(paymentsTable)
+    .where(eq(paymentsTable.orderId, order.id))
+    .orderBy(desc(paymentsTable.createdAt))
+    .limit(1);
 
   res.json({
     ...order,

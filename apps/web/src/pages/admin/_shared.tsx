@@ -4,52 +4,59 @@ import { cn } from "@/lib/utils";
 
 /* ─── Theme tokens ─────────────────────────────────────────── */
 export const D = {
-  bg:       "bg-[#080e1c]",
-  card:     "bg-[#0e1829]",
-  card2:    "bg-[#111f35]",
-  cardHov:  "hover:bg-[#131e30]",
-  border:   "border-[#1a2d4a]",
-  divide:   "divide-[#1a2d4a]",
-  header:   "bg-[#060b15]",
-  sidebar:  "bg-[#06101e]",
-  accent:   "text-[#b08a58]",
+  bg:       "bg-slate-50",
+  card:     "bg-white",
+  card2:    "bg-slate-50",
+  cardHov:  "hover:bg-slate-50",
+  border:   "border-slate-200",
+  divide:   "divide-slate-200",
+  header:   "bg-white",
+  sidebar:  "bg-white",
+  accent:   "text-[#7a5c30]",
   accentBg: "bg-[#8d6b3d]",
-  muted:    "text-slate-400",
-  text:     "text-slate-100",
-  sub:      "text-slate-300",
+  muted:    "text-slate-500",
+  text:     "text-slate-800",
+  sub:      "text-slate-600",
 };
 
 export const STATUS_COLORS: Record<string, string> = {
-  pending:           "bg-yellow-400/15 text-yellow-300 border border-yellow-400/30",
-  confirmed:         "bg-blue-400/15 text-blue-300 border border-blue-400/30",
-  awaiting_delivery: "bg-orange-400/15 text-orange-300 border border-orange-400/30",
-  shipped:           "bg-indigo-400/15 text-indigo-300 border border-indigo-400/30",
-  delivered:         "bg-emerald-400/15 text-emerald-300 border border-emerald-400/30",
-  cancelled:         "bg-red-400/15 text-red-300 border border-red-400/30",
-  successful:        "bg-emerald-400/15 text-emerald-300 border border-emerald-400/30",
-  failed:            "bg-red-400/15 text-red-300 border border-red-400/30",
+  pending:           "bg-amber-50 text-amber-700 border border-amber-200",
+  confirmed:         "bg-blue-50 text-blue-700 border border-blue-200",
+  awaiting_delivery: "bg-orange-50 text-orange-700 border border-orange-200",
+  picked_up:         "bg-cyan-50 text-cyan-700 border border-cyan-200",
+  in_transit:        "bg-violet-50 text-violet-700 border border-violet-200",
+  shipped:           "bg-indigo-50 text-indigo-700 border border-indigo-200",
+  delivered:         "bg-emerald-50 text-emerald-700 border border-emerald-200",
+  failed_delivery:   "bg-rose-50 text-rose-700 border border-rose-200",
+  cancelled:         "bg-red-50 text-red-700 border border-red-200",
+  successful:        "bg-emerald-50 text-emerald-700 border border-emerald-200",
+  failed:            "bg-red-50 text-red-700 border border-red-200",
 };
 
 export const STATUS_HEX: Record<string, string> = {
   pending:           "#facc15",
   confirmed:         "#60a5fa",
   awaiting_delivery: "#fb923c",
+  picked_up:         "#22d3ee",
+  in_transit:        "#a78bfa",
   shipped:           "#818cf8",
   delivered:         "#34d399",
+  failed_delivery:   "#fb7185",
   cancelled:         "#f87171",
 };
 
 export const PAYMENT_METHOD_META: Record<string, { label: string; color: string; abbr: string }> = {
-  airtel_money:     { label: "Airtel Money",     color: "#ef4444", abbr: "A"    },
-  mtn_money:        { label: "MTN MoMo",         color: "#eab308", abbr: "MTN"  },
-  zamtel_money:     { label: "Zamtel Kwacha",    color: "#22c55e", abbr: "ZM"   },
-  visa_mastercard:  { label: "Visa/Mastercard",  color: "#3b82f6", abbr: "CARD" },
-  bank_transfer:    { label: "Bank Transfer",    color: "#6366f1", abbr: "BNK"  },
-  cash_on_delivery: { label: "Cash on Delivery", color: "#f59e0b", abbr: "COD"  },
+  airtel_money:             { label: "Airtel Money",              color: "#ef4444", abbr: "A"    },
+  mtn_money:                { label: "MTN MoMo",                  color: "#eab308", abbr: "MTN"  },
+  zamtel_money:             { label: "Zamtel Kwacha",             color: "#22c55e", abbr: "ZM"   },
+  visa_mastercard:          { label: "Visa/Mastercard",           color: "#3b82f6", abbr: "CARD" },
+  bank_transfer:            { label: "Bank Transfer",             color: "#6366f1", abbr: "BNK"  },
+  mobile_money_on_delivery: { label: "Mobile Money on Delivery",  color: "#f59e0b", abbr: "MOD"  },
 };
 
 export const ORDER_STATUSES = [
-  "pending", "confirmed", "awaiting_delivery", "shipped", "delivered", "cancelled",
+  "pending", "confirmed", "awaiting_delivery", "picked_up", "in_transit",
+  "delivered", "failed_delivery", "cancelled",
 ] as const;
 
 export const formatStatus = (s: string) =>

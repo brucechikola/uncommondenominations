@@ -10,8 +10,8 @@ const EASE = [0.22, 1, 0.36, 1] as const;
 
 const inputStyle: React.CSSProperties = {
   width: "100%",
-  background: "hsl(220,45%,9%)",
-  border: `1px solid hsl(220,38%,20%)`,
+  background: "hsl(40,28%,99%)",
+  border: `1px solid ${CARD_BORDER}`,
   borderRadius: "12px",
   color: TEXT_PRIMARY,
   fontSize: "0.875rem",
@@ -98,7 +98,7 @@ export default function Reviews() {
                   {Array.from({ length: 5 }).map((_, i) => (
                     <Star key={i} className="h-5 w-5" style={{
                       fill: i < Math.round(Number(avgRating)) ? GOLD : "transparent",
-                      color: i < Math.round(Number(avgRating)) ? GOLD : "hsl(220,38%,28%)",
+                      color: i < Math.round(Number(avgRating)) ? GOLD : "hsl(40,14%,86%)",
                     }} />
                   ))}
                 </div>
@@ -133,7 +133,7 @@ export default function Reviews() {
                     {Array.from({ length: 5 }).map((_, j) => (
                       <Star key={j} className="h-3.5 w-3.5" style={{
                         fill: j < review.rating ? GOLD : "transparent",
-                        color: j < review.rating ? GOLD : "hsl(220,38%,28%)",
+                        color: j < review.rating ? GOLD : "hsl(40,14%,86%)",
                       }} />
                     ))}
                   </div>
@@ -228,7 +228,7 @@ export default function Reviews() {
                         className="transition-transform hover:scale-110">
                         <Star className="h-8 w-8 transition-colors" style={{
                           fill: i < (hoverRating || rating) ? GOLD : "transparent",
-                          color: i < (hoverRating || rating) ? GOLD : "hsl(220,38%,28%)",
+                          color: i < (hoverRating || rating) ? GOLD : "hsl(40,14%,86%)",
                         }} />
                       </button>
                     ))}

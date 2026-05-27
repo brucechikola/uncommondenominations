@@ -4,16 +4,18 @@ import { D } from "./_shared";
 import { useAdminAuthStore } from "@/lib/store";
 import {
   LayoutDashboard, ShoppingBag, Star, MessageSquare,
-  CreditCard, Settings, LogOut,
+  CreditCard, Settings, LogOut, Users, Truck,
 } from "lucide-react";
 
 const NAV = [
-  { href: "/admin",           label: "Dashboard",     icon: LayoutDashboard, exact: true },
-  { href: "/admin/orders",    label: "Orders",        icon: ShoppingBag },
-  { href: "/admin/reviews",   label: "Reviews",       icon: Star },
-  { href: "/admin/messages",  label: "Messages",      icon: MessageSquare },
-  { href: "/admin/payments",  label: "Payments",      icon: CreditCard },
-  { href: "/admin/settings",  label: "Settings",      icon: Settings },
+  { href: "/admin",            label: "Dashboard",  icon: LayoutDashboard, exact: true },
+  { href: "/admin/orders",     label: "Orders",     icon: ShoppingBag },
+  { href: "/admin/agents",     label: "Agents",     icon: Users },
+  { href: "/admin/couriers",   label: "Couriers",   icon: Truck },
+  { href: "/admin/reviews",    label: "Reviews",    icon: Star },
+  { href: "/admin/messages",   label: "Messages",   icon: MessageSquare },
+  { href: "/admin/payments",   label: "Payments",   icon: CreditCard },
+  { href: "/admin/settings",   label: "Settings",   icon: Settings },
 ];
 
 export function AdminLayout({ children }: { children: React.ReactNode }) {
@@ -29,21 +31,21 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
     <div className={cn("min-h-screen flex", D.bg)}>
       {/* ── Sidebar ─────────────────────────────────────────────── */}
       <aside className={cn(
-        "hidden md:flex flex-col w-56 flex-shrink-0 fixed top-0 left-0 h-full z-30 border-r",
+        "hidden md:flex flex-col w-56 flex-shrink-0 fixed top-0 left-0 h-full z-30 border-r shadow-sm",
         D.sidebar, D.border,
       )}>
         {/* Logo */}
         <div className={cn("px-5 py-5 border-b", D.border)}>
           <div className="flex items-center gap-2.5">
             <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
-              style={{ background: "rgba(141,107,61,0.15)", border: "1px solid rgba(141,107,61,0.35)" }}>
-              <span className="text-[#b08a58] font-bold text-xs">UD</span>
+              style={{ background: "rgba(141,107,61,0.12)", border: "1px solid rgba(141,107,61,0.3)" }}>
+              <span className="text-[#8d6b3d] font-bold text-xs">UD</span>
             </div>
             <div className="min-w-0">
-              <p className="text-[0.7rem] font-bold text-slate-100 uppercase tracking-wider leading-tight truncate">
+              <p className="text-[0.7rem] font-bold text-slate-700 uppercase tracking-wider leading-tight truncate">
                 Uncommon
               </p>
-              <p className="text-[0.6rem] text-slate-500 uppercase tracking-wider leading-tight truncate">
+              <p className="text-[0.6rem] text-slate-400 uppercase tracking-wider leading-tight truncate">
                 Admin Panel
               </p>
             </div>
@@ -59,10 +61,10 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
                 <div className={cn(
                   "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all cursor-pointer",
                   active
-                    ? "bg-[#8d6b3d]/20 text-[#b08a58] border border-[#8d6b3d]/30"
-                    : cn(D.muted, "hover:bg-white/5 hover:text-slate-200 border border-transparent"),
+                    ? "bg-[#8d6b3d]/10 text-[#7a5c30] border border-[#8d6b3d]/20"
+                    : cn(D.muted, "hover:bg-slate-100 hover:text-slate-700 border border-transparent"),
                 )}>
-                  <Icon className={cn("h-4 w-4 flex-shrink-0", active ? "text-[#b08a58]" : "")} />
+                  <Icon className={cn("h-4 w-4 flex-shrink-0", active ? "text-[#8d6b3d]" : "")} />
                   {label}
                 </div>
               </Link>
@@ -74,7 +76,7 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
         <div className={cn("px-3 py-4 border-t", D.border)}>
           <button onClick={handleLogout}
             className={cn("w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all",
-              D.muted, "hover:bg-white/5 hover:text-red-300")}>
+              D.muted, "hover:bg-red-50 hover:text-red-600")}>
             <LogOut className="h-4 w-4 flex-shrink-0" />
             Log Out
           </button>
@@ -82,20 +84,20 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
       </aside>
 
       {/* ── Mobile top bar ───────────────────────────────────────── */}
-      <div className={cn("md:hidden fixed top-0 inset-x-0 z-30 border-b flex items-center justify-between px-4 h-13", D.sidebar, D.border)}>
+      <div className={cn("md:hidden fixed top-0 inset-x-0 z-30 border-b flex items-center justify-between px-4 h-13 shadow-sm", D.sidebar, D.border)}>
         <span className={cn("text-sm font-bold", D.text)}>Admin</span>
         <div className="flex items-center gap-1 overflow-x-auto">
           {NAV.map(({ href, icon: Icon, label, exact }) => (
             <Link key={href} href={href}>
               <div title={label} className={cn(
                 "p-2 rounded-lg transition-colors",
-                isActive(href, exact) ? "text-[#b08a58]" : D.muted,
+                isActive(href, exact) ? "text-[#8d6b3d]" : D.muted,
               )}>
                 <Icon className="h-4 w-4" />
               </div>
             </Link>
           ))}
-          <button onClick={handleLogout} className={cn("p-2 rounded-lg transition-colors", D.muted, "hover:text-red-300")}>
+          <button onClick={handleLogout} className={cn("p-2 rounded-lg transition-colors", D.muted, "hover:text-red-600")}>
             <LogOut className="h-4 w-4" />
           </button>
         </div>

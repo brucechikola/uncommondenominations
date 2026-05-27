@@ -9,7 +9,7 @@ const EASE = [0.22, 1, 0.36, 1] as const;
 
 const inputStyle: React.CSSProperties = {
   width: "100%",
-  background: "hsl(220,45%,9%)",
+  background: "hsl(40,28%,99%)",
   border: `1px solid ${CARD_BORDER}`,
   borderRadius: "12px",
   color: TEXT_PRIMARY,

@@ -2,12 +2,16 @@ import { Router, type IRouter } from "express";
 import { db } from "@workspace/db";
 import {
   adminsTable,
+  agentsTable,
+  couriersTable,
   ordersTable,
   paymentsTable,
   buyersTable,
   visitorsTable,
   reviewsTable,
   paymentSettingsTable,
+  paymentGatewaySettingsTable,
+  productsTable,
 } from "@workspace/db";
 import { eq, sql, desc, count, sum, and, or, ilike } from "drizzle-orm";
 import bcrypt from "bcryptjs";
@@ -452,20 +456,25 @@ router.delete("/admin/reviews/:id", requireAdmin, async (req, res): Promise<void
 router.patch("/admin/orders/:id/status", requireAdmin, async (req, res): Promise<void> => {
   const id = Number(req.params.id);
   const { status } = req.body as { status: string };
-  const validStatuses = ["pending", "confirmed", "shipped", "delivered", "cancelled"];
+  const validStatuses = ["pending", "confirmed", "awaiting_delivery", "picked_up", "in_transit", "delivered", "failed_delivery", "cancelled"];
   if (!id || isNaN(id) || !validStatuses.includes(status)) {
     res.status(400).json({ error: "Invalid request" });
     return;
   }
   const [order] = await db.update(ordersTable)
-    .set({ status: status as "pending" | "confirmed" | "shipped" | "delivered" | "cancelled" })
+    .set({ status })
     .where(eq(ordersTable.id, id))
     .returning();
   if (!order) {
     res.status(404).json({ error: "Order not found" });
     return;
   }
-  res.json({ ...order, createdAt: order.createdAt.toISOString() });
+  res.json({
+    ...order,
+    totalAmount: Number(order.totalAmount),
+    createdAt: order.createdAt.toISOString(),
+    updatedAt: order.updatedAt.toISOString(),
+  });
 });
 
 router.get("/admin/contacts", requireAdmin, async (req, res): Promise<void> => {
@@ -521,6 +530,385 @@ router.patch("/admin/payment-settings/:channelId", requireAdmin, async (req, res
     return;
   }
   res.json(updated);
+});
+
+router.get("/admin/payment-gateway-settings", requireAdmin, async (_req, res): Promise<void> => {
+  const [settings] = await db.select().from(paymentGatewaySettingsTable).limit(1);
+  res.json(settings ?? null);
+});
+
+router.put("/admin/payment-gateway-settings", requireAdmin, async (req, res): Promise<void> => {
+  const body = req.body as {
+    enabled?: boolean;
+    baseUrl?: string;
+    clientId?: string | null;
+    clientSecret?: string | null;
+    callbackUrl?: string | null;
+    successUrl?: string | null;
+    cancelUrl?: string | null;
+    publicWebUrl?: string | null;
+    publicApiUrl?: string | null;
+    notes?: string | null;
+  };
+
+  if (typeof body.enabled !== "boolean" || typeof body.baseUrl !== "string" || !body.baseUrl.trim()) {
+    res.status(400).json({ error: "enabled and baseUrl are required" });
+    return;
+  }
+
+  const payload = {
+    provider: "probase",
+    enabled: body.enabled,
+    baseUrl: body.baseUrl.trim(),
+    clientId: body.clientId?.trim() || null,
+    clientSecret: body.clientSecret?.trim() || null,
+    callbackUrl: body.callbackUrl?.trim() || null,
+    successUrl: body.successUrl?.trim() || null,
+    cancelUrl: body.cancelUrl?.trim() || null,
+    publicWebUrl: body.publicWebUrl?.trim() || null,
+    publicApiUrl: body.publicApiUrl?.trim() || null,
+    notes: body.notes?.trim() || null,
+  };
+
+  const [existing] = await db.select({ id: paymentGatewaySettingsTable.id }).from(paymentGatewaySettingsTable).limit(1);
+
+  const [saved] = existing
+    ? await db.update(paymentGatewaySettingsTable).set(payload).where(eq(paymentGatewaySettingsTable.id, existing.id)).returning()
+    : await db.insert(paymentGatewaySettingsTable).values(payload).returning();
+
+  res.json(saved);
+});
+
+// ── Agent management ──────────────────────────────────────────────────────────
+
+router.get("/admin/agents", requireAdmin, async (_req, res): Promise<void> => {
+  const agents = await db.select({
+    id: agentsTable.id,
+    name: agentsTable.name,
+    phone: agentsTable.phone,
+    email: agentsTable.email,
+    active: agentsTable.active,
+    createdAt: agentsTable.createdAt,
+  }).from(agentsTable).orderBy(desc(agentsTable.createdAt));
+
+  const agentIds = agents.map(a => a.id);
+  let orderCounts: { agentId: number | null; cnt: number }[] = [];
+  if (agentIds.length > 0) {
+    orderCounts = await db.select({
+      agentId: ordersTable.agentId,
+      cnt: sql<number>`cast(count(*) as int)`,
+    }).from(ordersTable)
+      .where(sql`${ordersTable.agentId} = ANY(ARRAY[${sql.raw(agentIds.join(","))}]::int[])`)
+      .groupBy(ordersTable.agentId);
+  }
+  const countMap = new Map(orderCounts.map(r => [r.agentId, r.cnt]));
+
+  res.json(agents.map(a => ({
+    ...a,
+    createdAt: a.createdAt.toISOString(),
+    totalOrders: countMap.get(a.id) ?? 0,
+  })));
+});
+
+router.post("/admin/agents", requireAdmin, async (req, res): Promise<void> => {
+  const { name, phone, email, password } = req.body as { name: string; phone: string; email: string; password: string };
+  if (!name || !phone || !email || !password) {
+    res.status(400).json({ error: "name, phone, email and password are required" });
+    return;
+  }
+  if (password.length < 6) {
+    res.status(400).json({ error: "password must be at least 6 characters" });
+    return;
+  }
+
+  const existing = await db.select({ id: agentsTable.id }).from(agentsTable)
+    .where(or(eq(agentsTable.email, email.toLowerCase().trim()), eq(agentsTable.phone, phone.trim())));
+  if (existing.length > 0) {
+    res.status(409).json({ error: "An agent with that email or phone already exists" });
+    return;
+  }
+
+  const passwordHash = await bcrypt.hash(password, 12);
+  const [agent] = await db.insert(agentsTable).values({
+    name: name.trim(),
+    phone: phone.trim(),
+    email: email.toLowerCase().trim(),
+    passwordHash,
+    active: true,
+  }).returning({
+    id: agentsTable.id,
+    name: agentsTable.name,
+    phone: agentsTable.phone,
+    email: agentsTable.email,
+    active: agentsTable.active,
+    createdAt: agentsTable.createdAt,
+  });
+
+  res.status(201).json({ ...agent, createdAt: agent.createdAt.toISOString() });
+});
+
+router.patch("/admin/agents/:id", requireAdmin, async (req, res): Promise<void> => {
+  const id = Number(req.params.id);
+  if (!Number.isInteger(id) || id < 1) { res.status(400).json({ error: "Invalid agent id" }); return; }
+
+  const { active, name, phone, email } = req.body as { active?: boolean; name?: string; phone?: string; email?: string };
+  const updates: Partial<{ active: boolean; name: string; phone: string; email: string }> = {};
+  if (typeof active === "boolean") updates.active = active;
+  if (name) updates.name = name.trim();
+  if (phone) updates.phone = phone.trim();
+  if (email) updates.email = email.toLowerCase().trim();
+
+  if (Object.keys(updates).length === 0) {
+    res.status(400).json({ error: "Nothing to update" });
+    return;
+  }
+
+  const [updated] = await db.update(agentsTable).set(updates).where(eq(agentsTable.id, id)).returning({
+    id: agentsTable.id,
+    name: agentsTable.name,
+    phone: agentsTable.phone,
+    email: agentsTable.email,
+    active: agentsTable.active,
+    createdAt: agentsTable.createdAt,
+  });
+  if (!updated) { res.status(404).json({ error: "Agent not found" }); return; }
+  res.json({ ...updated, createdAt: updated.createdAt.toISOString() });
+});
+
+router.patch("/admin/agents/:id/reset-password", requireAdmin, async (req, res): Promise<void> => {
+  const id = Number(req.params.id);
+  const { password } = req.body as { password: string };
+  if (!password || password.length < 6) {
+    res.status(400).json({ error: "password must be at least 6 characters" });
+    return;
+  }
+  const passwordHash = await bcrypt.hash(password, 12);
+  const [updated] = await db.update(agentsTable).set({ passwordHash }).where(eq(agentsTable.id, id)).returning({ id: agentsTable.id });
+  if (!updated) { res.status(404).json({ error: "Agent not found" }); return; }
+  res.json({ success: true });
+});
+
+// ── Stock management ──────────────────────────────────────────────────────────
+
+router.get("/admin/stock", requireAdmin, async (_req, res): Promise<void> => {
+  const products = await db.select().from(productsTable).orderBy(productsTable.type);
+  res.json(products.map(p => ({
+    ...p,
+    priceKwacha: Number(p.priceKwacha),
+    createdAt: p.createdAt.toISOString(),
+  })));
+});
+
+router.patch("/admin/stock/:type", requireAdmin, async (req, res): Promise<void> => {
+  const rawType = Array.isArray(req.params.type) ? req.params.type[0] : req.params.type;
+  if (!["paperback", "hardcover"].includes(rawType)) {
+    res.status(400).json({ error: "type must be paperback or hardcover" });
+    return;
+  }
+  const { stockQuantity } = req.body as { stockQuantity: number };
+  if (typeof stockQuantity !== "number" || stockQuantity < 0 || !Number.isInteger(stockQuantity)) {
+    res.status(400).json({ error: "stockQuantity must be a non-negative integer" });
+    return;
+  }
+  const [updated] = await db.update(productsTable)
+    .set({ stockQuantity })
+    .where(eq(productsTable.type, rawType))
+    .returning();
+  if (!updated) { res.status(404).json({ error: "Product not found" }); return; }
+  res.json({ ...updated, priceKwacha: Number(updated.priceKwacha), createdAt: updated.createdAt.toISOString() });
+});
+
+// ── Courier management ────────────────────────────────────────────────────────
+
+router.get("/admin/couriers", requireAdmin, async (_req, res): Promise<void> => {
+  const couriers = await db.select({
+    id: couriersTable.id,
+    name: couriersTable.name,
+    phone: couriersTable.phone,
+    email: couriersTable.email,
+    vehicleInfo: couriersTable.vehicleInfo,
+    active: couriersTable.active,
+    createdAt: couriersTable.createdAt,
+  }).from(couriersTable).orderBy(couriersTable.name);
+
+  const ids = couriers.map(c => c.id);
+  let deliveryCounts: { courierId: number | null; cnt: number }[] = [];
+  if (ids.length > 0) {
+    deliveryCounts = await db.select({
+      courierId: ordersTable.courierId,
+      cnt: sql<number>`cast(count(*) as int)`,
+    }).from(ordersTable)
+      .where(sql`${ordersTable.courierId} = ANY(ARRAY[${sql.raw(ids.join(","))}]::int[])`)
+      .groupBy(ordersTable.courierId);
+  }
+  const countMap = new Map(deliveryCounts.map(r => [r.courierId, r.cnt]));
+
+  res.json(couriers.map(c => ({
+    ...c,
+    createdAt: c.createdAt.toISOString(),
+    totalDeliveries: countMap.get(c.id) ?? 0,
+  })));
+});
+
+router.post("/admin/couriers", requireAdmin, async (req, res): Promise<void> => {
+  const { name, phone, email, password, vehicleInfo } = req.body as {
+    name: string; phone: string; email: string; password: string; vehicleInfo?: string;
+  };
+  if (!name || !phone || !email || !password) {
+    res.status(400).json({ error: "name, phone, email and password are required" }); return;
+  }
+  if (password.length < 6) {
+    res.status(400).json({ error: "password must be at least 6 characters" }); return;
+  }
+  const existing = await db.select({ id: couriersTable.id }).from(couriersTable)
+    .where(or(eq(couriersTable.email, email.toLowerCase().trim()), eq(couriersTable.phone, phone.trim())));
+  if (existing.length > 0) {
+    res.status(409).json({ error: "A courier with that email or phone already exists" }); return;
+  }
+  const passwordHash = await bcrypt.hash(password, 12);
+  const [courier] = await db.insert(couriersTable).values({
+    name: name.trim(),
+    phone: phone.trim(),
+    email: email.toLowerCase().trim(),
+    passwordHash,
+    vehicleInfo: vehicleInfo?.trim() ?? null,
+    active: true,
+  }).returning({
+    id: couriersTable.id, name: couriersTable.name, phone: couriersTable.phone,
+    email: couriersTable.email, vehicleInfo: couriersTable.vehicleInfo,
+    active: couriersTable.active, createdAt: couriersTable.createdAt,
+  });
+  res.status(201).json({ ...courier, createdAt: courier.createdAt.toISOString() });
+});
+
+router.patch("/admin/couriers/:id", requireAdmin, async (req, res): Promise<void> => {
+  const id = Number(req.params.id);
+  if (!Number.isInteger(id) || id < 1) { res.status(400).json({ error: "Invalid courier id" }); return; }
+  const { active, name, phone, email, vehicleInfo } = req.body as {
+    active?: boolean; name?: string; phone?: string; email?: string; vehicleInfo?: string;
+  };
+  const updates: Record<string, unknown> = {};
+  if (typeof active === "boolean") updates.active = active;
+  if (name) updates.name = name.trim();
+  if (phone) updates.phone = phone.trim();
+  if (email) updates.email = email.toLowerCase().trim();
+  if (vehicleInfo !== undefined) updates.vehicleInfo = vehicleInfo.trim() || null;
+  if (Object.keys(updates).length === 0) { res.status(400).json({ error: "Nothing to update" }); return; }
+  const [updated] = await db.update(couriersTable)
+    .set(updates as any)
+    .where(eq(couriersTable.id, id))
+    .returning({
+      id: couriersTable.id, name: couriersTable.name, phone: couriersTable.phone,
+      email: couriersTable.email, vehicleInfo: couriersTable.vehicleInfo,
+      active: couriersTable.active, createdAt: couriersTable.createdAt,
+    });
+  if (!updated) { res.status(404).json({ error: "Courier not found" }); return; }
+  res.json({ ...updated, createdAt: updated.createdAt.toISOString() });
+});
+
+router.patch("/admin/couriers/:id/reset-password", requireAdmin, async (req, res): Promise<void> => {
+  const id = Number(req.params.id);
+  const { password } = req.body as { password: string };
+  if (!password || password.length < 6) { res.status(400).json({ error: "password must be at least 6 characters" }); return; }
+  const passwordHash = await bcrypt.hash(password, 12);
+  const [u] = await db.update(couriersTable).set({ passwordHash }).where(eq(couriersTable.id, id)).returning({ id: couriersTable.id });
+  if (!u) { res.status(404).json({ error: "Courier not found" }); return; }
+  res.json({ success: true });
+});
+
+// ── Assign courier to order ───────────────────────────────────────────────────
+
+router.patch("/admin/orders/:id/assign-courier", requireAdmin, async (req, res): Promise<void> => {
+  const orderId = Number(req.params.id);
+  if (!Number.isInteger(orderId) || orderId < 1) { res.status(400).json({ error: "Invalid order id" }); return; }
+
+  const { courierId, deliveryPaymentMethod } = req.body as {
+    courierId: number;
+    deliveryPaymentMethod?: string;
+  };
+  if (!courierId) { res.status(400).json({ error: "courierId is required" }); return; }
+
+  const [courier] = await db.select({ id: couriersTable.id, active: couriersTable.active })
+    .from(couriersTable).where(eq(couriersTable.id, courierId));
+  if (!courier) { res.status(404).json({ error: "Courier not found" }); return; }
+  if (!courier.active) { res.status(400).json({ error: "Courier is inactive" }); return; }
+
+  const updates: Record<string, unknown> = {
+    courierId,
+    status: "awaiting_delivery",
+  };
+  if (deliveryPaymentMethod) updates.deliveryPaymentMethod = deliveryPaymentMethod;
+
+  const [updated] = await db.update(ordersTable)
+    .set(updates as any)
+    .where(eq(ordersTable.id, orderId))
+    .returning();
+  if (!updated) { res.status(404).json({ error: "Order not found" }); return; }
+
+  res.json({
+    ...updated,
+    totalAmount: Number(updated.totalAmount),
+    createdAt: updated.createdAt.toISOString(),
+    updatedAt: updated.updatedAt.toISOString(),
+  });
+});
+
+// ── Unassign courier from order ───────────────────────────────────────────────
+
+router.patch("/admin/orders/:id/unassign-courier", requireAdmin, async (req, res): Promise<void> => {
+  const orderId = Number(req.params.id);
+  if (!Number.isInteger(orderId) || orderId < 1) { res.status(400).json({ error: "Invalid order id" }); return; }
+  const [updated] = await db.update(ordersTable)
+    .set({ courierId: null, status: "confirmed" } as any)
+    .where(eq(ordersTable.id, orderId))
+    .returning();
+  if (!updated) { res.status(404).json({ error: "Order not found" }); return; }
+  res.json({
+    ...updated,
+    totalAmount: Number(updated.totalAmount),
+    createdAt: updated.createdAt.toISOString(),
+    updatedAt: updated.updatedAt.toISOString(),
+  });
+});
+
+// ── Order detail (with courier + agent info) ──────────────────────────────────
+
+router.get("/admin/orders/:id", requireAdmin, async (req, res): Promise<void> => {
+  const orderId = Number(req.params.id);
+  if (!Number.isInteger(orderId) || orderId < 1) { res.status(400).json({ error: "Invalid order id" }); return; }
+
+  const [order] = await db.select().from(ordersTable).where(eq(ordersTable.id, orderId));
+  if (!order) { res.status(404).json({ error: "Order not found" }); return; }
+
+  const [payment] = await db.select()
+    .from(paymentsTable)
+    .where(eq(paymentsTable.orderId, orderId))
+    .orderBy(desc(paymentsTable.createdAt))
+    .limit(1);
+  const agent = order.agentId
+    ? (await db.select({ id: agentsTable.id, name: agentsTable.name, phone: agentsTable.phone })
+        .from(agentsTable).where(eq(agentsTable.id, order.agentId)))[0] ?? null
+    : null;
+  const courier = order.courierId
+    ? (await db.select({
+        id: couriersTable.id, name: couriersTable.name, phone: couriersTable.phone, vehicleInfo: couriersTable.vehicleInfo,
+      }).from(couriersTable).where(eq(couriersTable.id, order.courierId)))[0] ?? null
+    : null;
+
+  res.json({
+    ...order,
+    totalAmount: Number(order.totalAmount),
+    createdAt: order.createdAt.toISOString(),
+    updatedAt: order.updatedAt.toISOString(),
+    payment: payment ? {
+      ...payment,
+      amount: Number(payment.amount),
+      createdAt: payment.createdAt.toISOString(),
+      updatedAt: payment.updatedAt.toISOString(),
+    } : null,
+    agent,
+    courier,
+  });
 });
 
 export default router;

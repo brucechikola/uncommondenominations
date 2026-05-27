@@ -92,7 +92,10 @@ export const GetOrderResponse = zod.object({
   "productType": zod.string(),
   "quantity": zod.number(),
   "totalAmount": zod.number(),
-  "status": zod.enum(['pending', 'confirmed', 'awaiting_delivery', 'shipped', 'delivered', 'cancelled']),
+  "status": zod.enum(['pending', 'confirmed', 'awaiting_delivery', 'picked_up', 'in_transit', 'delivered', 'failed_delivery', 'cancelled']),
+  "courierId": zod.number().nullish(),
+  "trackingNotes": zod.string().nullish(),
+  "deliveryPaymentMethod": zod.string().nullish(),
   "notes": zod.string().nullish(),
   "createdAt": zod.string(),
   "payment": zod.object({
@@ -104,6 +107,16 @@ export const GetOrderResponse = zod.object({
   "reference": zod.string(),
   "phoneNumber": zod.string().nullish(),
   "accountName": zod.string().nullish(),
+  "gatewayTransactionId": zod.string().nullish(),
+  "gatewayStatus": zod.string().nullish(),
+  "gatewayCheckoutUrl": zod.string().nullish(),
+  "gatewayProviderReference": zod.string().nullish(),
+  "gatewayIdempotencyKey": zod.string().nullish(),
+  "gatewayLastPayload": zod.record(zod.string(), zod.unknown()).nullish(),
+  "lastCheckedAt": zod.string().nullish(),
+  "completedAt": zod.string().nullish(),
+  "expiresAt": zod.string().nullish(),
+  "failureReason": zod.string().nullish(),
   "createdAt": zod.string(),
   "updatedAt": zod.string().optional()
 }).optional()
@@ -115,7 +128,7 @@ export const GetOrderResponse = zod.object({
  */
 export const InitiatePaymentBody = zod.object({
   "orderId": zod.number(),
-  "method": zod.enum(['airtel_money', 'mtn_money', 'zamtel_money', 'visa_mastercard', 'bank_transfer', 'cash_on_delivery']),
+  "method": zod.enum(['airtel_money', 'mtn_money', 'zamtel_money', 'visa_mastercard', 'bank_transfer', 'mobile_money_on_delivery']),
   "phoneNumber": zod.string().nullish(),
   "accountName": zod.string().nullish()
 })
@@ -137,6 +150,47 @@ export const GetPaymentResponse = zod.object({
   "reference": zod.string(),
   "phoneNumber": zod.string().nullish(),
   "accountName": zod.string().nullish(),
+  "gatewayTransactionId": zod.string().nullish(),
+  "gatewayStatus": zod.string().nullish(),
+  "gatewayCheckoutUrl": zod.string().nullish(),
+  "gatewayProviderReference": zod.string().nullish(),
+  "gatewayIdempotencyKey": zod.string().nullish(),
+  "gatewayLastPayload": zod.record(zod.string(), zod.unknown()).nullish(),
+  "lastCheckedAt": zod.string().nullish(),
+  "completedAt": zod.string().nullish(),
+  "expiresAt": zod.string().nullish(),
+  "failureReason": zod.string().nullish(),
+  "createdAt": zod.string(),
+  "updatedAt": zod.string().optional()
+})
+
+
+/**
+ * @summary Refresh payment status from the gateway
+ */
+export const RefreshPaymentParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+export const RefreshPaymentResponse = zod.object({
+  "id": zod.number(),
+  "orderId": zod.number(),
+  "method": zod.string(),
+  "amount": zod.number(),
+  "status": zod.enum(['pending', 'successful', 'failed']),
+  "reference": zod.string(),
+  "phoneNumber": zod.string().nullish(),
+  "accountName": zod.string().nullish(),
+  "gatewayTransactionId": zod.string().nullish(),
+  "gatewayStatus": zod.string().nullish(),
+  "gatewayCheckoutUrl": zod.string().nullish(),
+  "gatewayProviderReference": zod.string().nullish(),
+  "gatewayIdempotencyKey": zod.string().nullish(),
+  "gatewayLastPayload": zod.record(zod.string(), zod.unknown()).nullish(),
+  "lastCheckedAt": zod.string().nullish(),
+  "completedAt": zod.string().nullish(),
+  "expiresAt": zod.string().nullish(),
+  "failureReason": zod.string().nullish(),
   "createdAt": zod.string(),
   "updatedAt": zod.string().optional()
 })
@@ -162,6 +216,16 @@ export const SimulatePaymentResponse = zod.object({
   "reference": zod.string(),
   "phoneNumber": zod.string().nullish(),
   "accountName": zod.string().nullish(),
+  "gatewayTransactionId": zod.string().nullish(),
+  "gatewayStatus": zod.string().nullish(),
+  "gatewayCheckoutUrl": zod.string().nullish(),
+  "gatewayProviderReference": zod.string().nullish(),
+  "gatewayIdempotencyKey": zod.string().nullish(),
+  "gatewayLastPayload": zod.record(zod.string(), zod.unknown()).nullish(),
+  "lastCheckedAt": zod.string().nullish(),
+  "completedAt": zod.string().nullish(),
+  "expiresAt": zod.string().nullish(),
+  "failureReason": zod.string().nullish(),
   "createdAt": zod.string(),
   "updatedAt": zod.string().optional()
 })
@@ -286,7 +350,10 @@ export const ListAdminOrdersResponse = zod.object({
   "productType": zod.string(),
   "quantity": zod.number(),
   "totalAmount": zod.number(),
-  "status": zod.enum(['pending', 'confirmed', 'awaiting_delivery', 'shipped', 'delivered', 'cancelled']),
+  "status": zod.enum(['pending', 'confirmed', 'awaiting_delivery', 'picked_up', 'in_transit', 'delivered', 'failed_delivery', 'cancelled']),
+  "courierId": zod.number().nullish(),
+  "trackingNotes": zod.string().nullish(),
+  "deliveryPaymentMethod": zod.string().nullish(),
   "notes": zod.string().nullish(),
   "createdAt": zod.string(),
   "payment": zod.object({
@@ -298,6 +365,16 @@ export const ListAdminOrdersResponse = zod.object({
   "reference": zod.string(),
   "phoneNumber": zod.string().nullish(),
   "accountName": zod.string().nullish(),
+  "gatewayTransactionId": zod.string().nullish(),
+  "gatewayStatus": zod.string().nullish(),
+  "gatewayCheckoutUrl": zod.string().nullish(),
+  "gatewayProviderReference": zod.string().nullish(),
+  "gatewayIdempotencyKey": zod.string().nullish(),
+  "gatewayLastPayload": zod.record(zod.string(), zod.unknown()).nullish(),
+  "lastCheckedAt": zod.string().nullish(),
+  "completedAt": zod.string().nullish(),
+  "expiresAt": zod.string().nullish(),
+  "failureReason": zod.string().nullish(),
   "createdAt": zod.string(),
   "updatedAt": zod.string().optional()
 }).optional()
@@ -471,7 +548,7 @@ export const UpdateOrderStatusParams = zod.object({
 })
 
 export const UpdateOrderStatusBody = zod.object({
-  "status": zod.enum(['pending', 'confirmed', 'awaiting_delivery', 'shipped', 'delivered', 'cancelled'])
+  "status": zod.enum(['pending', 'confirmed', 'awaiting_delivery', 'picked_up', 'in_transit', 'delivered', 'failed_delivery', 'cancelled'])
 })
 
 export const UpdateOrderStatusResponse = zod.object({
@@ -484,7 +561,10 @@ export const UpdateOrderStatusResponse = zod.object({
   "productType": zod.string(),
   "quantity": zod.number(),
   "totalAmount": zod.number(),
-  "status": zod.enum(['pending', 'confirmed', 'awaiting_delivery', 'shipped', 'delivered', 'cancelled']),
+  "status": zod.enum(['pending', 'confirmed', 'awaiting_delivery', 'picked_up', 'in_transit', 'delivered', 'failed_delivery', 'cancelled']),
+  "courierId": zod.number().nullish(),
+  "trackingNotes": zod.string().nullish(),
+  "deliveryPaymentMethod": zod.string().nullish(),
   "notes": zod.string().nullish(),
   "createdAt": zod.string(),
   "payment": zod.object({
@@ -496,6 +576,16 @@ export const UpdateOrderStatusResponse = zod.object({
   "reference": zod.string(),
   "phoneNumber": zod.string().nullish(),
   "accountName": zod.string().nullish(),
+  "gatewayTransactionId": zod.string().nullish(),
+  "gatewayStatus": zod.string().nullish(),
+  "gatewayCheckoutUrl": zod.string().nullish(),
+  "gatewayProviderReference": zod.string().nullish(),
+  "gatewayIdempotencyKey": zod.string().nullish(),
+  "gatewayLastPayload": zod.record(zod.string(), zod.unknown()).nullish(),
+  "lastCheckedAt": zod.string().nullish(),
+  "completedAt": zod.string().nullish(),
+  "expiresAt": zod.string().nullish(),
+  "failureReason": zod.string().nullish(),
   "createdAt": zod.string(),
   "updatedAt": zod.string().optional()
 }).optional()
@@ -560,6 +650,281 @@ export const UpdatePaymentSettingResponse = zod.object({
 
 
 /**
+ * @summary List all agents
+ */
+export const ListAdminAgentsResponseItem = zod.object({
+  "id": zod.number(),
+  "name": zod.string(),
+  "phone": zod.string(),
+  "email": zod.string(),
+  "active": zod.boolean(),
+  "totalOrders": zod.number().optional(),
+  "createdAt": zod.string()
+})
+export const ListAdminAgentsResponse = zod.array(ListAdminAgentsResponseItem)
+
+
+/**
+ * @summary Create a new agent account
+ */
+export const createAgentBodyNameMin = 2;
+
+export const createAgentBodyPhoneMin = 8;
+
+export const createAgentBodyPasswordMin = 6;
+
+
+
+export const CreateAgentBody = zod.object({
+  "name": zod.string().min(createAgentBodyNameMin),
+  "phone": zod.string().min(createAgentBodyPhoneMin),
+  "email": zod.string().email(),
+  "password": zod.string().min(createAgentBodyPasswordMin)
+})
+
+
+/**
+ * @summary Update agent details or active status
+ */
+export const UpdateAgentParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+export const UpdateAgentBody = zod.object({
+  "name": zod.string().optional(),
+  "phone": zod.string().optional(),
+  "email": zod.string().optional(),
+  "active": zod.boolean().optional()
+})
+
+export const UpdateAgentResponse = zod.object({
+  "id": zod.number(),
+  "name": zod.string(),
+  "phone": zod.string(),
+  "email": zod.string(),
+  "active": zod.boolean(),
+  "totalOrders": zod.number().optional(),
+  "createdAt": zod.string()
+})
+
+
+/**
+ * @summary Reset an agent password
+ */
+export const ResetAgentPasswordParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+export const resetAgentPasswordBodyPasswordMin = 6;
+
+
+
+export const ResetAgentPasswordBody = zod.object({
+  "password": zod.string().min(resetAgentPasswordBodyPasswordMin)
+})
+
+export const ResetAgentPasswordResponse = zod.object({
+  "success": zod.boolean().optional()
+})
+
+
+/**
+ * @summary Get stock levels for all products
+ */
+export const GetAdminStockResponseItem = zod.object({
+  "id": zod.number(),
+  "name": zod.string(),
+  "type": zod.enum(['paperback', 'hardcover']),
+  "priceKwacha": zod.number(),
+  "stockQuantity": zod.number(),
+  "description": zod.string(),
+  "features": zod.array(zod.string()).optional(),
+  "createdAt": zod.string()
+})
+export const GetAdminStockResponse = zod.array(GetAdminStockResponseItem)
+
+
+/**
+ * @summary Update stock quantity for a product type
+ */
+export const UpdateStockParams = zod.object({
+  "type": zod.enum(['paperback', 'hardcover'])
+})
+
+export const updateStockBodyStockQuantityMin = 0;
+
+
+
+export const UpdateStockBody = zod.object({
+  "stockQuantity": zod.number().min(updateStockBodyStockQuantityMin)
+})
+
+export const UpdateStockResponse = zod.object({
+  "id": zod.number(),
+  "name": zod.string(),
+  "type": zod.enum(['paperback', 'hardcover']),
+  "priceKwacha": zod.number(),
+  "stockQuantity": zod.number(),
+  "description": zod.string(),
+  "features": zod.array(zod.string()).optional(),
+  "createdAt": zod.string()
+})
+
+
+/**
+ * @summary Agent login
+ */
+export const AgentLoginBody = zod.object({
+  "email": zod.string().email(),
+  "password": zod.string()
+})
+
+export const AgentLoginResponse = zod.object({
+  "token": zod.string(),
+  "agent": zod.object({
+  "id": zod.number(),
+  "name": zod.string(),
+  "phone": zod.string(),
+  "email": zod.string(),
+  "active": zod.boolean(),
+  "totalOrders": zod.number().optional(),
+  "createdAt": zod.string()
+})
+})
+
+
+/**
+ * @summary Get current agent profile
+ */
+export const GetAgentMeResponse = zod.object({
+  "id": zod.number(),
+  "name": zod.string(),
+  "phone": zod.string(),
+  "email": zod.string(),
+  "active": zod.boolean(),
+  "totalOrders": zod.number().optional(),
+  "createdAt": zod.string()
+})
+
+
+/**
+ * @summary List orders created by this agent
+ */
+export const ListAgentOrdersQueryParams = zod.object({
+  "page": zod.coerce.number().optional(),
+  "limit": zod.coerce.number().optional()
+})
+
+export const ListAgentOrdersResponse = zod.object({
+  "orders": zod.array(zod.object({
+  "id": zod.number(),
+  "fullName": zod.string(),
+  "phone": zod.string(),
+  "email": zod.string(),
+  "deliveryAddress": zod.string(),
+  "city": zod.string(),
+  "productType": zod.string(),
+  "quantity": zod.number(),
+  "totalAmount": zod.number(),
+  "status": zod.string(),
+  "pricingTier": zod.string(),
+  "paymentLink": zod.string(),
+  "notes": zod.string().nullish(),
+  "createdAt": zod.string()
+})),
+  "total": zod.number(),
+  "page": zod.number(),
+  "limit": zod.number()
+})
+
+
+/**
+ * @summary Create an order on behalf of a customer
+ */
+export const createAgentOrderBodyFullNameMin = 2;
+
+export const createAgentOrderBodyPhoneMin = 8;
+
+export const createAgentOrderBodyDeliveryAddressMin = 5;
+
+export const createAgentOrderBodyCityMin = 2;
+
+
+
+
+export const CreateAgentOrderBody = zod.object({
+  "fullName": zod.string().min(createAgentOrderBodyFullNameMin),
+  "phone": zod.string().min(createAgentOrderBodyPhoneMin),
+  "email": zod.string().email(),
+  "deliveryAddress": zod.string().min(createAgentOrderBodyDeliveryAddressMin),
+  "city": zod.string().min(createAgentOrderBodyCityMin),
+  "productType": zod.enum(['paperback', 'hardcover']),
+  "quantity": zod.number().min(1),
+  "notes": zod.string().nullish(),
+  "overrideTier": zod.enum(['standard', 'bulk', 'institutional']).optional()
+})
+
+
+/**
+ * @summary Get agent sales summary
+ */
+export const GetAgentStatsResponse = zod.object({
+  "totalOrders": zod.number(),
+  "totalRevenue": zod.number(),
+  "pendingPayments": zod.number(),
+  "confirmedOrders": zod.number()
+})
+
+
+/**
+ * @summary Get order details via payment link token (public)
+ */
+export const GetOrderByPaymentTokenParams = zod.object({
+  "token": zod.coerce.string()
+})
+
+export const GetOrderByPaymentTokenResponse = zod.object({
+  "id": zod.number(),
+  "fullName": zod.string(),
+  "phone": zod.string(),
+  "email": zod.string(),
+  "deliveryAddress": zod.string(),
+  "city": zod.string(),
+  "productType": zod.string(),
+  "quantity": zod.number(),
+  "totalAmount": zod.number(),
+  "status": zod.enum(['pending', 'confirmed', 'awaiting_delivery', 'picked_up', 'in_transit', 'delivered', 'failed_delivery', 'cancelled']),
+  "courierId": zod.number().nullish(),
+  "trackingNotes": zod.string().nullish(),
+  "deliveryPaymentMethod": zod.string().nullish(),
+  "notes": zod.string().nullish(),
+  "createdAt": zod.string(),
+  "payment": zod.object({
+  "id": zod.number(),
+  "orderId": zod.number(),
+  "method": zod.string(),
+  "amount": zod.number(),
+  "status": zod.enum(['pending', 'successful', 'failed']),
+  "reference": zod.string(),
+  "phoneNumber": zod.string().nullish(),
+  "accountName": zod.string().nullish(),
+  "gatewayTransactionId": zod.string().nullish(),
+  "gatewayStatus": zod.string().nullish(),
+  "gatewayCheckoutUrl": zod.string().nullish(),
+  "gatewayProviderReference": zod.string().nullish(),
+  "gatewayIdempotencyKey": zod.string().nullish(),
+  "gatewayLastPayload": zod.record(zod.string(), zod.unknown()).nullish(),
+  "lastCheckedAt": zod.string().nullish(),
+  "completedAt": zod.string().nullish(),
+  "expiresAt": zod.string().nullish(),
+  "failureReason": zod.string().nullish(),
+  "createdAt": zod.string(),
+  "updatedAt": zod.string().optional()
+}).optional()
+})
+
+
+/**
  * @summary Get enabled payment channels (public)
  */
 export const GetPaymentSettingsResponseItem = zod.object({
@@ -570,5 +935,347 @@ export const GetPaymentSettingsResponseItem = zod.object({
   "sortOrder": zod.number()
 })
 export const GetPaymentSettingsResponse = zod.array(GetPaymentSettingsResponseItem)
+
+
+/**
+ * @summary List all couriers
+ */
+export const ListAdminCouriersResponseItem = zod.object({
+  "id": zod.number(),
+  "name": zod.string(),
+  "phone": zod.string(),
+  "email": zod.string().nullish(),
+  "vehicleInfo": zod.string().nullish(),
+  "active": zod.boolean(),
+  "createdAt": zod.string()
+})
+export const ListAdminCouriersResponse = zod.array(ListAdminCouriersResponseItem)
+
+
+/**
+ * @summary Create a new courier account
+ */
+export const createCourierBodyNameMin = 2;
+
+export const createCourierBodyPhoneMin = 8;
+
+export const createCourierBodyPasswordMin = 6;
+
+
+
+export const CreateCourierBody = zod.object({
+  "name": zod.string().min(createCourierBodyNameMin),
+  "phone": zod.string().min(createCourierBodyPhoneMin),
+  "email": zod.string().nullish(),
+  "vehicleInfo": zod.string().nullish(),
+  "password": zod.string().min(createCourierBodyPasswordMin)
+})
+
+
+/**
+ * @summary Update courier active status
+ */
+export const UpdateCourierParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+export const UpdateCourierBody = zod.object({
+  "active": zod.boolean()
+})
+
+export const UpdateCourierResponse = zod.object({
+  "id": zod.number(),
+  "name": zod.string(),
+  "phone": zod.string(),
+  "email": zod.string().nullish(),
+  "vehicleInfo": zod.string().nullish(),
+  "active": zod.boolean(),
+  "createdAt": zod.string()
+})
+
+
+/**
+ * @summary Get a single order with full details
+ */
+export const GetAdminOrderParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+export const GetAdminOrderResponse = zod.object({
+  "id": zod.number(),
+  "fullName": zod.string(),
+  "phone": zod.string(),
+  "email": zod.string(),
+  "deliveryAddress": zod.string(),
+  "city": zod.string(),
+  "productType": zod.string(),
+  "quantity": zod.number(),
+  "totalAmount": zod.number(),
+  "status": zod.string(),
+  "notes": zod.string().nullish(),
+  "agentId": zod.number().nullish(),
+  "pricingTier": zod.string().nullish(),
+  "courierId": zod.number().nullish(),
+  "trackingNotes": zod.string().nullish(),
+  "deliveryPaymentMethod": zod.string().nullish(),
+  "payment": zod.object({
+  "id": zod.number(),
+  "orderId": zod.number(),
+  "method": zod.string(),
+  "amount": zod.number(),
+  "status": zod.enum(['pending', 'successful', 'failed']),
+  "reference": zod.string(),
+  "phoneNumber": zod.string().nullish(),
+  "accountName": zod.string().nullish(),
+  "gatewayTransactionId": zod.string().nullish(),
+  "gatewayStatus": zod.string().nullish(),
+  "gatewayCheckoutUrl": zod.string().nullish(),
+  "gatewayProviderReference": zod.string().nullish(),
+  "gatewayIdempotencyKey": zod.string().nullish(),
+  "gatewayLastPayload": zod.record(zod.string(), zod.unknown()).nullish(),
+  "lastCheckedAt": zod.string().nullish(),
+  "completedAt": zod.string().nullish(),
+  "expiresAt": zod.string().nullish(),
+  "failureReason": zod.string().nullish(),
+  "createdAt": zod.string(),
+  "updatedAt": zod.string().optional()
+}).optional(),
+  "courier": zod.object({
+  "id": zod.number(),
+  "name": zod.string(),
+  "phone": zod.string(),
+  "email": zod.string().nullish(),
+  "vehicleInfo": zod.string().nullish(),
+  "active": zod.boolean(),
+  "createdAt": zod.string()
+}).optional(),
+  "createdAt": zod.string()
+})
+
+
+/**
+ * @summary Assign a courier to an order
+ */
+export const AssignCourierParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+export const AssignCourierBody = zod.object({
+  "courierId": zod.number(),
+  "deliveryPaymentMethod": zod.enum(['mobile_money_on_delivery', 'bank_transfer']).optional()
+})
+
+export const AssignCourierResponse = zod.object({
+  "id": zod.number(),
+  "fullName": zod.string(),
+  "phone": zod.string(),
+  "email": zod.string(),
+  "deliveryAddress": zod.string(),
+  "city": zod.string(),
+  "productType": zod.string(),
+  "quantity": zod.number(),
+  "totalAmount": zod.number(),
+  "status": zod.string(),
+  "notes": zod.string().nullish(),
+  "agentId": zod.number().nullish(),
+  "pricingTier": zod.string().nullish(),
+  "courierId": zod.number().nullish(),
+  "trackingNotes": zod.string().nullish(),
+  "deliveryPaymentMethod": zod.string().nullish(),
+  "payment": zod.object({
+  "id": zod.number(),
+  "orderId": zod.number(),
+  "method": zod.string(),
+  "amount": zod.number(),
+  "status": zod.enum(['pending', 'successful', 'failed']),
+  "reference": zod.string(),
+  "phoneNumber": zod.string().nullish(),
+  "accountName": zod.string().nullish(),
+  "gatewayTransactionId": zod.string().nullish(),
+  "gatewayStatus": zod.string().nullish(),
+  "gatewayCheckoutUrl": zod.string().nullish(),
+  "gatewayProviderReference": zod.string().nullish(),
+  "gatewayIdempotencyKey": zod.string().nullish(),
+  "gatewayLastPayload": zod.record(zod.string(), zod.unknown()).nullish(),
+  "lastCheckedAt": zod.string().nullish(),
+  "completedAt": zod.string().nullish(),
+  "expiresAt": zod.string().nullish(),
+  "failureReason": zod.string().nullish(),
+  "createdAt": zod.string(),
+  "updatedAt": zod.string().optional()
+}).optional(),
+  "courier": zod.object({
+  "id": zod.number(),
+  "name": zod.string(),
+  "phone": zod.string(),
+  "email": zod.string().nullish(),
+  "vehicleInfo": zod.string().nullish(),
+  "active": zod.boolean(),
+  "createdAt": zod.string()
+}).optional(),
+  "createdAt": zod.string()
+})
+
+
+/**
+ * @summary Unassign the courier from an order
+ */
+export const UnassignCourierParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+export const UnassignCourierResponse = zod.object({
+  "id": zod.number(),
+  "fullName": zod.string(),
+  "phone": zod.string(),
+  "email": zod.string(),
+  "deliveryAddress": zod.string(),
+  "city": zod.string(),
+  "productType": zod.string(),
+  "quantity": zod.number(),
+  "totalAmount": zod.number(),
+  "status": zod.string(),
+  "notes": zod.string().nullish(),
+  "agentId": zod.number().nullish(),
+  "pricingTier": zod.string().nullish(),
+  "courierId": zod.number().nullish(),
+  "trackingNotes": zod.string().nullish(),
+  "deliveryPaymentMethod": zod.string().nullish(),
+  "payment": zod.object({
+  "id": zod.number(),
+  "orderId": zod.number(),
+  "method": zod.string(),
+  "amount": zod.number(),
+  "status": zod.enum(['pending', 'successful', 'failed']),
+  "reference": zod.string(),
+  "phoneNumber": zod.string().nullish(),
+  "accountName": zod.string().nullish(),
+  "gatewayTransactionId": zod.string().nullish(),
+  "gatewayStatus": zod.string().nullish(),
+  "gatewayCheckoutUrl": zod.string().nullish(),
+  "gatewayProviderReference": zod.string().nullish(),
+  "gatewayIdempotencyKey": zod.string().nullish(),
+  "gatewayLastPayload": zod.record(zod.string(), zod.unknown()).nullish(),
+  "lastCheckedAt": zod.string().nullish(),
+  "completedAt": zod.string().nullish(),
+  "expiresAt": zod.string().nullish(),
+  "failureReason": zod.string().nullish(),
+  "createdAt": zod.string(),
+  "updatedAt": zod.string().optional()
+}).optional(),
+  "courier": zod.object({
+  "id": zod.number(),
+  "name": zod.string(),
+  "phone": zod.string(),
+  "email": zod.string().nullish(),
+  "vehicleInfo": zod.string().nullish(),
+  "active": zod.boolean(),
+  "createdAt": zod.string()
+}).optional(),
+  "createdAt": zod.string()
+})
+
+
+/**
+ * @summary Courier login
+ */
+export const CourierLoginBody = zod.object({
+  "phone": zod.string(),
+  "password": zod.string()
+})
+
+export const CourierLoginResponse = zod.object({
+  "token": zod.string(),
+  "courier": zod.object({
+  "id": zod.number(),
+  "name": zod.string(),
+  "phone": zod.string(),
+  "email": zod.string().nullish(),
+  "vehicleInfo": zod.string().nullish(),
+  "active": zod.boolean(),
+  "createdAt": zod.string()
+})
+})
+
+
+/**
+ * @summary Get current courier profile
+ */
+export const GetCourierMeResponse = zod.object({
+  "id": zod.number(),
+  "name": zod.string(),
+  "phone": zod.string(),
+  "email": zod.string().nullish(),
+  "vehicleInfo": zod.string().nullish(),
+  "active": zod.boolean(),
+  "createdAt": zod.string()
+})
+
+
+/**
+ * @summary List orders assigned to this courier
+ */
+export const ListCourierOrdersQueryParams = zod.object({
+  "status": zod.coerce.string().optional()
+})
+
+export const ListCourierOrdersResponse = zod.object({
+  "orders": zod.array(zod.object({
+  "id": zod.number(),
+  "fullName": zod.string(),
+  "phone": zod.string(),
+  "deliveryAddress": zod.string(),
+  "city": zod.string(),
+  "productType": zod.string(),
+  "quantity": zod.number(),
+  "totalAmount": zod.number(),
+  "status": zod.string(),
+  "trackingNotes": zod.string().nullish(),
+  "deliveryPaymentMethod": zod.string().nullish(),
+  "notes": zod.string().nullish(),
+  "createdAt": zod.string()
+})),
+  "total": zod.number()
+})
+
+
+/**
+ * @summary Update delivery status for an assigned order
+ */
+export const UpdateCourierOrderStatusParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+export const UpdateCourierOrderStatusBody = zod.object({
+  "status": zod.enum(['picked_up', 'in_transit', 'delivered', 'failed_delivery']),
+  "trackingNotes": zod.string().nullish()
+})
+
+export const UpdateCourierOrderStatusResponse = zod.object({
+  "id": zod.number(),
+  "fullName": zod.string(),
+  "phone": zod.string(),
+  "deliveryAddress": zod.string(),
+  "city": zod.string(),
+  "productType": zod.string(),
+  "quantity": zod.number(),
+  "totalAmount": zod.number(),
+  "status": zod.string(),
+  "trackingNotes": zod.string().nullish(),
+  "deliveryPaymentMethod": zod.string().nullish(),
+  "notes": zod.string().nullish(),
+  "createdAt": zod.string()
+})
+
+
+/**
+ * @summary Get courier delivery stats
+ */
+export const GetCourierStatsResponse = zod.object({
+  "assignedOrders": zod.number(),
+  "deliveredOrders": zod.number(),
+  "inTransitOrders": zod.number(),
+  "failedOrders": zod.number()
+})
 
 

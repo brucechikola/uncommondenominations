@@ -19,13 +19,26 @@ import Reviews from "@/pages/reviews";
 import Contact from "@/pages/contact";
 import Terms from "@/pages/terms";
 
-import AdminLogin    from "@/pages/admin/login";
+import AdminLogin     from "@/pages/admin/login";
 import AdminDashboard from "@/pages/admin/dashboard";
-import AdminOrders   from "@/pages/admin/orders";
-import AdminReviews  from "@/pages/admin/reviews";
-import AdminMessages from "@/pages/admin/messages";
-import AdminPayments from "@/pages/admin/payments";
-import AdminSettings from "@/pages/admin/settings";
+import AdminOrders    from "@/pages/admin/orders";
+import AdminReviews   from "@/pages/admin/reviews";
+import AdminMessages  from "@/pages/admin/messages";
+import AdminPayments  from "@/pages/admin/payments";
+import AdminSettings  from "@/pages/admin/settings";
+import AdminAgents    from "@/pages/admin/agents";
+import AdminCouriers  from "@/pages/admin/couriers";
+
+import AgentLogin     from "@/pages/agent/login";
+import AgentDashboard from "@/pages/agent/dashboard";
+import AgentNewOrder  from "@/pages/agent/new-order";
+import AgentOrders    from "@/pages/agent/orders";
+
+import CourierLogin     from "@/pages/courier/login";
+import CourierDashboard from "@/pages/courier/dashboard";
+import CourierOrders    from "@/pages/courier/orders";
+
+import PayByLink from "@/pages/pay";
 
 const queryClient = new QueryClient();
 
@@ -57,13 +70,26 @@ function Router() {
       <ScrollToTop />
       <VisitorTracker />
       <Switch>
-        <Route path="/admin/login"    component={AdminLogin} />
-        <Route path="/admin/orders"   component={AdminOrders} />
-        <Route path="/admin/reviews"  component={AdminReviews} />
-        <Route path="/admin/messages" component={AdminMessages} />
-        <Route path="/admin/payments" component={AdminPayments} />
-        <Route path="/admin/settings" component={AdminSettings} />
-        <Route path="/admin"          component={AdminDashboard} />
+        <Route path="/admin/login"     component={AdminLogin} />
+        <Route path="/admin/orders"    component={AdminOrders} />
+        <Route path="/admin/reviews"   component={AdminReviews} />
+        <Route path="/admin/messages"  component={AdminMessages} />
+        <Route path="/admin/payments"  component={AdminPayments} />
+        <Route path="/admin/settings"  component={AdminSettings} />
+        <Route path="/admin/agents"    component={AdminAgents} />
+        <Route path="/admin/couriers"  component={AdminCouriers} />
+        <Route path="/admin"           component={AdminDashboard} />
+
+        <Route path="/agent/login"  component={AgentLogin} />
+        <Route path="/agent/new"    component={AgentNewOrder} />
+        <Route path="/agent/orders" component={AgentOrders} />
+        <Route path="/agent"        component={AgentDashboard} />
+
+        <Route path="/courier/login"   component={CourierLogin} />
+        <Route path="/courier/orders"  component={CourierOrders} />
+        <Route path="/courier"         component={CourierDashboard} />
+
+        <Route path="/pay/:token" component={PayByLink} />
         <Route>
           <PublicLayout>
             <Switch>

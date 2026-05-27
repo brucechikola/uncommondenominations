@@ -5,8 +5,12 @@
   "type": "module",
   "scripts": {
     "seed-admin": "tsx ./src/seed-admin.ts",
+    "configure-ngrok-payment-settings": "tsx ./src/configure-ngrok-payment-settings.ts",
     "seed-payment-settings": "tsx ./src/seed-payment-settings.ts",
+    "seed-payment-gateway-settings": "tsx ./src/seed-payment-gateway-settings.ts",
     "seed-products": "tsx ./src/seed-products.ts",
+    "seed-agent": "tsx ./src/seed-agent.ts",
+    "seed-courier": "tsx ./src/seed-courier.ts",
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },
   "dependencies": {

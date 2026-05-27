@@ -7,6 +7,8 @@ import reviewsRouter from "./reviews";
 import visitorsRouter from "./visitors";
 import contactRouter from "./contact";
 import adminRouter from "./admin";
+import agentRouter from "./agent";
+import courierRouter from "./courier";
 import paymentSettingsRouter from "./payment-settings";
 
 const router: IRouter = Router();
@@ -20,5 +22,7 @@ router.use(reviewsRouter);
 router.use(visitorsRouter);
 router.use(contactRouter);
 router.use(adminRouter);
+router.use(agentRouter);
+router.use(courierRouter);
 
 export default router;

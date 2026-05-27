@@ -35,7 +35,7 @@ function ChartTooltip({ active, payload, label, prefix = "" }: {
   if (!active || !payload?.length) return null;
   return (
     <div className="rounded-xl border px-4 py-3 text-sm shadow-xl"
-      style={{ background: "#0e1829", borderColor: "#1a2d4a" }}>
+      style={{ background: "#f8fafc", borderColor: "#e2e8f0" }}>
       {label && <p className="text-slate-400 text-xs mb-2 font-medium">{label}</p>}
       {payload.map((p) => (
         <p key={p.name} className="font-semibold" style={{ color: p.color }}>
@@ -61,7 +61,7 @@ function StatCard({ label, value, icon: Icon, color, sub }: {
         <ArrowUpRight className="h-4 w-4 text-slate-700" />
       </div>
       <p className={cn("text-[0.7rem] font-medium uppercase tracking-wider mb-1", D.muted)}>{label}</p>
-      <p className="text-2xl font-bold text-slate-100">{value}</p>
+      <p className="text-2xl font-bold text-slate-800">{value}</p>
       {sub && <p className={cn("text-xs mt-1", D.muted)}>{sub}</p>}
       {/* Subtle glow */}
       <div className="absolute -bottom-6 -right-6 w-24 h-24 rounded-full opacity-5"
@@ -172,10 +172,10 @@ export default function AdminDashboard() {
             <p className={cn("text-xs mb-5", D.muted)}>Books sold and revenue by format</p>
             <ResponsiveContainer width="100%" height={220}>
               <BarChart data={editionData} barCategoryGap="40%" barGap={6}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#1a2d4a" vertical={false} />
+                <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" vertical={false} />
                 <XAxis dataKey="name" tick={{ fill: "#64748b", fontSize: 11 }} axisLine={false} tickLine={false} />
                 <YAxis tick={{ fill: "#64748b", fontSize: 10 }} axisLine={false} tickLine={false} width={36} />
-                <Tooltip content={<ChartTooltip />} cursor={{ fill: "rgba(255,255,255,0.04)" }} />
+                <Tooltip content={<ChartTooltip />} cursor={{ fill: "rgba(0,0,0,0.04)" }} />
                 <Legend iconType="circle" iconSize={8}
                   wrapperStyle={{ fontSize: "0.7rem", color: "#64748b", paddingTop: "12px" }} />
                 <Bar dataKey="Books Sold" fill="#8d6b3d" radius={[6, 6, 0, 0]} />
@@ -212,7 +212,7 @@ export default function AdminDashboard() {
                       const d = payload[0].payload as { name: string; value: number; color: string };
                       return (
                         <div className="rounded-xl border px-3 py-2 text-xs shadow-xl"
-                          style={{ background: "#0e1829", borderColor: "#1a2d4a" }}>
+                          style={{ background: "#f8fafc", borderColor: "#e2e8f0" }}>
                           <p style={{ color: d.color }} className="font-semibold">{d.name}</p>
                           <p className="text-slate-400">{d.value} order{d.value !== 1 ? "s" : ""}</p>
                         </div>
@@ -243,10 +243,10 @@ export default function AdminDashboard() {
             {methodData.length > 0 ? (
               <ResponsiveContainer width="100%" height={220}>
                 <BarChart data={methodData} layout="vertical" barCategoryGap="30%">
-                  <CartesianGrid strokeDasharray="3 3" stroke="#1a2d4a" horizontal={false} />
+                  <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" horizontal={false} />
                   <XAxis type="number" tick={{ fill: "#64748b", fontSize: 10 }} axisLine={false} tickLine={false} />
                   <YAxis type="category" dataKey="name" tick={{ fill: "#94a3b8", fontSize: 10 }} axisLine={false} tickLine={false} width={110} />
-                  <Tooltip content={<ChartTooltip />} cursor={{ fill: "rgba(255,255,255,0.04)" }} />
+                  <Tooltip content={<ChartTooltip />} cursor={{ fill: "rgba(0,0,0,0.04)" }} />
                   <Bar dataKey="count" name="Transactions" fill="#8d6b3d" radius={[0, 6, 6, 0]}>
                     {methodData.map((entry) => {
                       const key = Object.entries(PAYMENT_METHOD_META).find(([, v]) => v.label === entry.name)?.[0];
@@ -323,7 +323,7 @@ export default function AdminDashboard() {
                     <td className={cn("px-4 py-3.5 font-semibold", D.accent)}>{fmtMoney(order.totalAmount)}</td>
                     <td className={cn("px-4 py-3.5", D.muted)}>{order.city}</td>
                     <td className="px-4 py-3.5">
-                      <span className={cn("px-2.5 py-1 rounded-full text-xs font-medium", STATUS_COLORS[order.status] ?? "bg-white/10 text-slate-400")}>
+                      <span className={cn("px-2.5 py-1 rounded-full text-xs font-medium", STATUS_COLORS[order.status] ?? "bg-slate-100 text-slate-400")}>
                         {formatStatus(order.status)}
                       </span>
                     </td>

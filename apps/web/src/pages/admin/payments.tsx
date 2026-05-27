@@ -16,7 +16,7 @@ function PaymentModal({ payment, onClose }: { payment: AdminPayment; onClose: ()
     <Modal open onClose={onClose} title={`Transaction #${payment.id}`} subtitle={fmtDate(payment.createdAt)}>
       {/* Status + method badge */}
       <div className="flex items-center gap-3 flex-wrap">
-        <span className={cn("px-3 py-1 rounded-full text-xs font-medium capitalize border", STATUS_COLORS[payment.status] ?? "bg-white/10 text-slate-400")}>
+        <span className={cn("px-3 py-1 rounded-full text-xs font-medium capitalize border", STATUS_COLORS[payment.status] ?? "bg-slate-100 text-slate-400")}>
           {formatStatus(payment.status)}
         </span>
         {meta && (
@@ -31,7 +31,7 @@ function PaymentModal({ payment, onClose }: { payment: AdminPayment; onClose: ()
       </div>
 
       {/* Transaction details */}
-      <div className={cn("rounded-xl p-4 border", "bg-[#111f35]", D.border)}>
+      <div className={cn("rounded-xl p-4 border", "bg-slate-50", D.border)}>
         <p className={cn("text-xs font-semibold uppercase tracking-wider mb-3", D.muted)}>Transaction</p>
         <Field label="Amount"    value={<span className={cn("font-bold text-lg", D.accent)}>{fmtMoney(payment.amount)}</span>} accent />
         <Field label="Reference" value={<span className="font-mono text-xs">{payment.reference}</span>} />
@@ -44,7 +44,7 @@ function PaymentModal({ payment, onClose }: { payment: AdminPayment; onClose: ()
 
       {/* Customer */}
       {(payment.orderName || payment.orderPhone) && (
-        <div className={cn("rounded-xl p-4 border", "bg-[#111f35]", D.border)}>
+        <div className={cn("rounded-xl p-4 border", "bg-slate-50", D.border)}>
           <p className={cn("text-xs font-semibold uppercase tracking-wider mb-3", D.muted)}>Customer</p>
           {payment.orderName  && <Field label="Name"  value={payment.orderName} />}
           {payment.orderPhone && <Field label="Phone" value={<a href={`tel:${payment.orderPhone}`} className={cn(D.accent, "hover:underline")}>{payment.orderPhone}</a>} />}
@@ -138,7 +138,7 @@ export default function AdminPayments() {
                     <td className={cn("px-4 py-3.5 font-semibold", D.accent)}>{fmtMoney(p.amount)}</td>
                     <td className={cn("px-4 py-3.5 font-mono text-xs", D.muted)}>{p.reference}</td>
                     <td className="px-4 py-3.5">
-                      <span className={cn("px-2.5 py-1 rounded-full text-xs font-medium", STATUS_COLORS[p.status] ?? "bg-white/10 text-slate-400")}>
+                      <span className={cn("px-2.5 py-1 rounded-full text-xs font-medium", STATUS_COLORS[p.status] ?? "bg-slate-100 text-slate-400")}>
                         {formatStatus(p.status)}
                       </span>
                     </td>

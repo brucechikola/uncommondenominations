@@ -235,7 +235,7 @@ function StatItem({
       </div>
       <div
         className="font-sans text-[0.65rem] tracking-[0.22em] uppercase"
-        style={{ color: "hsl(220,18%,50%)" }}
+        style={{ color: "hsl(220,22%,52%)" }}
       >
         {label}
       </div>
@@ -305,7 +305,7 @@ export default function Home() {
     <div className="overflow-x-hidden">
       {/* ══════════════════════════════════════ HERO ══ */}
       <section ref={heroRef} className="relative overflow-hidden"
-        style={{ minHeight: "100svh", background: "hsl(222,58%,6%)", marginTop: "-56px", paddingTop: "56px" }}>
+        style={{ minHeight: "100svh", background: "hsl(38,30%,96%)", marginTop: "-56px", paddingTop: "56px" }}>
 
         {/* ── BACKGROUND LAYERS ── */}
         <div className="absolute inset-0 pointer-events-none select-none overflow-hidden">
@@ -325,7 +325,7 @@ export default function Home() {
               fontFamily: "var(--app-font-display)", fontWeight: 900,
               fontSize: "21vw", lineHeight: 1,
               color: "transparent",
-              WebkitTextStroke: "1px hsl(42,80%,52%,0.052)",
+              WebkitTextStroke: "1px hsl(42,80%,52%,0.07)",
               letterSpacing: "0.07em", whiteSpace: "nowrap", userSelect: "none",
               transform: "translateX(-1vw) translateY(8%)",
             }}>LUMINOUS</span>
@@ -335,12 +335,12 @@ export default function Home() {
           <motion.div style={{ y: bgY }} className="absolute inset-0">
             <div className="absolute -top-28 left-1/2 -translate-x-1/2 rounded-full"
               style={{ width: "1100px", height: "750px",
-                background: "radial-gradient(ellipse, hsl(222,65%,18%,0.8) 0%, transparent 65%)" }} />
+                background: "radial-gradient(ellipse, hsl(42,70%,80%,0.35) 0%, transparent 65%)" }} />
             <div className="absolute top-[18%] right-0 rounded-full"
               style={{ width: "520px", height: "620px",
-                background: "radial-gradient(ellipse 70% 80% at 80% 50%, hsl(42,78%,50%,0.07) 0%, transparent 68%)" }} />
+                background: "radial-gradient(ellipse 70% 80% at 80% 50%, hsl(42,78%,50%,0.06) 0%, transparent 68%)" }} />
             <div className="absolute bottom-0 inset-x-0 h-56"
-              style={{ background: "linear-gradient(0deg, hsl(222,58%,5%) 0%, transparent 100%)" }} />
+              style={{ background: "linear-gradient(0deg, hsl(40,28%,96%) 0%, transparent 100%)" }} />
           </motion.div>
 
           {/* Floating gold particles */}
@@ -368,14 +368,14 @@ export default function Home() {
                   style={{ background: "hsl(42,80%,58%)" }}
                   animate={{ opacity: [1, 0.18, 1] }} transition={{ duration: 2.2, repeat: Infinity }} />
                 <span className="font-sans text-[0.57rem] font-semibold tracking-[0.36em] uppercase"
-                  style={{ color: "hsl(42,78%,60%)" }}>Bestselling · Zambia 2024</span>
+                  style={{ color: "hsl(42,78%,40%)" }}>Bestselling · Zambia 2024</span>
               </div>
-              <div className="w-px h-3 flex-shrink-0" style={{ background: "hsl(220,38%,22%)" }} />
+              <div className="w-px h-3 flex-shrink-0" style={{ background: "hsl(40,14%,82%)" }} />
               <div className="flex items-center gap-1.5">
                 <div className="flex gap-0.5">
-                  {[1,2,3,4,5].map(i => <Star key={i} className="h-2.5 w-2.5 fill-current" style={{ color: "hsl(42,78%,54%)" }} />)}
+                  {[1,2,3,4,5].map(i => <Star key={i} className="h-2.5 w-2.5 fill-current" style={{ color: "hsl(42,78%,44%)" }} />)}
                 </div>
-                <span className="font-sans text-[0.57rem] font-medium" style={{ color: "hsl(220,14%,48%)" }}>5.0</span>
+                <span className="font-sans text-[0.57rem] font-medium" style={{ color: "hsl(220,22%,52%)" }}>5.0</span>
               </div>
             </motion.div>
 
@@ -386,8 +386,7 @@ export default function Home() {
                   <motion.span className="block" variants={slideUp}
                     style={{
                       fontSize: "clamp(3.2rem,6.5vw,5.4rem)",
-                      color: "hsl(40,24%,96%)",
-                      textShadow: "0 0 90px hsl(222,72%,44%,0.4), 0 0 180px hsl(222,65%,36%,0.2)",
+                      color: "hsl(220,52%,10%)",
                     }}>Uncommon</motion.span>
                 </div>
                 <div style={{ overflow: "hidden" }}>
@@ -405,19 +404,19 @@ export default function Home() {
             <motion.div variants={fadeUp} className="flex items-center gap-4 mb-6">
               <div className="h-px w-10 flex-shrink-0" style={{ background: "hsl(42,78%,50%,0.55)" }} />
               <span className="font-sans text-[0.56rem] tracking-[0.4em] uppercase font-semibold flex-shrink-0"
-                style={{ color: "hsl(42,78%,54%,0.6)" }}>Understanding Zambia's Economic Transformation</span>
-              <div className="h-px flex-1" style={{ background: "hsl(42,78%,48%,0.1)" }} />
+                style={{ color: "hsl(42,78%,44%,0.7)" }}>Understanding Zambia's Economic Transformation</span>
+              <div className="h-px flex-1" style={{ background: "hsl(40,14%,86%)" }} />
             </motion.div>
 
             {/* Author */}
             <motion.p variants={fadeUp} className="font-serif italic mb-5"
-              style={{ fontSize: "clamp(1rem,1.5vw,1.14rem)", color: "hsl(40,20%,58%)" }}>
+              style={{ fontSize: "clamp(1rem,1.5vw,1.14rem)", color: "hsl(220,22%,44%)" }}>
               by Monde Mwanalushi &amp; Eric Nalishebo
             </motion.p>
 
             {/* Description */}
             <motion.p variants={fadeUp} className="font-serif leading-[1.8] mb-8 max-w-[500px]"
-              style={{ fontSize: "clamp(0.9rem,1.3vw,1rem)", color: "hsl(220,14%,50%)" }}>
+              style={{ fontSize: "clamp(0.9rem,1.3vw,1rem)", color: "hsl(220,22%,44%)" }}>
               A rigorous, accessible diagnosis of the structural factors holding back
               Zambia's economic transformation — written for policymakers, business
               leaders, students, and every Zambian who wants to understand the real picture.
@@ -427,14 +426,14 @@ export default function Home() {
             <motion.div variants={fadeUp} className="relative mb-10 pl-3">
               <span className="absolute font-display italic font-bold"
                 style={{ top: "-0.5em", left: "-0.1em", fontSize: "5.5rem", lineHeight: 1,
-                  color: "hsl(42,78%,50%,0.1)", userSelect: "none", pointerEvents: "none" }}>"</span>
+                  color: "hsl(42,78%,50%,0.12)", userSelect: "none", pointerEvents: "none" }}>"</span>
               <p className="font-serif italic leading-snug relative z-10"
-                style={{ fontSize: "clamp(0.96rem,1.38vw,1.06rem)", color: "hsl(40,18%,56%)" }}>
+                style={{ fontSize: "clamp(0.96rem,1.38vw,1.06rem)", color: "hsl(220,22%,40%)" }}>
                 "The book Zambia has been waiting for."
               </p>
               <div className="flex items-center gap-2 mt-2">
                 <div className="h-px w-5" style={{ background: "hsl(42,78%,48%,0.35)" }} />
-                <span className="font-sans text-[0.67rem] tracking-wide" style={{ color: "hsl(220,18%,36%)" }}>
+                <span className="font-sans text-[0.67rem] tracking-wide" style={{ color: "hsl(220,22%,52%)" }}>
                   Chanda Mwale, Lusaka
                 </span>
               </div>
@@ -458,7 +457,7 @@ export default function Home() {
                   <Button size="lg" variant="outline" onClick={() => setProductType("hardcover")}
                     className="font-sans uppercase w-full sm:w-auto"
                     style={{ height: "3rem", padding: "0 2.2rem",
-                      color: "hsl(40,22%,60%)", background: "transparent" }}>
+                      color: "hsl(222,42%,28%)", borderColor: "hsl(220,22%,78%)", background: "transparent" }}>
                     Hardcover — K500
                   </Button>
                 </motion.div>
@@ -467,14 +466,14 @@ export default function Home() {
 
             {/* Stats */}
             <motion.div variants={fadeUp} className="flex flex-wrap items-center gap-x-8 gap-y-4 pt-7"
-              style={{ borderTop: "1px solid hsl(220,38%,14%)" }}>
+              style={{ borderTop: "1px solid hsl(40,14%,86%)" }}>
               {[
                 { to: 6,   suffix: "+",     label: "Cities Served" },
                 { to: 256,                  label: "Pages"         },
                 { to: 5.0, decimals: 1, prefix: "★ ", label: "Avg Rating" },
               ].map((s, i) => (
                 <div key={s.label} className="flex items-center gap-8">
-                  {i > 0 && <div className="hidden sm:block w-px h-8" style={{ background: "hsl(220,38%,16%)" }} />}
+                  {i > 0 && <div className="hidden sm:block w-px h-8" style={{ background: "hsl(40,14%,84%)" }} />}
                   <StatItem {...s} />
                 </div>
               ))}
@@ -486,16 +485,16 @@ export default function Home() {
             onMouseMove={handleBookMouseMove} onMouseLeave={handleBookMouseLeave}
             className="hidden lg:flex flex-col items-center justify-center relative overflow-hidden">
 
-            {/* Panel bg */}
-            <div className="absolute inset-0" style={{ background: "hsl(222,58%,5%)" }} />
+            {/* Panel bg — deep navy */}
+            <div className="absolute inset-0" style={{ background: "hsl(222,52%,10%)" }} />
 
             {/* Gold vertical separator */}
             <div className="absolute left-0 top-[10%] bottom-[10%] w-px"
-              style={{ background: "linear-gradient(180deg, transparent, hsl(42,78%,48%,0.22) 22%, hsl(42,78%,48%,0.22) 78%, transparent)" }} />
+              style={{ background: "linear-gradient(180deg, transparent, hsl(42,78%,48%,0.35) 22%, hsl(42,78%,48%,0.35) 78%, transparent)" }} />
 
             {/* Deep background bloom */}
             <div className="absolute inset-0 pointer-events-none" style={{
-              background: "radial-gradient(ellipse 90% 70% at 55% 42%, hsl(42,72%,42%,0.11) 0%, hsl(222,72%,18%,0.18) 45%, transparent 70%)",
+              background: "radial-gradient(ellipse 90% 70% at 55% 42%, hsl(42,72%,42%,0.14) 0%, hsl(222,72%,18%,0.18) 50%, transparent 75%)",
               filter: "blur(32px)",
             }} />
 
@@ -503,7 +502,7 @@ export default function Home() {
             <div className="absolute pointer-events-none" style={{
               top: "8%", left: "50%", transform: "translateX(-50%)",
               width: "320px", height: "420px",
-              background: "radial-gradient(ellipse 55% 65% at 50% 38%, hsl(42,90%,62%,0.13) 0%, hsl(42,60%,50%,0.06) 50%, transparent 72%)",
+              background: "radial-gradient(ellipse 55% 65% at 50% 38%, hsl(42,90%,62%,0.18) 0%, hsl(42,60%,50%,0.08) 50%, transparent 72%)",
               filter: "blur(12px)",
             }} />
 
@@ -598,13 +597,13 @@ export default function Home() {
                     onClick={() => setProductType(type)}
                     className="flex flex-col items-center gap-0.5 py-3 rounded-xl cursor-pointer"
                     style={{
-                      background: "hsl(222,55%,8%,0.85)",
-                      border: "1px solid hsl(220,36%,18%,0.8)",
+                      background: "hsl(222,52%,14%,0.85)",
+                      border: "1px solid hsl(220,38%,22%)",
                       backdropFilter: "blur(18px)",
                       WebkitBackdropFilter: "blur(18px)",
                     }}>
                     <span className="font-sans text-[0.5rem] tracking-[0.28em] uppercase font-semibold"
-                      style={{ color: "hsl(220,18%,38%)" }}>{label}</span>
+                      style={{ color: "hsl(220,18%,52%)" }}>{label}</span>
                     <span className="font-display font-bold text-[1.18rem]"
                       style={{ color: "hsl(42,78%,60%)" }}>{price}</span>
                   </motion.div>
@@ -619,7 +618,7 @@ export default function Home() {
               <div className="flex gap-[2px]">
                 {[1,2,3,4,5].map(i => <Star key={i} className="h-2.5 w-2.5 fill-current" style={{ color: "hsl(42,78%,52%)" }} />)}
               </div>
-              <span className="font-sans text-[0.58rem] tracking-wide" style={{ color: "hsl(220,16%,38%)" }}>
+              <span className="font-sans text-[0.58rem] tracking-wide" style={{ color: "hsl(220,18%,46%)" }}>
                 5.0 · Nationwide delivery
               </span>
             </motion.div>
@@ -630,12 +629,12 @@ export default function Home() {
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 2.8 }}
           className="absolute bottom-7 left-8 lg:left-16 xl:left-24 flex items-center gap-3">
           <motion.div animate={{ x: [0, 5, 0] }} transition={{ repeat: Infinity, duration: 2.2, ease: "easeInOut" }}>
-            <ChevronDown className="h-3.5 w-3.5" style={{ color: "hsl(220,18%,32%)", transform: "rotate(-90deg)" }} />
+            <ChevronDown className="h-3.5 w-3.5" style={{ color: "hsl(220,22%,56%)", transform: "rotate(-90deg)" }} />
           </motion.div>
-          <span className="font-sans text-[0.52rem] tracking-[0.38em] uppercase" style={{ color: "hsl(220,18%,30%)" }}>
+          <span className="font-sans text-[0.52rem] tracking-[0.38em] uppercase" style={{ color: "hsl(220,22%,54%)" }}>
             Scroll to explore
           </span>
-          <div className="h-px max-w-[36px] w-full" style={{ background: "hsl(220,38%,16%)" }} />
+          <div className="h-px max-w-[36px] w-full" style={{ background: "hsl(40,14%,84%)" }} />
         </motion.div>
       </section>
 
@@ -750,10 +749,10 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ══════════════════════════════════════ EDITIONS (dark) ══ */}
+      {/* ══════════════════════════════════════ EDITIONS ══ */}
       <section
         className="py-14 lg:py-28 relative"
-        style={{ background: "hsl(220,52%,9%)" }}
+        style={{ background: "hsl(222,52%,10%)" }}
       >
 
         <div className="container mx-auto px-5 sm:px-6 lg:px-10">
@@ -794,8 +793,9 @@ export default function Home() {
                   transition={{ type: "spring", stiffness: 220 }}
                   className="rounded-2xl p-5 sm:p-9"
                   style={{
-                    background: "hsl(220,52%,12%)",
-                    border: "1px solid hsl(220,38%,22%)",
+                    background: "hsl(222,52%,13%)",
+                    border: "1px solid hsl(220,38%,20%)",
+                    boxShadow: "0 8px 40px rgba(0,0,0,0.25)",
                   }}
                 >
                   <div
@@ -865,25 +865,25 @@ export default function Home() {
                   transition={{ type: "spring", stiffness: 220 }}
                   className="rounded-2xl p-5 sm:p-9 relative overflow-hidden"
                   style={{
-                    background:
-                      "linear-gradient(145deg, hsl(222,56%,14%), hsl(218,60%,10%))",
-                    border: "1px solid hsl(42,78%,50%,0.3)",
+                    background: "linear-gradient(145deg, hsl(222,56%,15%), hsl(218,60%,11%))",
+                    border: "1px solid hsl(42,78%,46%,0.35)",
+                    boxShadow: "0 8px 48px rgba(0,0,0,0.35), 0 0 0 1px hsl(42,78%,46%,0.1)",
                   }}
                 >
                   {/* Premium glow */}
                   <div
                     className="absolute -top-20 -right-20 w-48 h-48 rounded-full pointer-events-none"
                     style={{
-                      background:
-                        "radial-gradient(circle, hsl(42,78%,52%,0.08) 0%, transparent 70%)",
+                      background: "radial-gradient(circle, hsl(42,78%,52%,0.12) 0%, transparent 70%)",
                     }}
                   />
                   <div className="absolute top-4 right-4">
                     <span
                       className="font-display text-[0.55rem] tracking-[0.2em] uppercase border rounded-full px-2.5 py-1"
                       style={{
-                        color:       "hsl(42,80%,64%)",
-                        borderColor: "hsl(42,78%,52%,0.3)",
+                        color:        "hsl(42,80%,64%)",
+                        borderColor:  "hsl(42,78%,52%,0.35)",
+                        background:   "hsl(42,78%,46%,0.1)",
                       }}
                     >
                       Premium
@@ -959,11 +959,11 @@ export default function Home() {
           <Reveal className="flex justify-center order-2 lg:order-1">
             <motion.div variants={fadeLeft} className="relative">
               <div
-                className="w-64 h-64 lg:w-80 lg:h-80 rounded-3xl flex items-center justify-center shadow-2xl"
+                className="w-64 h-64 lg:w-80 lg:h-80 rounded-3xl flex items-center justify-center"
                 style={{
-                  background:
-                    "linear-gradient(145deg, hsl(220,52%,13%), hsl(218,58%,10%))",
-                  border: "1px solid hsl(40,14%,88%)",
+                  background: "linear-gradient(145deg, hsl(222,52%,13%), hsl(220,56%,9%))",
+                  border: "1px solid hsl(220,38%,20%)",
+                  boxShadow: "0 24px 64px rgba(0,0,0,0.18), 0 8px 24px rgba(0,0,0,0.12)",
                 }}
               >
                 <div className="text-center">
@@ -972,7 +972,7 @@ export default function Home() {
                     style={{
                       fontSize: "5rem",
                       background:
-                        "linear-gradient(135deg, hsl(42,78%,42%), hsl(44,84%,62%))",
+                        "linear-gradient(135deg, hsl(42,78%,42%), hsl(44,84%,56%))",
                       WebkitBackgroundClip: "text",
                       WebkitTextFillColor: "transparent",
                     }}
@@ -981,7 +981,7 @@ export default function Home() {
                   </div>
                   <div
                     className="font-sans text-[0.6rem] tracking-[0.28em] uppercase"
-                    style={{ color: "hsl(40,22%,38%)" }}
+                    style={{ color: "hsl(220,18%,42%)" }}
                   >
                     Mwanalushi &amp; Nalishebo
                   </div>
@@ -1056,11 +1056,11 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ══════════════════════════════════════ REVIEWS (dark) ══ */}
+      {/* ══════════════════════════════════════ REVIEWS ══ */}
       {topReviews.length > 0 && (
         <section
           className="py-14 lg:py-28 relative overflow-hidden"
-          style={{ background: "hsl(220,52%,9%)" }}
+          style={{ background: "hsl(38,32%,94%)" }}
         >
 
           <div className="container mx-auto px-5 sm:px-6 lg:px-10">
@@ -1068,7 +1068,7 @@ export default function Home() {
               <motion.p
                 variants={fadeUp}
                 className="font-sans text-[0.65rem] tracking-[0.3em] uppercase font-semibold mb-5"
-                style={{ color: "hsl(42,78%,62%)" }}
+                style={{ color: "hsl(42,78%,44%)" }}
               >
                 Reader Reviews
               </motion.p>
@@ -1077,7 +1077,7 @@ export default function Home() {
                 className="font-display font-bold"
                 style={{
                   fontSize: "clamp(1.7rem,3vw,2.4rem)",
-                  color: "hsl(40,22%,92%)",
+                  color: "hsl(222,52%,12%)",
                 }}
               >
                 What Readers Are Saying
@@ -1095,13 +1095,14 @@ export default function Home() {
                   whileHover={{ y: -5 }}
                   className="rounded-2xl p-8 flex flex-col"
                   style={{
-                    background: "hsl(220,52%,12%)",
-                    border: "1px solid hsl(220,38%,21%)",
+                    background: "hsl(38,30%,99%)",
+                    border: "1px solid hsl(38,20%,88%)",
+                    boxShadow: "0 4px 24px rgba(0,0,0,0.06)",
                   }}
                 >
                   <div
                     className="font-serif leading-none mb-3 select-none"
-                    style={{ fontSize: "4.5rem", color: "hsl(42,78%,48%,0.15)" }}
+                    style={{ fontSize: "4.5rem", color: "hsl(42,78%,48%,0.18)" }}
                   >
                     "
                   </div>
@@ -1109,7 +1110,7 @@ export default function Home() {
                     className="font-serif italic leading-relaxed mb-6 flex-1"
                     style={{
                       fontSize: "clamp(0.9rem,1.4vw,1rem)",
-                      color: "hsl(220,15%,60%)",
+                      color: "hsl(220,22%,44%)",
                     }}
                   >
                     "{r.comment}"
@@ -1120,22 +1121,22 @@ export default function Home() {
                         key={j}
                         className="h-3.5 w-3.5"
                         style={{
-                          fill: "hsl(42,78%,50%)",
-                          color: "hsl(42,78%,50%)",
+                          fill: "hsl(42,78%,44%)",
+                          color: "hsl(42,78%,44%)",
                         }}
                       />
                     ))}
                   </div>
                   <p
                     className="font-display text-[0.75rem] font-bold tracking-wide"
-                    style={{ color: "hsl(40,22%,78%)" }}
+                    style={{ color: "hsl(220,52%,14%)" }}
                   >
                     {r.reviewerName}
                   </p>
                   {r.reviewerTitle && (
                     <p
                       className="font-sans text-[0.68rem] mt-0.5"
-                      style={{ color: "hsl(220,15%,46%)" }}
+                      style={{ color: "hsl(220,22%,52%)" }}
                     >
                       {r.reviewerTitle}
                     </p>
@@ -1157,8 +1158,9 @@ export default function Home() {
                       fontSize:    "0.7rem",
                       height:      "2.8rem",
                       padding:     "0 2.5rem",
-                      borderColor: "hsl(220,38%,25%)",
-                      color:       "hsl(40,22%,60%)",
+                      borderColor: "hsl(38,20%,80%)",
+                      color:       "hsl(222,52%,14%)",
+                      background:  "transparent",
                     }}
                   >
                     Read All Reviews

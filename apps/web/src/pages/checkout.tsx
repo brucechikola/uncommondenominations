@@ -1,4 +1,5 @@
 import { useLocation } from "wouter";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useCartStore } from "@/lib/store";
@@ -6,6 +7,7 @@ import { useCreateOrder, useListProducts } from "@workspace/api-client-react";
 import { useForm } from "react-hook-form";
 import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
+import { Loader2, MapPinned } from "lucide-react";
 import { StepIndicator, MiniBook,
   PAGE_BG, CARD_BG, CARD_BORDER, GOLD, TEXT_PRIMARY, TEXT_MUTED, TEXT_DIM, fmtMoney } from "@/components/purchase-ui";
 
@@ -19,8 +21,8 @@ interface CheckoutForm {
 }
 
 const inputStyle = (err?: boolean): React.CSSProperties => ({
-  background: "hsl(222,54%,8%)",
-  borderColor: err ? "hsl(0,70%,50%)" : "hsl(220,38%,17%)",
+  background: "hsl(40,28%,99%)",
+  borderColor: err ? "hsl(0,70%,50%)" : CARD_BORDER,
   color: TEXT_PRIMARY,
   height: "3rem",
   borderRadius: "12px",
@@ -43,12 +45,76 @@ export default function Checkout() {
   const { data: products } = useListProducts();
   const createOrder = useCreateOrder();
 
-  const { register, handleSubmit, formState: { errors } } = useForm<CheckoutForm>();
+  const { register, handleSubmit, setValue, formState: { errors } } = useForm<CheckoutForm>();
+  const [locating, setLocating] = useState(false);
+  const [locationError, setLocationError] = useState<string | null>(null);
 
   const paperback = products?.find((p) => p.type === "paperback");
   const hardcover = products?.find((p) => p.type === "hardcover");
   const selectedProduct = products?.find((p) => p.type === productType);
   const total = selectedProduct ? selectedProduct.priceKwacha * quantity : 0;
+
+  const fillCurrentLocation = async () => {
+    if (!navigator.geolocation) {
+      setLocationError("Geolocation is not supported on this device.");
+      return;
+    }
+
+    setLocating(true);
+    setLocationError(null);
+
+    navigator.geolocation.getCurrentPosition(async (position) => {
+      try {
+        const url = new URL("https://nominatim.openstreetmap.org/reverse");
+        url.searchParams.set("format", "geocodejson");
+        url.searchParams.set("lat", String(position.coords.latitude));
+        url.searchParams.set("lon", String(position.coords.longitude));
+        url.searchParams.set("addressdetails", "1");
+        url.searchParams.set("zoom", "18");
+
+        const response = await fetch(url.toString(), {
+          headers: {
+            Accept: "application/json",
+          },
+        });
+
+        if (!response.ok) {
+          throw new Error("Location lookup failed");
+        }
+
+        const data = await response.json() as {
+          features?: Array<{
+            properties?: {
+              geocoding?: {
+                label?: string;
+                city?: string;
+                district?: string;
+                state?: string;
+              };
+            };
+          }>;
+        };
+
+        const geocoding = data.features?.[0]?.properties?.geocoding;
+        const label = geocoding?.label ?? "";
+        const city = geocoding?.city ?? geocoding?.district ?? geocoding?.state ?? "";
+
+        if (label) setValue("deliveryAddress", label, { shouldValidate: true, shouldDirty: true });
+        if (city) setValue("city", city, { shouldValidate: true, shouldDirty: true });
+      } catch {
+        setLocationError("We couldn't resolve your current location. You can still enter it manually.");
+      } finally {
+        setLocating(false);
+      }
+    }, () => {
+      setLocating(false);
+      setLocationError("We couldn't access your location. Please allow permission or enter it manually.");
+    }, {
+      enableHighAccuracy: true,
+      timeout: 15000,
+      maximumAge: 60000,
+    });
+  };
 
   const onSubmit = async (data: CheckoutForm) => {
     if (!productType) return;
@@ -80,7 +146,7 @@ export default function Checkout() {
       {/* Page atmosphere */}
       <div className="absolute inset-x-0 top-0 h-[420px] overflow-hidden pointer-events-none" style={{ zIndex: 0 }}>
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[900px] h-[420px]"
-          style={{ background: "radial-gradient(ellipse, hsl(222,65%,13%,0.7) 0%, transparent 65%)" }} />
+          style={{ background: "radial-gradient(ellipse, hsl(42,70%,80%,0.3) 0%, transparent 65%)" }} />
       </div>
 
       <div className="relative z-10 container mx-auto px-6 pt-14 max-w-5xl">
@@ -106,7 +172,7 @@ export default function Checkout() {
                   <FieldLabel>Full Name *</FieldLabel>
                   <Input placeholder="e.g. Chanda Mwale"
                     style={inputStyle(!!errors.fullName)}
-                    className="placeholder:text-[hsl(220,18%,28%)] focus-visible:ring-1 focus-visible:ring-[hsl(42,78%,46%,0.3)] focus-visible:ring-offset-0"
+                    className="placeholder:text-[hsl(220,22%,72%)] focus-visible:ring-1 focus-visible:ring-[hsl(42,78%,46%,0.3)] focus-visible:ring-offset-0"
                     {...register("fullName", { required: "Full name is required", minLength: { value: 2, message: "Name too short" } })} />
                   {errors.fullName && (
                     <p className="mt-1.5 font-sans text-[0.65rem]" style={{ color: "hsl(0,72%,58%)" }}>
@@ -118,7 +184,7 @@ export default function Checkout() {
                   <FieldLabel>Phone Number *</FieldLabel>
                   <Input placeholder="e.g. 0977 123 456"
                     style={inputStyle(!!errors.phone)}
-                    className="placeholder:text-[hsl(220,18%,28%)] focus-visible:ring-1 focus-visible:ring-[hsl(42,78%,46%,0.3)] focus-visible:ring-offset-0"
+                    className="placeholder:text-[hsl(220,22%,72%)] focus-visible:ring-1 focus-visible:ring-[hsl(42,78%,46%,0.3)] focus-visible:ring-offset-0"
                     {...register("phone", { required: "Phone is required", minLength: { value: 8, message: "Invalid phone" } })} />
                   {errors.phone && (
                     <p className="mt-1.5 font-sans text-[0.65rem]" style={{ color: "hsl(0,72%,58%)" }}>
@@ -133,7 +199,7 @@ export default function Checkout() {
                 <FieldLabel>Email Address *</FieldLabel>
                 <Input type="email" placeholder="e.g. you@email.com"
                   style={inputStyle(!!errors.email)}
-                  className="placeholder:text-[hsl(220,18%,28%)] focus-visible:ring-1 focus-visible:ring-[hsl(42,78%,46%,0.3)] focus-visible:ring-offset-0"
+                  className="placeholder:text-[hsl(220,22%,72%)] focus-visible:ring-1 focus-visible:ring-[hsl(42,78%,46%,0.3)] focus-visible:ring-offset-0"
                   {...register("email", { required: "Email is required", pattern: { value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/, message: "Invalid email" } })} />
                 {errors.email && (
                   <p className="mt-1.5 font-sans text-[0.65rem]" style={{ color: "hsl(0,72%,58%)" }}>
@@ -145,15 +211,38 @@ export default function Checkout() {
               {/* Address */}
               <div>
                 <FieldLabel>Delivery Address *</FieldLabel>
+                <div className="flex items-center justify-between mb-2">
+                  <span className="font-sans text-[0.62rem]" style={{ color: TEXT_DIM }}>
+                    Street, area, landmark
+                  </span>
+                  <button
+                    type="button"
+                    onClick={fillCurrentLocation}
+                    disabled={locating}
+                    className="flex items-center gap-1.5 text-[0.62rem] font-sans font-semibold transition-opacity disabled:opacity-50"
+                    style={{ color: GOLD }}
+                  >
+                    {locating ? <Loader2 className="w-3 h-3 animate-spin" /> : <MapPinned className="w-3 h-3" />}
+                    {locating ? "Locating..." : "Use Current Location"}
+                  </button>
+                </div>
                 <Input placeholder="Street address, house/flat number"
                   style={inputStyle(!!errors.deliveryAddress)}
-                  className="placeholder:text-[hsl(220,18%,28%)] focus-visible:ring-1 focus-visible:ring-[hsl(42,78%,46%,0.3)] focus-visible:ring-offset-0"
+                  className="placeholder:text-[hsl(220,22%,72%)] focus-visible:ring-1 focus-visible:ring-[hsl(42,78%,46%,0.3)] focus-visible:ring-offset-0"
                   {...register("deliveryAddress", { required: "Delivery address is required", minLength: { value: 5, message: "Address too short" } })} />
                 {errors.deliveryAddress && (
                   <p className="mt-1.5 font-sans text-[0.65rem]" style={{ color: "hsl(0,72%,58%)" }}>
                     {errors.deliveryAddress.message}
                   </p>
                 )}
+                {locationError && (
+                  <p className="mt-1.5 font-sans text-[0.65rem]" style={{ color: "hsl(0,72%,58%)" }}>
+                    {locationError}
+                  </p>
+                )}
+                <p className="mt-1.5 font-sans text-[0.62rem]" style={{ color: TEXT_DIM }}>
+                  Uses browser GPS and OpenStreetMap reverse lookup when you tap "Use Current Location".
+                </p>
               </div>
 
               {/* City */}
@@ -161,7 +250,7 @@ export default function Checkout() {
                 <FieldLabel>City / Town *</FieldLabel>
                 <Input placeholder="e.g. Lusaka, Ndola, Kitwe"
                   style={inputStyle(!!errors.city)}
-                  className="placeholder:text-[hsl(220,18%,28%)] focus-visible:ring-1 focus-visible:ring-[hsl(42,78%,46%,0.3)] focus-visible:ring-offset-0"
+                  className="placeholder:text-[hsl(220,22%,72%)] focus-visible:ring-1 focus-visible:ring-[hsl(42,78%,46%,0.3)] focus-visible:ring-offset-0"
                   {...register("city", { required: "City is required", minLength: { value: 2, message: "City too short" } })} />
                 {errors.city && (
                   <p className="mt-1.5 font-sans text-[0.65rem]" style={{ color: "hsl(0,72%,58%)" }}>
@@ -175,13 +264,13 @@ export default function Checkout() {
                 <FieldLabel>Special Instructions <span style={{ color: TEXT_DIM }}>(optional)</span></FieldLabel>
                 <Input placeholder="Any delivery notes or preferences"
                   style={inputStyle()}
-                  className="placeholder:text-[hsl(220,18%,28%)] focus-visible:ring-1 focus-visible:ring-[hsl(42,78%,46%,0.3)] focus-visible:ring-offset-0"
+                  className="placeholder:text-[hsl(220,22%,72%)] focus-visible:ring-1 focus-visible:ring-[hsl(42,78%,46%,0.3)] focus-visible:ring-offset-0"
                   {...register("notes")} />
               </div>
 
               {createOrder.isError && (
                 <p className="font-sans text-sm rounded-sm px-4 py-3"
-                  style={{ background: "hsl(0,60%,12%)", border: "1px solid hsl(0,60%,22%)", color: "hsl(0,72%,62%)" }}>
+                  style={{ background: "hsl(0,80%,97%)", border: "1px solid hsl(0,70%,88%)", color: "hsl(0,66%,46%)" }}>
                   There was an error placing your order. Please try again.
                 </p>
               )}
@@ -193,7 +282,7 @@ export default function Checkout() {
                 <Button type="submit" size="lg" className="w-full font-sans uppercase"
                   disabled={!productType || createOrder.isPending}
                   style={{ height: "3rem",
-                    background: productType ? GOLD : "hsl(220,38%,12%)",
+                    background: productType ? GOLD : "hsl(40,14%,88%)",
                     color: productType ? "#fff" : TEXT_DIM, fontWeight: productType ? 700 : undefined,
                     boxShadow: productType ? "0 4px 24px rgba(141,107,61,0.28)" : "none",
                     transition: "all 0.2s" }}>
@@ -210,7 +299,7 @@ export default function Checkout() {
 
               {/* Book visual */}
               <div className="flex items-center justify-center py-8"
-                style={{ background: "hsl(222,58%,6%)", borderBottom: `1px solid ${CARD_BORDER}` }}>
+                style={{ background: "hsl(40,22%,94%)", borderBottom: `1px solid ${CARD_BORDER}` }}>
                 <div style={{ position: "relative" }}>
                   <div style={{
                     position: "absolute", inset: "-20px",
@@ -232,8 +321,8 @@ export default function Checkout() {
                       onClick={() => setProductType(p.type as "paperback" | "hardcover")}
                       className="w-full text-left rounded-xl p-3.5 transition-all"
                       style={{
-                        background: productType === p.type ? "hsl(222,52%,11%)" : "transparent",
-                        border: `1px solid ${productType === p.type ? GOLD : "hsl(220,38%,14%)"}`,
+                        background: productType === p.type ? "hsl(42,78%,97%)" : "transparent",
+                        border: `1px solid ${productType === p.type ? GOLD : CARD_BORDER}`,
                       }}>
                       <div className="flex justify-between items-center">
                         <span className="font-sans text-[0.72rem] capitalize font-medium" style={{ color: TEXT_PRIMARY }}>
@@ -255,7 +344,7 @@ export default function Checkout() {
                   <div className="flex items-center gap-2.5">
                     <button type="button" onClick={() => setQuantity(Math.max(1, quantity - 1))}
                       className="w-7 h-7 rounded-full flex items-center justify-center font-bold text-sm"
-                      style={{ background: "hsl(220,38%,11%)", border: `1px solid ${CARD_BORDER}`, color: TEXT_MUTED }}>
+                      style={{ background: "hsl(40,14%,94%)", border: `1px solid ${CARD_BORDER}`, color: TEXT_MUTED }}>
                       −
                     </button>
                     <span className="font-display font-bold w-5 text-center" style={{ color: TEXT_PRIMARY }}>
@@ -263,7 +352,7 @@ export default function Checkout() {
                     </span>
                     <button type="button" onClick={() => setQuantity(quantity + 1)}
                       className="w-7 h-7 rounded-full flex items-center justify-center font-bold text-sm"
-                      style={{ background: "hsl(220,38%,11%)", border: `1px solid ${CARD_BORDER}`, color: TEXT_MUTED }}>
+                      style={{ background: "hsl(40,14%,94%)", border: `1px solid ${CARD_BORDER}`, color: TEXT_MUTED }}>
                       +
                     </button>
                   </div>

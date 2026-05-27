@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Receipt SHZBKS-00010</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif;
+      font-size: 13px;
+      color: #111;
+      background: #fff;
+      padding: 48px 56px;
+      max-width: 720px;
+      margin: 0 auto;
+    }
+
+    /* Header */
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 40px;
+    }
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 20px;
+      font-weight: 700;
+      color: #f26207;
+    }
+    .logo-icon {
+      width: 28px; height: 28px;
+      background: #f26207;
+      border-radius: 6px;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .logo-icon svg { width: 18px; height: 18px; fill: #fff; }
+    .receipt-title {
+      font-size: 28px;
+      font-weight: 300;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: #111;
+    }
+
+    /* From address */
+    .from-address {
+      font-size: 12px;
+      color: #444;
+      line-height: 1.7;
+      margin-bottom: 36px;
+    }
+
+    /* Bill-to + meta grid */
+    .meta-grid {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 36px;
+      gap: 24px;
+    }
+    .bill-to h4 {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin-bottom: 6px;
+    }
+    .bill-to p {
+      font-size: 12px;
+      color: #444;
+      line-height: 1.7;
+    }
+    .meta-table {
+      min-width: 280px;
+    }
+    .meta-table table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    .meta-table td {
+      padding: 4px 0;
+      font-size: 12px;
+      color: #444;
+    }
+    .meta-table td:first-child {
+      padding-right: 24px;
+      color: #666;
+    }
+    .meta-table tr.amount-paid td {
+      font-weight: 700;
+      color: #111;
+      font-size: 13px;
+      padding-top: 8px;
+    }
+
+    /* Line items table */
+    .items-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 0;
+    }
+    .items-table thead tr {
+      border-bottom: 1px solid #ddd;
+    }
+    .items-table thead th {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: #666;
+      padding: 8px 0 10px;
+      text-align: left;
+    }
+    .items-table thead th:not(:first-child) {
+      text-align: right;
+    }
+    .items-table tbody tr td {
+      padding: 10px 0 6px;
+      font-size: 12px;
+      color: #444;
+      vertical-align: top;
+    }
+    .items-table tbody tr td:not(:first-child) {
+      text-align: right;
+    }
+    .items-table .section-heading td {
+      font-weight: 700;
+      color: #111;
+      font-size: 13px;
+      padding-top: 18px;
+    }
+    .items-table .sub-row td {
+      font-size: 11.5px;
+      color: #555;
+      padding-top: 4px;
+      padding-bottom: 4px;
+    }
+    .items-table .sub-row td:first-child {
+      padding-left: 0;
+    }
+    .items-table .mono {
+      font-family: 'Courier New', monospace;
+      font-size: 10.5px;
+      color: #444;
+    }
+    .items-table .deduction td {
+      color: #444;
+      padding-top: 6px;
+      padding-bottom: 4px;
+    }
+    .items-table .spacer td { padding-top: 12px; }
+
+    /* Totals */
+    .totals-section {
+      display: flex;
+      justify-content: flex-end;
+      margin-top: 0;
+    }
+    .totals-table {
+      min-width: 220px;
+      border-collapse: collapse;
+    }
+    .totals-table td {
+      padding: 5px 0;
+      font-size: 12px;
+      color: #444;
+    }
+    .totals-table td:last-child {
+      text-align: right;
+      padding-left: 32px;
+    }
+    .totals-table .total-row td {
+      font-weight: 700;
+      color: #111;
+      font-size: 13px;
+      border-top: 1px solid #ddd;
+      padding-top: 10px;
+      margin-top: 4px;
+    }
+
+    /* Divider */
+    hr { border: none; border-top: 1px solid #e0e0e0; }
+
+    @media print {
+      body { padding: 32px 40px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Header -->
+  <div class="header">
+    <div class="logo">
+      <div class="logo-icon">
+        <svg viewBox="0 0 24 24"><path d="M4 4h9a5 5 0 0 1 0 10H4V4zm0 10h2l5 6H8l-4-6z"/></svg>
+      </div>
+      replit
+    </div>
+    <div class="receipt-title">Receipt</div>
+  </div>
+
+  <!-- From address -->
+  <div class="from-address">
+    Replit Inc<br>
+    1001 E Hillsdale Blvd<br>
+    4th floor<br>
+    Foster City, CA 94404
+  </div>
+
+  <!-- Bill-to + meta -->
+  <div class="meta-grid">
+    <div class="bill-to">
+      <h4>Bill to:</h4>
+      <p>
+        bruce chikola<br>
+        Lusaka, Probase<br>
+        Lusaka, ZM 10101<br>
+        chikolabruce23@gmail.com
+      </p>
+    </div>
+    <div class="meta-table">
+      <table>
+        <tr>
+          <td>Invoice number</td>
+          <td>SHZBKS-00010</td>
+        </tr>
+        <tr>
+          <td>Receipt date</td>
+          <td>May 15, 2026</td>
+        </tr>
+        <tr>
+          <td>Payment date</td>
+          <td>May 15, 2026</td>
+        </tr>
+        <tr class="amount-paid">
+          <td>Amount paid</td>
+          <td>$89.12</td>
+        </tr>
+      </table>
+    </div>
+  </div>
+
+  <hr style="margin-bottom: 0;" />
+
+  <!-- Line items -->
+  <table class="items-table">
+    <thead>
+      <tr>
+        <th>Description</th>
+        <th>Quantity</th>
+        <!-- <th>Rate</th> -->
+        <th>Amount</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr class="section-heading">
+        <td>Agent Usage</td>
+        <td></td>
+        <td>$89.12</td>
+      </tr>
+      <tr>
+        <td colspan="4" style="font-size:11px; color:#666; padding-top:2px; padding-bottom:8px;">
+          May 15, 2026
+        </td>
+      </tr>
+      <tr class="sub-row">
+        <td class="mono">8afde1d1-f70c-4435-aa08-0200f724e23c</td>
+        <td>5.597806</td>
+        <td>$38.67</td>
+      </tr>
+      <tr class="sub-row">
+        <td class="mono">c4525d8b-bc95-4f4a-9fa9-7354569f745e</td>
+        <td>5.044588</td>
+        <td>$50.45</td>
+      </tr>
+      <tr class="spacer"><td colspan="4"></td></tr>
+    </tbody>
+  </table>
+
+  <hr />
+
+  <!-- Totals -->
+  <div class="totals-section" style="margin-top: 12px;">
+    <table class="totals-table">
+      <tr>
+        <td>Subtotal</td>
+        <td>$89.12</td>
+      </tr>
+      <tr class="total-row">
+        <td>Amount paid</td>
+        <td>$89.12</td>
+      </tr>
+    </table>
+  </div>
+
+</body>
+</html>

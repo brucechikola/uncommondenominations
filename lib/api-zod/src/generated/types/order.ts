@@ -20,6 +20,12 @@ export interface Order {
   totalAmount: number;
   status: OrderStatus;
   /** @nullable */
+  courierId?: number | null;
+  /** @nullable */
+  trackingNotes?: string | null;
+  /** @nullable */
+  deliveryPaymentMethod?: string | null;
+  /** @nullable */
   notes?: string | null;
   createdAt: string;
   payment?: Payment;

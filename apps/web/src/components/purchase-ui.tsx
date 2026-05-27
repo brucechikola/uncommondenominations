@@ -18,9 +18,9 @@ export function StepIndicator({ current }: { current: 1 | 2 | 3 }) {
                 width: 28, height: 28, borderRadius: "50%", flexShrink: 0,
                 display: "flex", alignItems: "center", justifyContent: "center",
                 fontSize: "0.62rem", fontWeight: 700, fontFamily: "var(--app-font-sans)",
-                background: active ? "hsl(42,78%,46%)" : done ? "hsl(42,78%,22%,0.5)" : "hsl(220,38%,11%)",
-                border: active ? "none" : done ? "1px solid hsl(42,78%,40%,0.45)" : "1px solid hsl(220,38%,16%)",
-                color: active ? "hsl(222,58%,8%)" : done ? "hsl(42,78%,58%)" : "hsl(220,18%,30%)",
+                background: active ? "hsl(42,78%,46%)" : done ? "hsl(42,78%,46%,0.15)" : "hsl(40,14%,90%)",
+                border: active ? "none" : done ? "1px solid hsl(42,78%,40%,0.45)" : "1px solid hsl(40,14%,82%)",
+                color: active ? "#fff" : done ? "hsl(42,78%,44%)" : "hsl(220,22%,60%)",
               }}>
                 {done ? "✓" : n}
               </div>
@@ -29,21 +29,21 @@ export function StepIndicator({ current }: { current: 1 | 2 | 3 }) {
                 <span className="sm:hidden" style={{
                   fontFamily: "var(--app-font-sans)", fontSize: "0.58rem",
                   fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase" as const,
-                  color: "hsl(42,78%,62%)", whiteSpace: "nowrap",
+                  color: "hsl(42,78%,44%)", whiteSpace: "nowrap",
                 }}>{short}</span>
               )}
               <span className="hidden sm:block" style={{
                 fontFamily: "var(--app-font-sans)", fontSize: "0.6rem",
                 fontWeight: active ? 600 : 400,
                 letterSpacing: "0.12em", textTransform: "uppercase" as const,
-                color: active ? "hsl(42,78%,62%)" : done ? "hsl(42,78%,42%)" : "hsl(220,18%,26%)",
+                color: active ? "hsl(42,78%,44%)" : done ? "hsl(42,78%,38%)" : "hsl(220,22%,56%)",
                 whiteSpace: "nowrap",
               }}>{label}</span>
             </div>
             {i < 2 && (
               <div style={{
                 flex: "1 1 10px", minWidth: 10, maxWidth: 40, height: 1, margin: "0 6px",
-                background: done ? "hsl(42,78%,38%,0.4)" : "hsl(220,38%,12%)",
+                background: done ? "hsl(42,78%,38%,0.4)" : "hsl(40,14%,84%)",
               }} />
             )}
           </div>
@@ -115,13 +115,13 @@ export const DK = {
   error: "mt-1.5 font-sans text-[0.65rem]",
 } as const;
 
-export const PAGE_BG = "hsl(222,58%,6%)";
-export const CARD_BG = "hsl(222,54%,8.5%)";
-export const CARD_BORDER = "hsl(220,38%,15%)";
+export const PAGE_BG = "hsl(38,30%,96%)";
+export const CARD_BG = "hsl(38,30%,99%)";
+export const CARD_BORDER = "hsl(38,18%,88%)";
 export const GOLD = "#8d6b3d";
-export const TEXT_PRIMARY = "hsl(40,24%,90%)";
-export const TEXT_MUTED = "hsl(220,16%,48%)";
-export const TEXT_DIM = "hsl(220,14%,32%)";
+export const TEXT_PRIMARY = "hsl(222,52%,12%)";
+export const TEXT_MUTED = "hsl(220,22%,42%)";
+export const TEXT_DIM = "hsl(220,18%,54%)";
 
 const ordinal = (n: number) => {
   const v = n % 100;

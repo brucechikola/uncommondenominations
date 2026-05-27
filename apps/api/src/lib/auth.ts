@@ -32,3 +32,71 @@ export function requireAdmin(req: Request, res: Response, next: NextFunction): v
   (req as Request & { admin: typeof payload }).admin = payload;
   next();
 }
+
+// ── Agent auth ────────────────────────────────────────────────────────────────
+
+export function signAgentToken(payload: { id: number; name: string }): string {
+  return jwt.sign({ ...payload, role: "agent" }, JWT_SECRET, { expiresIn: "72h" });
+}
+
+export function verifyAgentToken(token: string): { id: number; name: string; role: string } | null {
+  try {
+    const decoded = jwt.verify(token, JWT_SECRET) as { id: number; name: string; role: string };
+    if (decoded.role !== "agent") return null;
+    return decoded;
+  } catch {
+    return null;
+  }
+}
+
+export function requireAgent(req: Request, res: Response, next: NextFunction): void {
+  const authHeader = req.headers.authorization;
+  if (!authHeader?.startsWith("Bearer ")) {
+    res.status(401).json({ error: "Unauthorized" });
+    return;
+  }
+
+  const token = authHeader.slice(7);
+  const payload = verifyAgentToken(token);
+  if (!payload) {
+    res.status(401).json({ error: "Invalid or expired token" });
+    return;
+  }
+
+  (req as Request & { agent: typeof payload }).agent = payload;
+  next();
+}
+
+// ── Courier auth ──────────────────────────────────────────────────────────────
+
+export function signCourierToken(payload: { id: number; name: string }): string {
+  return jwt.sign({ ...payload, role: "courier" }, JWT_SECRET, { expiresIn: "72h" });
+}
+
+export function verifyCourierToken(token: string): { id: number; name: string; role: string } | null {
+  try {
+    const decoded = jwt.verify(token, JWT_SECRET) as { id: number; name: string; role: string };
+    if (decoded.role !== "courier") return null;
+    return decoded;
+  } catch {
+    return null;
+  }
+}
+
+export function requireCourier(req: Request, res: Response, next: NextFunction): void {
+  const authHeader = req.headers.authorization;
+  if (!authHeader?.startsWith("Bearer ")) {
+    res.status(401).json({ error: "Unauthorized" });
+    return;
+  }
+
+  const token = authHeader.slice(7);
+  const payload = verifyCourierToken(token);
+  if (!payload) {
+    res.status(401).json({ error: "Invalid or expired token" });
+    return;
+  }
+
+  (req as Request & { courier: typeof payload }).courier = payload;
+  next();
+}

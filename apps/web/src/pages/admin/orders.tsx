@@ -3,11 +3,13 @@ import { useAdminAuthStore } from "@/lib/store";
 import {
   useListAdminOrders, useUpdateOrderStatus,
   getListAdminOrdersQueryKey, type Order,
+  useListAdminCouriers, useAssignCourier, useUnassignCourier,
+  getListAdminCouriersQueryKey,
 } from "@workspace/api-client-react";
 import { fmtMoney, fmtDate } from "@/components/purchase-ui";
 import { useQueryClient } from "@tanstack/react-query";
 import { useState, useEffect } from "react";
-import { ChevronRight, FileText, FileSpreadsheet, Phone, MessageSquare } from "lucide-react";
+import { ChevronRight, FileText, FileSpreadsheet, Phone, MessageSquare, Truck, X } from "lucide-react";
 import * as XLSX from "xlsx";
 import { cn } from "@/lib/utils";
 import {
@@ -17,16 +19,47 @@ import {
 import { Modal } from "./_modal";
 import { AdminLayout } from "./layout";
 
+type ExtendedOrder = Order & {
+  email?: string;
+  courierId?: number | null;
+  deliveryPaymentMethod?: string | null;
+  trackingNotes?: string | null;
+};
+
 /* ─── Order detail modal ──────────────────────────────────────── */
 function OrderModal({
-  order, onClose, onStatusUpdate,
+  order, onClose, onStatusUpdate, token,
 }: {
-  order: Order;
+  order: ExtendedOrder;
   onClose: () => void;
   onStatusUpdate: (id: number, status: string) => Promise<void>;
+  token: string | null;
 }) {
   const [status, setStatus] = useState(order.status);
   const [saving, setSaving] = useState(false);
+  const [selectedCourierId, setSelectedCourierId] = useState<string>(
+    order.courierId ? String(order.courierId) : ""
+  );
+  const [deliveryMethod, setDeliveryMethod] = useState<string>(
+    order.deliveryPaymentMethod ?? "mobile_money_on_delivery"
+  );
+  const [assigning, setAssigning] = useState(false);
+  const [unassigning, setUnassigning] = useState(false);
+  const qc = useQueryClient();
+
+  const authHeader = { Authorization: `Bearer ${token}` };
+
+  const { data: couriers } = useListAdminCouriers({
+    query: { queryKey: getListAdminCouriersQueryKey() },
+    request: { headers: authHeader },
+  });
+
+  const { mutateAsync: assignCourier } = useAssignCourier({
+    request: { headers: authHeader },
+  });
+  const { mutateAsync: unassignCourier } = useUnassignCourier({
+    request: { headers: authHeader },
+  });
 
   const handleSave = async () => {
     if (status === order.status) return;
@@ -35,6 +68,37 @@ function OrderModal({
     setSaving(false);
     onClose();
   };
+
+  const handleAssign = async () => {
+    if (!selectedCourierId) return;
+    setAssigning(true);
+    try {
+      await assignCourier({
+        id: order.id,
+        data: {
+          courierId: Number(selectedCourierId),
+          deliveryPaymentMethod: deliveryMethod as "mobile_money_on_delivery" | "bank_transfer",
+        },
+      });
+      qc.invalidateQueries({ queryKey: getListAdminOrdersQueryKey() });
+      onClose();
+    } finally {
+      setAssigning(false);
+    }
+  };
+
+  const handleUnassign = async () => {
+    setUnassigning(true);
+    try {
+      await unassignCourier({ id: order.id });
+      qc.invalidateQueries({ queryKey: getListAdminOrdersQueryKey() });
+      onClose();
+    } finally {
+      setUnassigning(false);
+    }
+  };
+
+  const activeCouriers = (couriers ?? []).filter(c => c.active);
 
   return (
     <Modal open onClose={onClose} title={`Order #${order.id}`} subtitle={`Placed ${fmtDate(order.createdAt)}`} wide>
@@ -56,9 +120,7 @@ function OrderModal({
           <p className={cn("text-xs font-semibold uppercase tracking-wider mb-3", D.muted)}>Customer</p>
           <Field label="Full Name" value={order.fullName} />
           <Field label="Phone"     value={<a href={`tel:${order.phone}`} className={cn(D.accent, "hover:underline")}>{order.phone}</a>} />
-          {(order as Order & { email?: string }).email && (
-            <Field label="Email" value={(order as Order & { email?: string }).email} />
-          )}
+          {order.email && <Field label="Email" value={order.email} />}
           <Field label="City"    value={order.city} />
           <Field label="Address" value={order.deliveryAddress} />
         </div>
@@ -75,6 +137,70 @@ function OrderModal({
           } />
           <Field label="Date"     value={fmtDate(order.createdAt)} />
           {order.notes && <Field label="Notes" value={order.notes} />}
+          {order.deliveryPaymentMethod && (
+            <Field label="Delivery Payment" value={
+              <span className="text-amber-700 font-semibold">
+                {order.deliveryPaymentMethod === "bank_transfer" ? "Bank Transfer" : "Mobile Money"} on Delivery — NO CASH
+              </span>
+            } />
+          )}
+          {order.trackingNotes && <Field label="Tracking Notes" value={order.trackingNotes} />}
+        </div>
+      </div>
+
+      {/* Courier assignment */}
+      <div className={cn("rounded-xl p-4 border", D.card2, D.border)}>
+        <div className="flex items-center justify-between mb-3">
+          <p className={cn("text-xs font-semibold uppercase tracking-wider", D.muted)}>Courier Assignment</p>
+          {order.courierId && (
+            <button onClick={handleUnassign} disabled={unassigning}
+              className="flex items-center gap-1 text-xs text-red-600 hover:text-red-700 transition-colors disabled:opacity-60">
+              <X className="w-3 h-3" /> {unassigning ? "Removing…" : "Unassign"}
+            </button>
+          )}
+        </div>
+        {order.courierId ? (
+          <div className="flex items-center gap-2 mb-3">
+            <Truck className="w-4 h-4 text-cyan-600" />
+            <span className="text-sm text-cyan-700 font-medium">
+              {activeCouriers.find(c => c.id === order.courierId)?.name ?? `Courier #${order.courierId}`}
+            </span>
+            <span className="text-xs text-slate-500">— currently assigned</span>
+          </div>
+        ) : (
+          <p className={cn("text-xs mb-3", D.muted)}>No courier assigned yet</p>
+        )}
+
+        <div className="flex gap-2 flex-wrap items-end">
+          <div className="flex-1 min-w-[140px]">
+            <label className={cn("block text-xs font-medium mb-1", D.muted)}>Select Courier</label>
+            <select
+              value={selectedCourierId}
+              onChange={e => setSelectedCourierId(e.target.value)}
+              className={cn("w-full px-3 py-2 rounded-xl text-sm border outline-none", D.card, D.border, D.sub)}>
+              <option value="">— choose —</option>
+              {activeCouriers.map(c => (
+                <option key={c.id} value={c.id}>{c.name} ({c.phone})</option>
+              ))}
+            </select>
+          </div>
+          <div className="flex-1 min-w-[160px]">
+            <label className={cn("block text-xs font-medium mb-1", D.muted)}>Payment on Delivery</label>
+            <select
+              value={deliveryMethod}
+              onChange={e => setDeliveryMethod(e.target.value)}
+              className={cn("w-full px-3 py-2 rounded-xl text-sm border outline-none", D.card, D.border, D.sub)}>
+              <option value="mobile_money_on_delivery">Mobile Money</option>
+              <option value="bank_transfer">Bank Transfer</option>
+            </select>
+          </div>
+          <button
+            onClick={handleAssign}
+            disabled={!selectedCourierId || assigning}
+            className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium text-white bg-cyan-700 hover:bg-cyan-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors whitespace-nowrap">
+            <Truck className="w-4 h-4" />
+            {assigning ? "Assigning…" : order.courierId ? "Reassign" : "Assign Courier"}
+          </button>
         </div>
       </div>
 
@@ -87,7 +213,7 @@ function OrderModal({
               className={cn("px-3 py-1.5 rounded-full text-xs font-medium capitalize transition-all border",
                 status === s
                   ? STATUS_COLORS[s]
-                  : "bg-white/5 text-slate-400 border-white/10 hover:border-white/20")}>
+                  : "bg-slate-100 text-slate-400 border-slate-200 hover:border-slate-300")}>
               {formatStatus(s)}
             </button>
           ))}
@@ -96,7 +222,7 @@ function OrderModal({
           className={cn("w-full py-2.5 rounded-xl text-sm font-medium transition-all",
             status !== order.status
               ? "bg-[#8d6b3d] text-white hover:opacity-90"
-              : "bg-white/5 text-slate-500 cursor-not-allowed")}>
+              : "bg-slate-100 text-slate-500 cursor-not-allowed")}>
           {saving ? "Saving…" : status === order.status ? "No changes" : `Save — Mark as ${formatStatus(status)}`}
         </button>
       </div>
@@ -107,13 +233,13 @@ function OrderModal({
 /* ─── Orders page ─────────────────────────────────────────────── */
 export default function AdminOrders() {
   const [, navigate] = useLocation();
-  const { isAuthenticated } = useAdminAuthStore();
+  const { isAuthenticated, token } = useAdminAuthStore();
   const queryClient = useQueryClient();
 
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
-  const [selected, setSelected] = useState<Order | null>(null);
+  const [selected, setSelected] = useState<ExtendedOrder | null>(null);
 
   useEffect(() => { setPage(1); }, [search, statusFilter]);
 
@@ -125,13 +251,13 @@ export default function AdminOrders() {
   });
   const updateOrderStatus = useUpdateOrderStatus();
 
-  const orders: Order[] = result?.orders ?? [];
-  const total: number   = result?.total ?? 0;
+  const orders = (result?.orders ?? []) as ExtendedOrder[];
+  const total: number = result?.total ?? 0;
 
   const handleStatusUpdate = async (id: number, status: string) => {
     await updateOrderStatus.mutateAsync({ id, data: { status: status as typeof ORDER_STATUSES[number] } });
     await queryClient.invalidateQueries({ queryKey: getListAdminOrdersQueryKey() });
-    if (selected?.id === id) setSelected((o) => o ? { ...o, status } as Order : null);
+    if (selected?.id === id) setSelected((o) => o ? { ...o, status } as ExtendedOrder : null);
   };
 
   const exportExcel = () => {
@@ -157,7 +283,7 @@ export default function AdminOrders() {
           </div>
           <div className="flex gap-2">
             <button onClick={() => window.location.assign("/api/admin/export/orders")}
-              className={cn("flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium border transition-colors", D.muted, D.border, "hover:bg-white/5")}>
+              className={cn("flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium border transition-colors", D.muted, D.border, "hover:bg-slate-100")}>
               <FileText className="h-4 w-4" />CSV
             </button>
             <button onClick={exportExcel}
@@ -201,12 +327,19 @@ export default function AdminOrders() {
                   <td className={cn("px-4 py-3.5 font-semibold", D.accent)}>{fmtMoney(order.totalAmount)}</td>
                   <td className={cn("px-4 py-3.5", D.muted)}>{order.city}</td>
                   <td className="px-4 py-3.5">
-                    <span className={cn("px-2.5 py-1 rounded-full text-xs font-medium", STATUS_COLORS[order.status] ?? "bg-white/10 text-slate-400")}>
+                    <span className={cn("px-2.5 py-1 rounded-full text-xs font-medium", STATUS_COLORS[order.status] ?? "bg-slate-100 text-slate-400")}>
                       {formatStatus(order.status)}
                     </span>
                   </td>
                   <td className={cn("px-4 py-3.5 text-xs whitespace-nowrap", D.muted)}>{fmtDate(order.createdAt)}</td>
-                  <td className="px-4 py-3.5"><ChevronRight className={cn("h-4 w-4", D.muted)} /></td>
+                  <td className="px-4 py-3.5">
+                    <div className="flex items-center gap-1.5">
+                      {order.courierId && (
+                        <span title="Courier assigned"><Truck className="h-3.5 w-3.5 text-cyan-500" /></span>
+                      )}
+                      <ChevronRight className={cn("h-4 w-4", D.muted)} />
+                    </div>
+                  </td>
                 </tr>
               ))}
             </tbody>
@@ -217,7 +350,12 @@ export default function AdminOrders() {
       </div>
 
       {selected && (
-        <OrderModal order={selected} onClose={() => setSelected(null)} onStatusUpdate={handleStatusUpdate} />
+        <OrderModal
+          order={selected}
+          onClose={() => setSelected(null)}
+          onStatusUpdate={handleStatusUpdate}
+          token={token}
+        />
       )}
     </AdminLayout>
   );

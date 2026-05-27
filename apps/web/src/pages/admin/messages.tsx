@@ -28,7 +28,7 @@ function ContactModal({ contact, onClose }: { contact: ContactMessage; onClose: 
       </div>
 
       {/* Details */}
-      <div className={cn("rounded-xl p-4 border", "bg-[#111f35]", D.border)}>
+      <div className={cn("rounded-xl p-4 border", "bg-slate-50", D.border)}>
         <Field label="Name"     value={contact.name} />
         <Field label="Email"    value={<a href={`mailto:${contact.email}`} className={cn(D.accent, "hover:underline")}>{contact.email}</a>} />
         {contact.phone && <Field label="Phone" value={<a href={`tel:${contact.phone}`} className={cn(D.muted, "hover:underline")}>{contact.phone}</a>} />}
@@ -36,7 +36,7 @@ function ContactModal({ contact, onClose }: { contact: ContactMessage; onClose: 
       </div>
 
       {/* Message */}
-      <div className={cn("rounded-xl p-4 border", "bg-[#111f35]", D.border)}>
+      <div className={cn("rounded-xl p-4 border", "bg-slate-50", D.border)}>
         <p className={cn("text-xs font-semibold uppercase tracking-wider mb-3", D.muted)}>Message</p>
         <p className={cn("text-sm leading-relaxed whitespace-pre-wrap", D.sub)}>{contact.message}</p>
       </div>
