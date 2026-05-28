@@ -32,6 +32,7 @@ export type ProbaseCollectionResponse = {
   status: ProbaseCollectionStatus;
   session_url?: string | null;
   description?: string | null;
+  discription?: string | null;
   transaction?: {
     reference?: string | null;
     completed_at?: string | null;
@@ -47,6 +48,7 @@ export type ProbaseCollectionResponse = {
       identifier?: string | null;
       provider?: {
         msisdn?: string | null;
+        prefix?: string | null;
         network?: string | null;
       } | null;
     } | null;
@@ -54,6 +56,7 @@ export type ProbaseCollectionResponse = {
 };
 
 type DirectCollectionInput = {
+  method: Exclude<MobileMoneyNetwork, null>;
   amount: string;
   reference: string;
   description: string;
@@ -70,6 +73,7 @@ type DirectCollectionInput = {
 };
 
 type CheckoutCollectionInput = {
+  paymentMethod: "CARD" | "BANK_ACCOUNT" | "ALL";
   amount: string;
   reference: string;
   description: string;
@@ -192,6 +196,11 @@ export function normalizeZambianPhoneNumber(input: string): string {
 }
 
 export type MobileMoneyNetwork = "airtel_money" | "mtn_money" | "zamtel_money" | null;
+export type ProbaseDirectPaymentType =
+  | "MOBILE_MONEY"
+  | "AIRTEL_MOBILE_MONEY"
+  | "MTN_MOBILE_MONEY"
+  | "ZAMTEL_MOBILE_MONEY";
 
 export function detectZambianMobileMoneyNetwork(input: string): MobileMoneyNetwork {
   const normalized = normalizeZambianPhoneNumber(input);
@@ -207,6 +216,17 @@ export function detectZambianMobileMoneyNetwork(input: string): MobileMoneyNetwo
   if (prefix === "95" || prefix === "75") return "zamtel_money";
 
   return null;
+}
+
+export function toProbaseDirectPaymentType(method: Exclude<MobileMoneyNetwork, null>): ProbaseDirectPaymentType {
+  switch (method) {
+    case "airtel_money":
+      return "AIRTEL_MOBILE_MONEY";
+    case "mtn_money":
+      return "MTN_MOBILE_MONEY";
+    case "zamtel_money":
+      return "ZAMTEL_MOBILE_MONEY";
+  }
 }
 
 export function splitCustomerName(fullName: string): { firstName: string; lastName: string } {
@@ -239,7 +259,7 @@ export async function createDirectCollection(input: DirectCollectionInput): Prom
         description: input.description,
       },
       payment_method: {
-        type: "MOBILE_MONEY",
+        type: toProbaseDirectPaymentType(input.method),
         identifier: input.phoneNumber,
       },
       customer: {
@@ -274,7 +294,7 @@ export async function createCheckoutCollection(input: CheckoutCollectionInput): 
         mobile: input.customer.mobile,
         address: input.customer.address,
       },
-      payment_method: "ALL",
+      payment_method: input.paymentMethod,
       success_callback_url: input.successCallbackUrl,
       cancel_callback_url: input.cancelCallbackUrl,
     }),
@@ -291,13 +311,22 @@ export async function inquireCollection(transactionId: string): Promise<ProbaseC
   });
 }
 
+function normalizeGatewayStatus(status: string | null | undefined): string {
+  return status?.trim().toUpperCase() || "";
+}
+
 export function mapGatewayStatus(status: string | null | undefined): "pending" | "successful" | "failed" {
-  switch (status) {
+  switch (normalizeGatewayStatus(status)) {
+    case "SUCCESS":
     case "SUCCESSFUL":
       return "successful";
     case "FAILED":
+    case "FAIL":
+    case "ERROR":
+    case "DECLINED":
     case "EXPIRED":
     case "CANCELLED":
+    case "CANCELED":
       return "failed";
     default:
       return "pending";
@@ -314,4 +343,8 @@ export async function getProbaseResolvedConfig(): Promise<Omit<ProbaseConfig, "c
 
 export function getGatewayTransactionId(payload: ProbaseCollectionResponse): string | null {
   return payload.id || payload.transaction_id || null;
+}
+
+export function getGatewayDescription(payload: ProbaseCollectionResponse): string | null {
+  return payload.description || payload.discription || null;
 }

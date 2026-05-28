@@ -197,7 +197,21 @@ export default function Contact() {
                 <div className="space-y-5">
                   {[
                     { icon: Phone, label: "Phone / WhatsApp", content: <a href="tel:0979697853" className="font-mono hover:underline" style={{ color: GOLD, fontSize: "0.85rem" }}>0979 697 853</a> },
-                    { icon: Mail,  label: "Email",            content: <a href="mailto:info@uncommondenominators.co.zm" className="hover:underline" style={{ color: GOLD, fontSize: "0.82rem" }}>info@uncommondenominators.co.zm</a> },
+                    { icon: Mail,  label: "Email",            content: (
+                      <div className="space-y-1.5">
+                        <a
+                          href="mailto:S.NALISHEBO@AFDB.ORG?cc=snalishebo@yahoo.com"
+                          className="hover:underline"
+                          style={{ color: GOLD, fontSize: "0.82rem" }}
+                        >
+                          S.NALISHEBO@AFDB.ORG
+                        </a>
+                        <p className="font-sans leading-relaxed" style={{ color: TEXT_MUTED, fontSize: "0.76rem" }}>
+                          Please send to <span style={{ color: GOLD }}>S.NALISHEBO@AFDB.ORG</span>, copy to{" "}
+                          <span style={{ color: GOLD }}>snalishebo@yahoo.com</span>, in case my gmail acting up.
+                        </p>
+                      </div>
+                    ) },
                     { icon: MapPin,label: "Office",           content: <span className="font-sans" style={{ color: TEXT_MUTED, fontSize: "0.82rem" }}>Lusaka, Zambia</span> },
                   ].map(({ icon: Icon, label, content }) => (
                     <div key={label} className="flex items-start gap-3.5"

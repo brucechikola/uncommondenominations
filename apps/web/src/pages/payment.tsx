@@ -541,7 +541,7 @@ export default function Payment() {
                             </div>
                             <div>
                               <p className="font-sans text-[0.8rem] font-semibold" style={{ color: TEXT_PRIMARY }}>Bank and other payment options</p>
-                              <p className="font-sans text-[0.68rem]" style={{ color: TEXT_DIM }}>Continue to the payment page to choose an available option.</p>
+                              <p className="font-sans text-[0.68rem]" style={{ color: TEXT_DIM }}>Continue to the bank payment page to finish the payment there.</p>
                             </div>
                           </div>
                           <div className="p-5 space-y-0">
@@ -566,7 +566,7 @@ export default function Payment() {
                               <div>
                                 <p className="font-sans text-[0.72rem] font-semibold" style={{ color: TEXT_PRIMARY }}>Continue to payment</p>
                                 <p className="font-sans text-[0.66rem]" style={{ color: TEXT_DIM }}>
-                                  We&apos;ll open the payment page so you can choose an available option and complete the order there.
+                                  We&apos;ll open the bank payment page so you can finish the payment there.
                                 </p>
                               </div>
                             </div>

@@ -348,7 +348,7 @@ export default function PayByLink() {
 
             {selectedMethod === "bank_transfer" && (
               <div className="rounded-2xl p-4 bg-white border border-slate-200 text-sm text-slate-500">
-                When you continue, you&apos;ll be taken to the payment page to choose an available option and complete the payment there.
+                When you continue, you&apos;ll be taken to the bank payment page to finish the payment there.
               </div>
             )}
 

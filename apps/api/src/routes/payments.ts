@@ -11,6 +11,7 @@ import {
   createCheckoutCollection,
   createDirectCollection,
   detectZambianMobileMoneyNetwork,
+  getGatewayDescription,
   getProbaseResolvedConfig,
   getGatewayTransactionId,
   inquireCollection,
@@ -26,6 +27,10 @@ const PRICES: Record<string, number> = {
   paperback: 400,
   hardcover: 500,
 };
+
+function isMobileMoneyMethod(method: string): method is "airtel_money" | "mtn_money" | "zamtel_money" {
+  return ["airtel_money", "mtn_money", "zamtel_money"].includes(method);
+}
 
 function generateReference(orderId: number): string {
   const prefix = "TXN";
@@ -93,7 +98,7 @@ async function syncPaymentFromGateway(paymentId: number, gateway: ProbaseCollect
       lastCheckedAt: new Date(),
       completedAt: toDate(gateway.transaction?.completed_at),
       expiresAt: toDate(gateway.transaction?.expires_at),
-      failureReason: localStatus === "failed" ? (gateway.description ?? gateway.status) : null,
+      failureReason: localStatus === "failed" ? (getGatewayDescription(gateway) ?? gateway.status) : null,
     })
     .where(eq(paymentsTable.id, paymentId))
     .returning();
@@ -138,17 +143,17 @@ router.post("/payments", async (req, res): Promise<void> => {
   const reference = generateReference(order.id);
   const normalizedPhone = parsed.data.phoneNumber ? normalizeZambianPhoneNumber(parsed.data.phoneNumber) : null;
 
-  if (["airtel_money", "mtn_money", "zamtel_money"].includes(parsed.data.method) && !normalizedPhone) {
+  if (isMobileMoneyMethod(parsed.data.method) && !normalizedPhone) {
     res.status(400).json({ error: "Phone number is required for mobile money payments" });
     return;
   }
 
-  if (normalizedPhone && ["airtel_money", "mtn_money", "zamtel_money"].includes(parsed.data.method) && !/^260\d{9}$/.test(normalizedPhone)) {
+  if (normalizedPhone && isMobileMoneyMethod(parsed.data.method) && !/^260\d{9}$/.test(normalizedPhone)) {
     res.status(400).json({ error: "Mobile money numbers must normalize to a 12-digit Zambian number in the form 260XXXXXXXXX." });
     return;
   }
 
-  if (normalizedPhone && ["airtel_money", "mtn_money", "zamtel_money"].includes(parsed.data.method)) {
+  if (normalizedPhone && isMobileMoneyMethod(parsed.data.method)) {
     const detectedNetwork = detectZambianMobileMoneyNetwork(normalizedPhone);
     if (!detectedNetwork) {
       res.status(400).json({ error: "Unsupported mobile money prefix. Use an Airtel, MTN, or Zamtel number." });
@@ -193,12 +198,13 @@ router.post("/payments", async (req, res): Promise<void> => {
     const webBaseUrl = gatewayConfig.publicWebUrl?.replace(/\/+$/, "") || getWebBaseUrl(req);
     const apiBaseUrl = gatewayConfig.publicApiUrl?.replace(/\/+$/, "") || getApiBaseUrl(req);
     let gatewayResponse: ProbaseCollectionResponse;
-    const idempotencyKey = ["airtel_money", "mtn_money", "zamtel_money"].includes(parsed.data.method)
+    const idempotencyKey = isMobileMoneyMethod(parsed.data.method)
       ? crypto.randomUUID()
       : null;
 
-    if (["airtel_money", "mtn_money", "zamtel_money"].includes(parsed.data.method)) {
+    if (isMobileMoneyMethod(parsed.data.method)) {
       gatewayResponse = await createDirectCollection({
+        method: parsed.data.method,
         amount: amount.toFixed(2),
         reference,
         description,
@@ -215,6 +221,7 @@ router.post("/payments", async (req, res): Promise<void> => {
       });
     } else {
       gatewayResponse = await createCheckoutCollection({
+        paymentMethod: parsed.data.method === "visa_mastercard" ? "CARD" : "BANK_ACCOUNT",
         amount: amount.toFixed(2),
         reference,
         description,
@@ -300,9 +307,13 @@ router.post("/payments/probase/callback", async (req, res): Promise<void> => {
   const [updated] = await db.update(paymentsTable)
     .set({
       status: mappedStatus,
+      gatewayTransactionId: gatewayTransactionId ?? payment.gatewayTransactionId,
       gatewayStatus: status,
       gatewayLastPayload: payload,
+      gatewayProviderReference: getNestedString(payload, [["transaction", "provider_reference"], ["data", "transaction", "provider_reference"]]),
       lastCheckedAt: new Date(),
+      completedAt: toDate(getNestedString(payload, [["transaction", "completed_at"], ["data", "transaction", "completed_at"]])),
+      expiresAt: toDate(getNestedString(payload, [["transaction", "expires_at"], ["data", "transaction", "expires_at"]])),
       failureReason: mappedStatus === "failed" ? (status || "Gateway callback reported failure") : null,
     })
     .where(eq(paymentsTable.id, payment.id))
