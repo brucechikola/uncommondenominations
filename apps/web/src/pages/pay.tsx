@@ -31,6 +31,7 @@ const PAYMENT_OPTIONS: Array<{ id: PayMethod; label: string; icon: typeof Smartp
 
 const POLL_TIMEOUT_MS = 3 * 60 * 1000;
 const POLL_INTERVALS_MS = [5000, 7000, 10000] as const;
+const PAYMENT_TIMEOUT_MESSAGE = "Timed out waiting for payment confirmation.";
 
 function fmtMoney(n: number) {
   return `K${n.toLocaleString("en-ZM", { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`;
@@ -38,6 +39,13 @@ function fmtMoney(n: number) {
 
 function methodLabel(method: string) {
   return method.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
+}
+
+function formatCountdown(ms: number) {
+  const totalSeconds = Math.max(0, Math.ceil(ms / 1000));
+  const minutes = Math.floor(totalSeconds / 60);
+  const seconds = totalSeconds % 60;
+  return `${minutes}:${seconds.toString().padStart(2, "0")}`;
 }
 
 function NetworkLogo({ method, size = 36 }: { method: MobileNetworkMethod; size?: number }) {
@@ -65,6 +73,8 @@ export default function PayByLink() {
   const [payError, setPayError] = useState<string | null>(null);
   const [paymentDone, setPaymentDone] = useState(false);
   const [downloading, setDownloading] = useState(false);
+  const [processingDeadline, setProcessingDeadline] = useState<number | null>(null);
+  const [countdownRemainingMs, setCountdownRemainingMs] = useState(0);
 
   useEffect(() => {
     fetch(`/api/pay/${token}`)
@@ -82,6 +92,26 @@ export default function PayByLink() {
   const detectedNetwork = detectMobileNetwork(subscriberDigits);
   const detectedMeta = detectedNetwork ? MOBILE_NETWORK_META[detectedNetwork] : null;
   const canPay = selectedMethod === "mobile_money" ? normalizedMobileNumber.length === 12 && !!detectedNetwork : true;
+  const countdownProgress = Math.max(0, Math.min(100, (countdownRemainingMs / POLL_TIMEOUT_MS) * 100));
+
+  useEffect(() => {
+    if (!paying || selectedMethod !== "mobile_money" || !processingDeadline) {
+      return;
+    }
+
+    const updateRemaining = () => {
+      setCountdownRemainingMs(Math.max(0, processingDeadline - Date.now()));
+    };
+
+    updateRemaining();
+    const intervalId = window.setInterval(updateRemaining, 1000);
+    return () => window.clearInterval(intervalId);
+  }, [paying, processingDeadline, selectedMethod]);
+
+  function resetCountdown() {
+    setProcessingDeadline(null);
+    setCountdownRemainingMs(0);
+  }
 
   const handleDownload = async () => {
     if (!order) return;
@@ -128,6 +158,17 @@ export default function PayByLink() {
     return response.json();
   }
 
+  async function markPaymentTimedOut(paymentId: number) {
+    const response = await fetch(`/api/payments/${paymentId}/timeout`, { method: "POST" });
+    const body = await response.json().catch(() => null);
+    if (!response.ok) {
+      throw new Error(body && typeof body === "object" && "error" in body && typeof body.error === "string"
+        ? body.error
+        : PAYMENT_TIMEOUT_MESSAGE);
+    }
+    return body as { id: number; status: string; failureReason?: string | null; method: string; reference: string };
+  }
+
   const handlePay = async () => {
     if (!order) return;
     setPaying(true);
@@ -138,6 +179,13 @@ export default function PayByLink() {
       setPayError("Enter a valid Zambian mobile money number.");
       setPaying(false);
       return;
+    }
+
+    if (selectedMethod === "mobile_money") {
+      setProcessingDeadline(Date.now() + POLL_TIMEOUT_MS);
+      setCountdownRemainingMs(POLL_TIMEOUT_MS);
+    } else {
+      resetCountdown();
     }
 
     try {
@@ -159,26 +207,33 @@ export default function PayByLink() {
       if (selectedMethod === "mobile_money") {
         const result = await pollPaymentStatus(payment.id);
         if (result.status === "successful") {
+          resetCountdown();
           setPaymentDone(true);
           setOrder((prev) => prev ? { ...prev, payment: result, status: "awaiting_delivery" } : prev);
           return;
         }
         if (result.status === "pending") {
-          setOrder((prev) => prev ? { ...prev, payment: result } : prev);
-          setPayError("Payment is still pending. Please confirm the prompt on the phone and refresh later if needed.");
+          const timedOut = await markPaymentTimedOut(payment.id);
+          resetCountdown();
+          setOrder((prev) => prev ? { ...prev, payment: timedOut } : prev);
+          setPayError(timedOut.failureReason ?? PAYMENT_TIMEOUT_MESSAGE);
           return;
         }
+        resetCountdown();
         setPayError(result.failureReason ?? "Payment failed.");
         return;
       }
 
       if (payment.gatewayCheckoutUrl) {
+        resetCountdown();
         window.location.assign(payment.gatewayCheckoutUrl);
         return;
       }
 
+      resetCountdown();
       setPayError("Payment session could not be created.");
     } catch {
+      resetCountdown();
       setPayError("Network error. Please try again.");
     } finally {
       setPaying(false);
@@ -337,6 +392,23 @@ export default function PayByLink() {
                     <p className="text-xs text-slate-500">Airtel: 097 / 077 · MTN: 096 / 076 · Zamtel: 095 / 075</p>
                   )}
                 </div>
+                {paying && (
+                  <div className="rounded-xl p-3.5" style={{ background: "#fff8eb", border: "1px solid rgba(176,138,88,0.25)" }}>
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-xs font-semibold uppercase tracking-[0.14em] text-[#8d6b3d]">Time Remaining</span>
+                      <span className="font-mono text-lg font-bold text-[#8d6b3d]">{formatCountdown(countdownRemainingMs)}</span>
+                    </div>
+                    <div className="h-2 rounded-full overflow-hidden bg-[#f1e5d2]">
+                      <div
+                        className="h-full rounded-full transition-[width] duration-700"
+                        style={{ width: `${countdownProgress}%`, background: "linear-gradient(90deg, #8d6b3d 0%, #b08a58 100%)" }}
+                      />
+                    </div>
+                    <p className="text-xs text-slate-500 mt-3">
+                      Confirm the payment prompt on your phone before the timer reaches zero.
+                    </p>
+                  </div>
+                )}
               </div>
             )}
 

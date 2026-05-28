@@ -27,6 +27,7 @@ const PRICES: Record<string, number> = {
   paperback: 400,
   hardcover: 500,
 };
+const PAYMENT_TIMEOUT_REASON = "Timed out waiting for payment confirmation.";
 
 function isMobileMoneyMethod(method: string): method is "airtel_money" | "mtn_money" | "zamtel_money" {
   return ["airtel_money", "mtn_money", "zamtel_money"].includes(method);
@@ -400,6 +401,61 @@ router.post("/payments/:id/refresh", async (req, res): Promise<void> => {
   } catch (error) {
     res.status(502).json({ error: error instanceof Error ? error.message : "Failed to refresh payment" });
   }
+});
+
+router.post("/payments/:id/timeout", async (req, res): Promise<void> => {
+  const raw = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
+  const params = GetPaymentParams.safeParse({ id: Number(raw) });
+  if (!params.success) {
+    res.status(400).json({ error: params.error.message });
+    return;
+  }
+
+  const [payment] = await db.select().from(paymentsTable).where(eq(paymentsTable.id, params.data.id));
+  if (!payment) {
+    res.status(404).json({ error: "Payment not found" });
+    return;
+  }
+
+  if (payment.status !== "pending") {
+    res.json(serializePayment(payment));
+    return;
+  }
+
+  if (payment.gatewayTransactionId) {
+    try {
+      const gateway = await inquireCollection(payment.gatewayTransactionId);
+      const updated = await syncPaymentFromGateway(payment.id, gateway);
+      if (updated && updated.status !== "pending") {
+        res.json(serializePayment(updated));
+        return;
+      }
+    } catch {
+      // Continue and mark the payment failed locally if the gateway still has no terminal result.
+    }
+  }
+
+  const [timedOut] = await db.update(paymentsTable)
+    .set({
+      status: "failed",
+      failureReason: PAYMENT_TIMEOUT_REASON,
+      lastCheckedAt: new Date(),
+    })
+    .where(and(eq(paymentsTable.id, payment.id), eq(paymentsTable.status, "pending")))
+    .returning();
+
+  if (!timedOut) {
+    const [latest] = await db.select().from(paymentsTable).where(eq(paymentsTable.id, payment.id)).limit(1);
+    if (!latest) {
+      res.status(404).json({ error: "Payment not found" });
+      return;
+    }
+    res.json(serializePayment(latest));
+    return;
+  }
+
+  await setOrderStatusFromPayment(timedOut.orderId, timedOut.status as "pending" | "successful" | "failed", timedOut.method);
+  res.json(serializePayment(timedOut));
 });
 
 router.patch("/payments/:id/simulate", async (req, res): Promise<void> => {

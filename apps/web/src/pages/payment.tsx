@@ -1,10 +1,9 @@
 import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { useCartStore } from "@/lib/store";
 import { useGetOrder, useGetPaymentSettings, useInitiatePayment, useRefreshPayment } from "@workspace/api-client-react";
 import { getGetOrderQueryKey, getGetPaymentSettingsQueryKey } from "@workspace/api-client-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Loader2, Smartphone, CreditCard, Landmark, Check, X, PackageCheck } from "lucide-react";
 import { StepIndicator, MiniBook,
@@ -26,22 +25,13 @@ type Tab = "cod" | "mobile" | "card" | "bank";
 type MobileMethod = MobileNetworkMethod;
 const MOBILE_POLL_TIMEOUT_MS = 3 * 60 * 1000;
 const MOBILE_POLL_INTERVALS_MS = [5000, 7000, 10000] as const;
+const PAYMENT_TIMEOUT_MESSAGE = "Timed out waiting for payment confirmation.";
 const TABS: { id: Tab; label: string; icon: React.ElementType; subtext: string }[] = [
   { id: "cod",    label: "Pay on Delivery",  icon: PackageCheck, subtext: "Pay when it arrives" },
   { id: "mobile", label: "Mobile Money",     icon: Smartphone,   subtext: "Airtel · MTN · Zamtel" },
   { id: "card",   label: "Card",             icon: CreditCard,   subtext: "Visa / Mastercard" },
   { id: "bank",   label: "Bank Transfer",    icon: Landmark,     subtext: "Direct to account" },
 ];
-
-const inputStyle: React.CSSProperties = {
-  background: "hsl(40,28%,99%)",
-  borderColor: CARD_BORDER,
-  color: TEXT_PRIMARY,
-  height: "3rem",
-  borderRadius: "12px",
-  fontSize: "0.875rem",
-  fontFamily: "var(--app-font-sans)",
-};
 
 function FieldLabel({ children }: { children: React.ReactNode }) {
   return (
@@ -50,6 +40,13 @@ function FieldLabel({ children }: { children: React.ReactNode }) {
       {children}
     </label>
   );
+}
+
+function formatCountdown(ms: number): string {
+  const totalSeconds = Math.max(0, Math.ceil(ms / 1000));
+  const minutes = Math.floor(totalSeconds / 60);
+  const seconds = totalSeconds % 60;
+  return `${minutes}:${seconds.toString().padStart(2, "0")}`;
 }
 
 function NetworkBadge({ abbr, accent, size = 42 }: { abbr: string; accent: string; size?: number }) {
@@ -92,6 +89,8 @@ export default function Payment() {
   const [phone, setPhone] = useState("");
   const [stage, setStage] = useState<"select" | "processing" | "success" | "order_confirmed" | "failed">("select");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [processingDeadline, setProcessingDeadline] = useState<number | null>(null);
+  const [countdownRemainingMs, setCountdownRemainingMs] = useState(0);
 
   const { data: order } = useGetOrder(currentOrderId!, {
     query: { enabled: !!currentOrderId, queryKey: getGetOrderQueryKey(currentOrderId!) },
@@ -127,11 +126,32 @@ export default function Payment() {
   const detectedSoftBorder = detectedMobileMethod ? `${detectedMobileMethod.accent}40` : CARD_BORDER;
   const detectedFieldBg = detectedMobileMethod ? `${detectedMobileMethod.accent}0D` : "hsl(40,28%,99%)";
   const detectedFieldBorder = detectedMobileMethod ? detectedMobileMethod.accent : CARD_BORDER;
+  const countdownProgress = Math.max(0, Math.min(100, (countdownRemainingMs / MOBILE_POLL_TIMEOUT_MS) * 100));
+
+  useEffect(() => {
+    if (stage !== "processing" || activeTab !== "mobile" || !processingDeadline) {
+      return;
+    }
+
+    const updateRemaining = () => {
+      setCountdownRemainingMs(Math.max(0, processingDeadline - Date.now()));
+    };
+
+    updateRemaining();
+    const intervalId = window.setInterval(updateRemaining, 1000);
+
+    return () => window.clearInterval(intervalId);
+  }, [activeTab, processingDeadline, stage]);
 
   function handleTabChange(tab: Tab) {
     setActiveTab(tab);
     setPhone("");
     setErrorMessage(null);
+  }
+
+  function resetCountdown() {
+    setProcessingDeadline(null);
+    setCountdownRemainingMs(0);
   }
 
   function effectiveMethod(): Method | null {
@@ -164,10 +184,27 @@ export default function Payment() {
     return refreshPayment.mutateAsync({ id: paymentId });
   }
 
+  async function markPaymentTimedOut(paymentId: number) {
+    const response = await fetch(`/api/payments/${paymentId}/timeout`, { method: "POST" });
+    const body = await response.json().catch(() => null);
+    if (!response.ok) {
+      throw new Error(body && typeof body === "object" && "error" in body && typeof body.error === "string"
+        ? body.error
+        : PAYMENT_TIMEOUT_MESSAGE);
+    }
+    return body as { status: string; failureReason?: string | null };
+  }
+
   const handlePay = async () => {
     const method = effectiveMethod();
     if (!method || !currentOrderId) return;
     setErrorMessage(null);
+    if (activeTab === "mobile") {
+      setProcessingDeadline(Date.now() + MOBILE_POLL_TIMEOUT_MS);
+      setCountdownRemainingMs(MOBILE_POLL_TIMEOUT_MS);
+    } else {
+      resetCountdown();
+    }
     setStage("processing");
 
     try {
@@ -182,6 +219,7 @@ export default function Payment() {
       setCurrentPaymentId(payment.id);
 
       if (activeTab === "cod") {
+        resetCountdown();
         // Cash on delivery — leave payment as pending, confirm the order view
         await new Promise((r) => setTimeout(r, 1600));
         setStage("order_confirmed");
@@ -192,29 +230,37 @@ export default function Payment() {
       if (activeTab === "mobile") {
         const result = await pollPaymentStatus(payment.id);
         if (result.status === "successful") {
+          resetCountdown();
           setStage("success");
           setTimeout(() => navigate("/confirmation"), 1800);
           return;
         }
 
         if (result.status === "pending") {
-          navigate("/confirmation");
+          const timedOut = await markPaymentTimedOut(payment.id);
+          resetCountdown();
+          setErrorMessage(timedOut.failureReason || PAYMENT_TIMEOUT_MESSAGE);
+          setStage("failed");
           return;
         }
 
+        resetCountdown();
         setErrorMessage(result.failureReason || "The payment was not completed.");
         setStage("failed");
         return;
       }
 
       if (payment.gatewayCheckoutUrl) {
+        resetCountdown();
         window.location.assign(payment.gatewayCheckoutUrl);
         return;
       }
 
+      resetCountdown();
       setErrorMessage("The payment session could not be created.");
       setStage("failed");
     } catch (error) {
+      resetCountdown();
       let message = "Something went wrong while starting the payment.";
       if (error && typeof error === "object" && "data" in error) {
         const data = (error as { data?: unknown }).data;
@@ -624,14 +670,32 @@ export default function Payment() {
                   <p className="font-serif text-sm" style={{ color: TEXT_MUTED }}>
                     {activeTab === "cod"
                       ? "Setting up your cash on delivery order…"
-                      : activeTab === "mobile"
-                        ? "Please wait while we confirm your transaction. This can take up to 3 minutes."
+                        : activeTab === "mobile"
+                        ? "Please wait while we confirm your transaction before the timer runs out."
                         : "Opening the payment page…"}
                   </p>
                   {activeTab === "mobile" && (
-                    <p className="font-sans text-[0.72rem] mt-3" style={{ color: TEXT_DIM }}>
-                      Check your phone for a payment prompt.
-                    </p>
+                    <div className="mt-5 w-full max-w-sm rounded-2xl p-4" style={{ background: "hsl(40,18%,96%)", border: `1px solid ${CARD_BORDER}` }}>
+                      <div className="flex items-center justify-between mb-2">
+                        <p className="font-sans text-[0.68rem] uppercase tracking-[0.14em] font-semibold" style={{ color: TEXT_DIM }}>
+                          Time Remaining
+                        </p>
+                        <p className="font-mono text-lg font-bold" style={{ color: GOLD }}>
+                          {formatCountdown(countdownRemainingMs)}
+                        </p>
+                      </div>
+                      <div className="h-2 rounded-full overflow-hidden" style={{ background: "hsl(40,14%,90%)" }}>
+                        <motion.div
+                          className="h-full rounded-full"
+                          animate={{ width: `${countdownProgress}%` }}
+                          transition={{ ease: "linear", duration: 0.6 }}
+                          style={{ background: "linear-gradient(90deg, hsl(42,78%,46%) 0%, hsl(32,75%,56%) 100%)" }}
+                        />
+                      </div>
+                      <p className="font-sans text-[0.72rem] mt-3" style={{ color: TEXT_DIM }}>
+                        Check your phone for the payment prompt. If time runs out before confirmation, this payment attempt will be marked failed.
+                      </p>
+                    </div>
                   )}
                 </motion.div>
               )}
